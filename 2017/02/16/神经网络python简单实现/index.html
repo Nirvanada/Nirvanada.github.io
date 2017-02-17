@@ -84,12 +84,24 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="Andante">
-<meta property="og:url" content="https://nirvanada.github.io/index.html">
+<meta name="description" content="最近团队在搞DNN，用的都是别人搭好的框架，因此想着自己来实现一下简单的神经网络模型，更好的理解其中foward和back propagation的过程。
+原理最简单的神经网络基本上可以分为两个步骤：前向传播和后向误差传递。
+前向传播定义input layer与hidden layer之间的weights为$w_1$，hidden layer与output layer之间的weights为$w_2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="神经网络python简单实现">
+<meta property="og:url" content="https://nirvanada.github.io/2017/02/16/神经网络python简单实现/index.html">
 <meta property="og:site_name" content="Andante">
+<meta property="og:description" content="最近团队在搞DNN，用的都是别人搭好的框架，因此想着自己来实现一下简单的神经网络模型，更好的理解其中foward和back propagation的过程。
+原理最简单的神经网络基本上可以分为两个步骤：前向传播和后向误差传递。
+前向传播定义input layer与hidden layer之间的weights为$w_1$，hidden layer与output layer之间的weights为$w_2">
+<meta property="og:image" content="https://nirvanada.github.io/images/NN/fig.png">
+<meta property="og:updated_time" content="2017-02-17T13:42:32.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Andante">
+<meta name="twitter:title" content="神经网络python简单实现">
+<meta name="twitter:description" content="最近团队在搞DNN，用的都是别人搭好的框架，因此想着自己来实现一下简单的神经网络模型，更好的理解其中foward和back propagation的过程。
+原理最简单的神经网络基本上可以分为两个步骤：前向传播和后向误差传递。
+前向传播定义input layer与hidden layer之间的weights为$w_1$，hidden layer与output layer之间的weights为$w_2">
+<meta name="twitter:image" content="https://nirvanada.github.io/images/NN/fig.png">
 
 
 
@@ -110,9 +122,9 @@
 
 
 
-  <link rel="canonical" href="https://nirvanada.github.io/"/>
+  <link rel="canonical" href="https://nirvanada.github.io/2017/02/16/神经网络python简单实现/"/>
 
-  <title> Andante </title>
+  <title> 神经网络python简单实现 | Andante </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -133,9 +145,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-right 
-   page-home 
- ">
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -222,9 +232,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
   
@@ -244,10 +254,7 @@
             
             
               
-                
-                <a class="post-title-link" href="/2017/02/16/神经网络python简单实现/" itemprop="url">
-                  神经网络python简单实现
-                </a>
+                神经网络python简单实现
               
             
           </h1>
@@ -306,9 +313,7 @@
       
 
       
-        
-          
-            <p>最近团队在搞DNN，用的都是别人搭好的框架，因此想着自己来实现一下简单的神经网络模型，更好的理解其中foward和back propagation的过程。</p>
+        <p>最近团队在搞DNN，用的都是别人搭好的框架，因此想着自己来实现一下简单的神经网络模型，更好的理解其中foward和back propagation的过程。</p>
 <h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>最简单的神经网络基本上可以分为两个步骤：前向传播和后向误差传递。<br><img src="/images/NN/fig.png"></p>
 <h4 id="前向传播"><a href="#前向传播" class="headerlink" title="前向传播"></a>前向传播</h4><p>定义input layer与hidden layer之间的weights为$w_1$，hidden layer与output layer之间的weights为$w_2$。输入向量$x$与$w_1$相乘累加后通过一个非线性变换函数activation function (sigmoid, tanh, relu等)得到hidden layer中neuron的输出结果，然后hidden layer与$w_2$相乘累加后再通过activation function得到output layer中nueron的输出结果。如果中间有多个hidden layer，就不断重复这一过程（这里为了简化处理省略了bias项）。</p>
 <script type="math/tex; mode=display">
@@ -344,16 +349,19 @@ w_{update} = w - \eta \frac{\partial loss} {\partial w}</script><p>针对$w_2$�
 <p>加了nueron上的bias项、ReLU和learning rate，更加通用</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</div><div class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> datasets</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">sigmoid</span><span class="params">(x)</span>:</span></div><div class="line">	<span class="keyword">return</span> <span class="number">1</span>/(<span class="number">1</span>+np.exp(-x))</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">sigmoid_derivative</span><span class="params">(x)</span>:</span></div><div class="line">	<span class="keyword">return</span> x * (<span class="number">1</span> - x)</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">relu</span><span class="params">(x)</span>:</span></div><div class="line">	x[x &lt;= <span class="number">0</span>] = <span class="number">0</span></div><div class="line">	<span class="keyword">return</span> x</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">relu_derivative</span><span class="params">(x)</span>:</span></div><div class="line">	x[x &lt;= <span class="number">0</span>] = <span class="number">0</span></div><div class="line">	x[x &gt; <span class="number">0</span>] = <span class="number">1</span></div><div class="line">	<span class="keyword">return</span> x</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">mean_square</span><span class="params">(y, y_hat)</span>:</span></div><div class="line">	<span class="keyword">return</span> np.mean(np.square(y_hat - y))</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">cross_entropy</span><span class="params">(y, y_hat)</span>:</span></div><div class="line">	epsilon = <span class="number">1e-15</span></div><div class="line">	<span class="keyword">return</span> -np.mean(y * np.log(y_hat + epsilon) + (<span class="number">1</span> - y) * np.log(<span class="number">1</span> - y_hat + epsilon))</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span><span class="params">(X, y, activation = <span class="string">"sigmoid"</span>, hidden_units = <span class="number">128</span>)</span>:</span></div><div class="line">	<span class="comment"># weight initialization</span></div><div class="line">	w_l1 = <span class="number">2</span>*np.random.random((X.shape[<span class="number">1</span>],hidden_units)) - <span class="number">1</span></div><div class="line">	w_l2 = <span class="number">2</span>*np.random.random((hidden_units,y.shape[<span class="number">1</span>])) - <span class="number">1</span></div><div class="line">	<span class="comment"># bias initilization</span></div><div class="line">	b_l1 = np.zeros((<span class="number">1</span>, hidden_units))</div><div class="line">	b_l2 = np.zeros((<span class="number">1</span>, y.shape[<span class="number">1</span>]))</div><div class="line">    <span class="comment"># learning rate</span></div><div class="line">	lr = <span class="number">0.1</span></div><div class="line">	<span class="keyword">for</span> j <span class="keyword">in</span> range(<span class="number">10000</span>):</div><div class="line">		<span class="keyword">if</span> activation == <span class="string">"relu"</span>:</div><div class="line">			layer_1 = relu(np.dot(X,w_l1) + b_l1)</div><div class="line">			layer_2 = sigmoid(np.dot(layer_1,w_l2) + b_l2)</div><div class="line">			delta_2 = (y - layer_2) * sigmoid_derivative(layer_2)</div><div class="line">			delta_1 = delta_2.dot(w_l2.T) * relu_derivative(layer_1)</div><div class="line">		</div><div class="line">		<span class="keyword">else</span>:</div><div class="line">			layer_1 = sigmoid(np.dot(X,w_l1) + b_l1)</div><div class="line">			layer_2 = sigmoid(np.dot(layer_1,w_l2) + b_l2)</div><div class="line">			delta_2 = (y - layer_2) * sigmoid_derivative(layer_2)</div><div class="line">			delta_1 = delta_2.dot(w_l2.T) * sigmoid_derivative(layer_1)</div><div class="line">		<span class="comment">#update weights and biases</span></div><div class="line">		w_l2 += lr * layer_1.T.dot(delta_2)</div><div class="line">		w_l1 += lr * X.T.dot(delta_1)</div><div class="line">		b_l2 += lr * np.sum(delta_2, axis = <span class="number">0</span>, keepdims = <span class="keyword">True</span>)</div><div class="line">		b_l1 += lr * np.sum(delta_1, axis = <span class="number">0</span>, keepdims = <span class="keyword">True</span>)</div><div class="line">		<span class="comment">#print loss</span></div><div class="line">		<span class="keyword">if</span> j % <span class="number">2000</span> == <span class="number">0</span>:</div><div class="line">			print(<span class="string">"Iteration "</span>, j, <span class="string">": "</span>, cross_entropy(y, layer_2))</div><div class="line">			<span class="comment">#print(layer_2)</span></div><div class="line"></div><div class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</div><div class="line">	data = datasets.make_classification()</div><div class="line">	X = data[<span class="number">0</span>]</div><div class="line">	y = data[<span class="number">1</span>].reshape(<span class="number">-1</span>, <span class="number">1</span>)</div><div class="line">	train(X, y,<span class="string">'relu'</span>)</div></pre></td></tr></table></figure>
 
-          
+      
+    </div>
+
+    <div>
+      
         
       
     </div>
 
     <div>
       
-    </div>
+        
 
-    <div>
       
     </div>
 
@@ -361,483 +369,32 @@ w_{update} = w - \eta \frac{\partial loss} {\partial w}</script><p>针对$w_2$�
       
 
       
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
             
+              <a href="/2016/06/29/Shelter/" rel="next" title="Shelter Annimal Outcome">
+                <i class="fa fa-chevron-left"></i> Shelter Annimal Outcome
+              </a>
             
-              
-                
-                <a class="post-title-link" href="/2016/06/29/Shelter/" itemprop="url">
-                  Shelter Annimal Outcome
-                </a>
-              
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
             
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-06-29T09:52:17+08:00" content="2016-06-29">
-              2016-06-29
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Kaggle/" itemprop="url" rel="index">
-                    <span itemprop="name">Kaggle</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
+          </div>
         </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          
-            <p><a href="https://www.kaggle.com/c/shelter-animal-outcomes" target="_blank" rel="external">相应的Kaggle比赛在这里</a></p>
-<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>　　美国的宠物收容所每年会接纳七百余万只宠物，在这当中有一些是被主人所遗弃的，有一部分是走失后被他人捡到的。这其中一些比较幸运的少数宠物会最终重回一个温暖的家，不过由于要控制收容所宠物数量，每年大概有近三百万的汪星人和喵星人会被安乐死。</p>
-<h3 id="数据"><a href="#数据" class="headerlink" title="数据"></a>数据</h3><p>　　数据来源于<a href="http://www.austintexas.gov/department/animal-services" target="_blank" rel="external">Austin Animal Center</a>，包含喵星人和汪星人的名字、品种、年龄等信息，目的是为了预测具有不同特征的宠物最终去向（被收养、安乐死等），并且期望能够帮助收养机构了解到具有哪些特征的宠物需要一些额外的关注。</p>
-<h3 id="统计结果"><a href="#统计结果" class="headerlink" title="统计结果"></a>统计结果</h3><p>　　我们先对数据进行一些简单直观的可视化(Trainset + Testset)</p>
-<h4 id="宠物类型及品种"><a href="#宠物类型及品种" class="headerlink" title="宠物类型及品种"></a>宠物类型及品种</h4><p>　　喵星人和汪星人数量相当，Mixed品种的占大多数。<br><img src="/images/Shelter/type&mix.png"></p>
-<h4 id="性别信息"><a href="#性别信息" class="headerlink" title="性别信息"></a>性别信息</h4><p>　　公母数量相当，但绝大部分是neutered（公：被阉割的，母：被摘除卵巢的）。<br><img src="/images/Shelter/sex&neutered.png"></p>
-<h4 id="颜色及年龄信息"><a href="#颜色及年龄信息" class="headerlink" title="颜色及年龄信息"></a>颜色及年龄信息</h4><p>　　排名前三位的颜色分别为黑白、黑色和棕色斑点，而宠物年龄大多都不满一岁。<br><img src="/images/Shelter/color&age.png"></p>
-<h4 id="姓名"><a href="#姓名" class="headerlink" title="姓名"></a>姓名</h4><p>　　还有一个比较有趣，关于名字的信息，排名前三位分别为Bella, Max和Charlie。<br><img src="/images/Shelter/name.png"></p>
-<h4 id="阿猫阿狗的区别"><a href="#阿猫阿狗的区别" class="headerlink" title="阿猫阿狗的区别"></a>阿猫阿狗的区别</h4><p>　　喵星人和汪星人的区别主要体现三个方面：年龄、neutered situation和Mixed状况——喵星人的年龄更小，汪星人neutered的更多，几乎所有喵星人都是mixed。<br><img src="/images/Shelter/animaltype.png"></p>
-<h4 id="宠物去向（Trainset-Only）"><a href="#宠物去向（Trainset-Only）" class="headerlink" title="宠物去向（Trainset Only）"></a>宠物去向（Trainset Only）</h4><p>　　汪星人最终返回主人身边和被收养的比例出奇的高，而喵星人最多的去向是被转移到别的地方，难道狗真的比猫要更受人欢迎么；而Sex不同的宠物最终归宿差别极小。<br><img src="/images/Shelter/outcome1.png"></p>
-<p>　　从比例上来看，mixed与unmixed宠物的outcome区别也并不大；而neutered的宠物更容易被收养，而intact的宠物更多的被transfer，另外安乐死的比例也略高。<br><img src="/images/Shelter/outcome2.png"></p>
-<p>　　宠物的年龄越大，就约容易返回主人身边；而排名前三花色的宠物最终outcome无显著差异。<br><img src="/images/Shelter/outcome3.png"></p>
-<p>　　在品种数量排名前三位汪星人中，相比较吉娃娃和拉布拉多犬，收容所中比特犬虽然数量最多，但其安乐死比例非常高，而被收养率很低。<br><img src="/images/Shelter/dogbreed.png"></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
-    
-      
 
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/06/28/Epiphone 1960 Les Paul Tribute Plus/" itemprop="url">
-                  Epiphone 1960 Les Paul Tribute Plus
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-06-28T14:46:53+08:00" content="2016-06-28">
-              2016-06-28
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Entertainment/" itemprop="url" rel="index">
-                    <span itemprop="name">Entertainment</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><p>Epiphone’s long friendship with innovator Les Paul dates back to the late 30s and early 40s when Les and fellow guitarists such as Charlie Christian and George Barnes were at the forefront of jazz guitar. Epi Stathopoulos and Les were good friends and Epi would let Les use the Epiphone factory on 14th Street in New York City at night after hours to experiment on guitar and pickup designs. This also was the era when Les, inspired by the stinging sustain heard in electric steel guitars, began dreaming of making a solidbody guitar. He built his first, the legendary “Log,” at the Epi factory in 1941. Over the years, Les continued to work closely with Epiphone luthiers, reviewing new product ideas and offering suggestions.</p>
-<img src="/images/Epiphone/LP.jpg">
-<p>Now, the Epiphone Les Paul Tribute Plus honors Epiphone’s friendship with Les by combining his classic design features with legendary Epiphone quality and value with the added power of Gibson USA 57 Classic humbuckers. But this guitar is not just about recreating the “old”, it’s also about looking ahead, just as Les himself continued to do throughout his lifetime. Using 4-conductor pickup wiring, Epiphone has added two push/pull tone pots to allow for series/parallel pickup switching. The result is a Les Paul with all the standard sounds plus a huge palette of tonal possibilities at your fingertips. The Les Paul Tribute Plus also features Epiphone’s famous built-to-last hardware and electronics including a U.S. Switchcraft 3-way toggle, Mallory-150 tone capacitors, Epiphone StrapLocks, 16:1 ratio premium Grover locking tuners, and a premium hardshell case.</p>
-<img src="/images/Epiphone/color.jpg">
-<h3 id="Body"><a href="#Body" class="headerlink" title="Body"></a>Body</h3><p>The Epiphone Tribute Les Paul features a solid Mahogany back with a solid, carved hard Maple cap to create the ultimate combination of warmth and bite. The solid mahogany neck with a hand-fitted, glued-in joint extends well into the neck pickup cavity, creating maximum neck-to-body contact and acting almost like one continuous piece of wood. Combined with the Mahogany/Maple body, the result is a tribute to Les’ timeless guitar design with the sound that you can only get from a Les Paul. Color finishes include Black Cherry, Faded Cherry, Midnight Ebony, Midnight Sapphire, and Vintage Sunburst.</p>
-<img src="/images/Epiphone/body.jpg">
-<h3 id="Electronics"><a href="#Electronics" class="headerlink" title="Electronics"></a>Electronics</h3><p>Capturing all the power and nuances of the “Tribute’s” tonewoods is a pair of authentic Gibson USA 57 Classic humbucker pickups. With their “Patent Applied For” decal on the base plate, the 57 Classic and 57 Classic Plus are faithful replicas of the famous PAF Gibson humbuckers created by Seth Lover that helped define the “Les Paul” sound. The 57 Classic gives you a tone that is warm and subtle with full, even response that doesn’t hold back when you need that classic Gibson humbucker crunch! The 57 Classic Plus is the perfect bridge pickup and mimics humbuckers from the late 50s that often received a few extra turns of wire. This treatment gives the pickup a slightly higher output without sacrificing its rich, vintage tone. When combined, these humbuckers overdrive tube preamps to a smooth level of saturation without becoming overpowering. Both 57s Classic humbuckers feature Gibson’s special Alnico II magnets, vintage enamel coated wire, nickel plated pole pieces, nickel slugs, maple spacers and vintage-style braided wiring.</p>
-<img src="/images/Epiphone/elec.jpg">
-<h3 id="SPECIFICATIONS"><a href="#SPECIFICATIONS" class="headerlink" title="SPECIFICATIONS"></a>SPECIFICATIONS</h3><div class="table-container">
-<table>
-<thead>
-<tr>
-<th style="text-align:left"></th>
-<th style="text-align:left"></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left">Body Material</td>
-<td style="text-align:left">Mahogany</td>
-</tr>
-<tr>
-<td style="text-align:left">Top Material</td>
-<td style="text-align:left"><strong>Carved Hard Maple w/AAA Flame Maple Veneer</strong></td>
-</tr>
-<tr>
-<td style="text-align:left">Neck Material</td>
-<td style="text-align:left">Mahogany</td>
-</tr>
-<tr>
-<td style="text-align:left">Neck Shape Options</td>
-<td style="text-align:left">1960 SlimTaper™, D Profile</td>
-</tr>
-<tr>
-<td style="text-align:left">Neck Joint</td>
-<td style="text-align:left"><strong>Vintage “Deep-Set”, Glued-In</strong></td>
-</tr>
-<tr>
-<td style="text-align:left">Truss Rod</td>
-<td style="text-align:left">Adjustable</td>
-</tr>
-<tr>
-<td style="text-align:left">Scale Length</td>
-<td style="text-align:left">24.75”</td>
-</tr>
-<tr>
-<td style="text-align:left">Fingerboard Material</td>
-<td style="text-align:left">Rosewood w/Mother-Of-Pearl Trapezoid Inlays</td>
-</tr>
-<tr>
-<td style="text-align:left">Neck Pickup</td>
-<td style="text-align:left"><strong>Gibson USA 57 Classic™ Humbucker (4-Wire)</strong></td>
-</tr>
-<tr>
-<td style="text-align:left">Bridge Pickup</td>
-<td style="text-align:left"><strong>Gibson USA 57 Classic Plus™ Humbucker (4-Wire)</strong></td>
-</tr>
-<tr>
-<td style="text-align:left">Controls</td>
-<td style="text-align:left">Switchcraft™ 3-Way Pickup Selector, Neck Pickup Volume, Bridge Pickup Volume, <strong>Neck Pickup Tone (push/pull - series/parallel), B ridge Pickup Tone (push/pull - series/parallel)</strong></td>
-</tr>
-<tr>
-<td style="text-align:left">Electronics</td>
-<td style="text-align:left">Mallory-150 Tone Capacitors</td>
-</tr>
-<tr>
-<td style="text-align:left">Binding</td>
-<td style="text-align:left">Fingerboard-1-Ply (Cream), Body - 1-Ply (Cream)</td>
-</tr>
-<tr>
-<td style="text-align:left">Fingerboard Radius</td>
-<td style="text-align:left">12”</td>
-</tr>
-<tr>
-<td style="text-align:left">Frets</td>
-<td style="text-align:left">22, Medium-Jumbo</td>
-</tr>
-<tr>
-<td style="text-align:left">Bridge</td>
-<td style="text-align:left">LockTone™ Tune-o-Matic/Stopbar</td>
-</tr>
-<tr>
-<td style="text-align:left">Nut Width</td>
-<td style="text-align:left">1-11/16”</td>
-</tr>
-<tr>
-<td style="text-align:left">Hardware</td>
-<td style="text-align:left">Nickel</td>
-</tr>
-<tr>
-<td style="text-align:left">Machine Heads</td>
-<td style="text-align:left">Grover™ Locking</td>
-</tr>
-<tr>
-<td style="text-align:left">Colors</td>
-<td style="text-align:left">Black Cherry (BC), Faded Cherry Sunburst (FC), Midnight Ebony (ME), Midnight Sapphire (MS), Vintage Sunburst (VS)</td>
-</tr>
-</tbody>
-</table>
-</div>
-
-          
-        
+    <div class="post-spread">
       
     </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/06/27/Test/" itemprop="url">
-                  Hexo Test
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-06-27T13:17:49+08:00" content="2016-06-27">
-              2016-06-27
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Entertainment/" itemprop="url" rel="index">
-                    <span itemprop="name">Entertainment</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>This is the first test.<br>中文测试</p>
-<h2 id="1"><a href="#1" class="headerlink" title="1"></a>1</h2><p>hahaha</p>
-<h3 id="1-1"><a href="#1-1" class="headerlink" title="1.1"></a>1.1</h3><p>Mist scheme中小图片无法居中，<a href="https://github.com/iissnan/hexo-theme-next/issues/765" target="_blank" rel="external">通过修改/themes/source/css/_schemes/Mist/_posts-expanded.styl 30行可解决</a></p>
-<h4 id="1-1-1-自定义图片大小"><a href="#1-1-1-自定义图片大小" class="headerlink" title="1.1.1 自定义图片大小"></a>1.1.1 自定义图片大小</h4><img src="/images/Test/avatar.png" width="400" height="400">
-<h4 id="1-1-2-为图片加caption"><a href="#1-1-2-为图片加caption" class="headerlink" title="1.1.2 为图片加caption"></a>1.1.2 为图片加caption</h4><img src="/images/Test/guitar.jpg" title="Epiphone Les Paul">
-<h3 id="1-2"><a href="#1-2" class="headerlink" title="1.2"></a>1.2</h3><p>代码测试<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Java Test</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span> </span>&#123; </div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</div><div class="line">    System.out.println(<span class="string">"HelloWorld!"</span>); </div><div class="line">  &#125; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Scala Test</span></div><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">HelloWorld</span> </span>&#123;</div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]): <span class="type">Unit</span> = &#123;</div><div class="line">    println(<span class="string">"Hello, world!"</span>)</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">// Python Test</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></div><div class="line">  <span class="keyword">print</span> <span class="string">"HelloWorld!"</span></div></pre></td></tr></table></figure>
-<h2 id="2"><a href="#2" class="headerlink" title="2"></a>2</h2><p>hahaha</p>
-<h3 id="2-1"><a href="#2-1" class="headerlink" title="2.1"></a>2.1</h3><p>Quote Test:<br><blockquote><p>Do not just seek happiness for yourself. Seek happiness for all. Through kindness. Through mercy.</p>
-</blockquote></p>
-<h3 id="2-2"><a href="#2-2" class="headerlink" title="2.2"></a>2.2</h3><p>Raw Test<br>
-content
-</p>
-<h3 id="2-3"><a href="#2-3" class="headerlink" title="2.3"></a>2.3</h3><p>Video Test<br>Video Plugin: <a href="https://github.com/m80126colin/hexo-tag-owl" target="_blank" rel="external">hexo-tag-owl</a><br><div class="owl-media owl-video owl-youku"><iframe src="http://player.youku.com/embed/XMTYxMDA4OTA5Ng==" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen></iframe></div></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-  </section>
-
-  
+  </div>
 
 
           </div>
@@ -845,6 +402,10 @@ content
 
 
           
+  <div class="comments" id="comments">
+    
+  </div>
+
 
         </div>
         
@@ -864,8 +425,17 @@ content
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.png"
@@ -908,6 +478,17 @@ content
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#原理"><span class="nav-number">1.</span> <span class="nav-text">原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#前向传播"><span class="nav-number">1.1.</span> <span class="nav-text">前向传播</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#后向误差传递"><span class="nav-number">1.2.</span> <span class="nav-text">后向误差传递</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现"><span class="nav-number">2.</span> <span class="nav-text">实现</span></a></li></ol></div>
+            
+          </div>
+        </section>
       
 
     </div>
@@ -1004,6 +585,10 @@ content
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
 
   
 
