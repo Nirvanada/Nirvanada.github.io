@@ -362,6 +362,7 @@ Gain = \frac{1}{2} [\frac{G_L^2}{H_L + \lambda} + \frac{G_R^2}{H_R + \lambda} - 
 <li>达到给定条件时，终止训练当前树结构，每个训练样本的新预测结果都是前N棵树与当前树预测结果的累加和$\hat y_i^{(t)} = \hat y_i^{(t-1)} +\eta f_t(x_i)$ ($\eta$为学习率，相当于对每棵树模型都指定一个衰减系数，减小模型variance，防止过拟合)</li>
 <li>回到1，训练第$t$+1棵树，直到等于指定最大树个数n_estimators</li>
 </ol>
+<p>参考资料<br><a href="https://homes.cs.washington.edu/~tqchen/pdf/BoostedTree.pdf" target="_blank" rel="external">Boosted Tree by Tianqi Chen</a><br><a href="http://xgboost.readthedocs.io/en/latest/model.html" target="_blank" rel="external">Xgboost Documentation</a></p>
 
           
         
