@@ -245,6 +245,172 @@
             
               
                 
+                <a class="post-title-link" href="/2017/02/21/xgb/" itemprop="url">
+                  Xgboost梳理
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-02-21T22:06:27+08:00" content="2017-02-21">
+              2017-02-21
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>从研究生时候搞Kaggle比赛到现在工作，一直接触xgboost，可以说是无论是用来直接用来做训练还是利用模型生成表达能力更强的特征然后与其他模型融合，目前来看在工业界应该是最流行和普遍使用的机器学习算法之一。文档、调参技巧和一些技术细节也看了很多次，索性把脑子里的东西整理出来作为学习笔记记录下来。</p>
+<p>Xgboost(Extreme Gradient Boosting)实际上是Gradient Boosting Decision Tree(GBDT)的一个变种或者称为升级，成名于Kaggle的一次比赛，后来作者Tianqi Chen不断迭代优化，最终形成了目前比较成熟的版本。</p>
+<h3 id="模型"><a href="#模型" class="headerlink" title="模型"></a>模型</h3><h4 id="目标函数"><a href="#目标函数" class="headerlink" title="目标函数"></a>目标函数</h4><p>首先，一个基于树的模型，基础肯定是Decision Tree。那么对于一个监督学习问题，无论是分类还是回归，如果有多棵不同tree的参与，一个样本最终所被预测的得分可以看成是这些tree每个预测结果的累加，数学上可以写为</p>
+<script type="math/tex; mode=display">
+\hat {y_i} = \sum_{k=1}^{K} f_k(x_i), f_k\in F</script><p>这里$K$为tree的个数，$f_k$为每棵树在函数空间$F$中所对应的预测函数，因此这个监督学习问题的目标函数就可以由损失函数和正则项的加和定义出来了</p>
+<script type="math/tex; mode=display">
+obj = \sum_{i=1}^{n} l(y_i, \hat{y_i}) + \sum_{k=1}^{K} \Omega(f_k)</script><p>这里如果我们回忆一下Random Forest，可以发现rf的损失函数其实也可以写成这种形式，即树的组合再加上正则约束，所以看上去gbdt和rf没什么两样嘛。但他们之间的本质区别就在于如何去优化这个$obj$。rf是并行训练每棵树作为弱分类/回归器，最后对这些树做了加权或是投票；而gbdt则是串行增量训练每棵树，最终将每棵树加到一起。换句话说，rf是Bagging的思想，gbdt是Boosting的思想。</p>
+<p>事实上，最终需要学习的函数就是包含树结构和叶子节点得分的$f_i$。我们利用一种增量学习的方法，也就是一棵树一棵树的迭代学习，每次学习完一棵树就保存下来，然后在此基础上再新加入一棵树来不断降低目标损失。因此在第$t$个step我们学习到的$\hat y_i^{(t)}$可以写成如下形式：</p>
+<script type="math/tex; mode=display">
+\hat y_i^{(0)} = 0\\
+\hat y_i^{(1)} = f_1(x_i) = \hat y^{(0)} + f_1(x_i)\\
+\hat y_i^{(2)} = f_1(x_i) + f_2(x_i) = \hat y_i^{(1)} + f_2(x_i)\\
+\ldots\\
+\hat y_i^{(t)} =\sum_{k=1}^{t} f_k(x_i) = \hat y_{i}^{(t-1)} + f_t(x_i)</script><p>如果我们的损失函数定义为MSE的话，那么目标函数就可以变为这种形式：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+obj^{(t)} & =  \sum_{i=1}^{n} (y_i - (\hat y_{i}^{(t-1)} + f_t(x_i)))^2 + \sum_{i=1}^{t} \Omega(f_i)\\
+& = \sum_{i=1}^{n} [2(\hat y_i^{t-1} - y_i) f_t(x_i) + f_t(x_i)^2 ] + \Omega(f_t) + constant
+\end{align}</script><p>其中$constant$是与$y_i$和$\hat y_i^{t-1}$有关的一坨。现在我们把目标函数搞成了这种形式比较优雅的形式：一个$f$的一阶项、二阶项组合，但是实际应用的时候，可能面对的损失函数多种多样，比如hinge、logloss等等，因此就需要一个比较general的表达式，即对loss function进行二阶<a href="https://zh.wikipedia.org/wiki/%E6%B3%B0%E5%8B%92%E5%85%AC%E5%BC%8F" target="_blank" rel="external">泰勒展开</a>，这里我个人认为也是xgboost的重点和亮点之一：</p>
+<script type="math/tex; mode=display">
+obj^{(t)}  =  \sum_{i=1}^{n} [l(y_i, \hat y_{i}^{(t-1)}) + g_if_t(x_i) + \frac{1}{2}h_if_t^2(x_i) ]+ \Omega(f_t) + constant\\
+g_i = \partial_{\hat y_i^{(t-1)}} l(y_i, y_i^{(t-1)})\\
+h_i = \partial^2_{\hat y_i^{(t-1)}} l(y_i, y_i^{(t-1)})</script><p>最终的在训练到第$t$棵树时的目标函数为</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^{n} [g_if_t(x_i) + \frac{1}{2}h_if_t^2(x_i)] + \Omega(f_t)</script><p>一旦我们自己定义好了损失函数，一阶微分和二阶微分$g_i$、$h_i$也就被唯一确定了，也就是变相定义了目标函数。regulation项$\Omega$还需要指定一下。对于每棵树$f$，其实可以表达为下面这种形式</p>
+<script type="math/tex; mode=display">
+f_t(x) = \omega_{q(x)}, \omega \in R^T, q: R^d \to \{1,2,\ldots , T\}</script><p>$w_q$为一棵树所有叶子节点（叶子数为$T$）的打分向量，$q$是每个样本所对应叶子节点的映射函数。我们将所有叶子节点向量的平方和与叶子节点数量的summation作为regulation term：</p>
+<script type="math/tex; mode=display">
+\Omega(f) = \gamma T + \frac{1}{2}\lambda \sum_{j=1}^{T}\omega^2_j</script><p>这里可能过于晦涩，举个例子。假设s_a被分到了leaf_1，打分为0.4；s_b被分到了leaf_2，打分为0.6；s_c、s_d、s_e被分到了leaf_3，打分为1.0，那么$q(s_a) = 1$，$q(s_b) = 1$，$q(s_c, s_d, s_e) = 1$，$\Omega = 3\gamma + \frac{1}{2}\lambda(0.4^2+0.6^2+1.0^2)$。虽然正则项的定义方式多种多样，但是作者提到了，这种定义方式在实际应用中效果是比较好的。</p>
+<h4 id="学习过程"><a href="#学习过程" class="headerlink" title="学习过程"></a>学习过程</h4><p>到这里，宏观问题基本已经解决了，接下来就要考察每棵树的最优树结构，换句话说就是最优化每个父节点分叉时所利用的信息。有了之前的一些定义，又可以将目标函数重写成如下形式</p>
+<script type="math/tex; mode=display">
+\begin{align}
+obj^{(t)} & = \sum_{i=1}^{n} [g_i w_{q(x_i)} + \frac{1}{2}h_i w_{q(x_i)}^2] +  \gamma T + \frac{1}{2}\lambda \sum_{j=1}^{T}\omega^2_j\\
+& = \sum_{j=1}^{T} [(\sum_{i \in I_j} g_i) w_i + \frac{1}{2}((\sum_{i \in I_j} h_i + \lambda) w_{j}^{2}] + \gamma T
+\end{align}</script><p>其中$I_j$定义为所有属于叶子节点$j$的样本集合。如果继续定义</p>
+<script type="math/tex; mode=display">
+G_i = \sum_{i \in I_j} g_i\\
+H_i = \sum_{i \in I_j} h_i</script><p>，这里可以理解为一棵树中落在其中一个叶子节点上所有样本的一阶导求和和二阶导求和项，那么上面的式子就可以化简为</p>
+<script type="math/tex; mode=display">
+obj^{(t)} = \sum_{j=1}^{T} [G_jw_j + \frac{1}{2}(H_j + \lambda) w_{j}^{2}] + \gamma T</script><p>优雅的形式再次出现，$w_j$代表第$j$个叶子节点上的得分，与上面式子中各种乱七八糟的东西都无关，quatratic形式$Ax^2 + Bx$使得$\omega$可解</p>
+<script type="math/tex; mode=display">
+\omega_{j}^{*} = -\frac{G_j}{H_j + \lambda}\\
+obj^* = -\frac{1}{2} \sum_{j=1}^{T} \frac{G_j}{H_j + \lambda} + \gamma T</script><p>很明显，$obj$越小，说明我们构建的这个树结构就越好，最好的方法就是我们遍历所有可能的树结构，which is impossible。所以针对每棵树利用这个目标函数作为节点分裂准则对每个节点进行分裂，只要分裂后的树结构比分裂前的树结构要好，那么就分裂，否则不分裂，在这一点上xgboost和decision tree通过熵增益的方法来分裂树的思想是一致的，只不过所采用的信息增益度量方法不同而已。由$obj^*$可以得到一个结点分裂后的信息增益为</p>
+<script type="math/tex; mode=display">
+Gain = \frac{1}{2} [\frac{G_L^2}{H_L + \lambda} + \frac{G_R^2}{H_R + \lambda} - \frac{(G_L + G_R)^2}{H_L + H_R + \lambda}] - \gamma</script><p>其中$L$和$R$分别代表左结点和右结点。这里规则就是：如果$Gain&gt;0$，结点分裂，否则不分裂。对于连续特征，最简单的做法就是先对所有样本进行特征排序，依次对排序后的序列样本分割后计算$G$和$H$，并找出$Gain$最大值所对应的最佳分割点；对于分类特征，可以one-hot编码后按照连续特征一样处理，最终找出最佳特征的最佳分割点即可完成依次结点分裂过程，当满足一定条件（如树最大深度为N或叶子节点样本个数最少为M）时，即可终止一棵树的学习过程，训练完成。</p>
+<h4 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h4><p>xgboost刚出来那会Kaggle的比赛几乎都在疯狂调参，所以对于一般结构化数据的classification/regression类比赛都可以变相的理解为xgboost调参+特征工程+model ensemble大赛，熟悉了之后基本调参的维度也就5~6维，参数具体含义作者也明确的给出了（<a href="https://github.com/dmlc/xgboost/blob/master/doc/parameter.md" target="_blank" rel="external">https://github.com/dmlc/xgboost/blob/master/doc/parameter.md</a>）。调参具体可以采用Grid Search或者Random Search大法，如果数据量大、学习率低、树深度深再加上树棵数又比较多，真的是比较耗时的一件事。而且实话实话说，如果不是搞比赛的话真的没必要去在tuning上花过多时间，即使调了一手好参数，得到一手好结果，数据量一大，之后上线后泛化能力真的不好说。</p>
+<p>不过另一方面，现在深度学习火起来之后大家对xgboost似乎也没有那么迷信了，都在用一些比较时髦的模型。但不可否认的是目前来看xgboost在工业界对于一些传统的分类问题地位感觉还是蛮高的，而且使用的方法也是五花八门，之前仿照Facebook在2014年提出的方法（Practical lessons from predicting clicks on adsat facebook），用xgboost生成的高维稀疏特征+ffm离线评测感觉也还可以接受，至少基本与xgboost的single model指标持平。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>最后简单一下整个xgboost的训练过程:</p>
+<ol>
+<li>建立第$t$棵树，从根节点分裂开始</li>
+<li>对于当前节点，计算$g_i$和$h_i$，并通过$Gain$来判断是否分裂和最佳分割点</li>
+<li>达到给定条件时，终止训练当前树结构，每个训练样本的新预测结果都是前N棵树与当前树预测结果的累加和$\hat y_i^{(t)} = \hat y_i^{(t-1)} +\eta f_t(x_i)$ ($\eta$为学习率，相当于对每棵树模型都指定一个衰减系数，减小模型variance，防止过拟合)</li>
+<li>回到1，训练第$t$+1棵树，直到等于指定最大树个数n_estimators</li>
+</ol>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2017/02/16/NN/" itemprop="url">
                   神经网络python简单实现
                 </a>
@@ -876,7 +1042,7 @@ content
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-count">5</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
