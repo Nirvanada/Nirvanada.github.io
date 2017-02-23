@@ -84,34 +84,22 @@
 
 
 
-<meta name="description" content="This is the first test.中文测试
-1hahaha
-1.1Mist scheme中小图片无法居中，通过修改/themes/source/css/_schemes/Mist/_posts-expanded.styl 30行可解决
-1.1.1 自定义图片大小
-1.1.2 为图片加caption
-1.2代码测试123456// Java Testpublic class HelloW">
+<meta name="description" content="看到一篇关于deep learning一些小trick的博客，感觉对于初学者可能帮助很大，但老司机应该对这些所谓的“黑魔法”烂熟于心。不管怎么说，还是囊括了大部分目前主流的一些tricks，就我本人而言也都在工作中用了这些小技巧，只不过平时都当做common sense了并没有太在意，因此也想着整理记录下来。
+
+在每一个epoch结束后，一定要对数据做shuffle。也就是说要确保每轮迭代时min">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hexo Test">
-<meta property="og:url" content="https://nirvanada.github.io/2016/06/27/Test/index.html">
+<meta property="og:title" content="Deep Learning的一些tricks">
+<meta property="og:url" content="https://nirvanada.github.io/2017/02/23/dl-trick/index.html">
 <meta property="og:site_name" content="Andante">
-<meta property="og:description" content="This is the first test.中文测试
-1hahaha
-1.1Mist scheme中小图片无法居中，通过修改/themes/source/css/_schemes/Mist/_posts-expanded.styl 30行可解决
-1.1.1 自定义图片大小
-1.1.2 为图片加caption
-1.2代码测试123456// Java Testpublic class HelloW">
-<meta property="og:image" content="https://nirvanada.github.io/images/Test/avatar.png">
-<meta property="og:image" content="https://nirvanada.github.io/images/Test/guitar.jpg">
-<meta property="og:updated_time" content="2017-02-17T13:35:33.000Z">
+<meta property="og:description" content="看到一篇关于deep learning一些小trick的博客，感觉对于初学者可能帮助很大，但老司机应该对这些所谓的“黑魔法”烂熟于心。不管怎么说，还是囊括了大部分目前主流的一些tricks，就我本人而言也都在工作中用了这些小技巧，只不过平时都当做common sense了并没有太在意，因此也想着整理记录下来。
+
+在每一个epoch结束后，一定要对数据做shuffle。也就是说要确保每轮迭代时min">
+<meta property="og:updated_time" content="2017-02-23T15:12:37.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo Test">
-<meta name="twitter:description" content="This is the first test.中文测试
-1hahaha
-1.1Mist scheme中小图片无法居中，通过修改/themes/source/css/_schemes/Mist/_posts-expanded.styl 30行可解决
-1.1.1 自定义图片大小
-1.1.2 为图片加caption
-1.2代码测试123456// Java Testpublic class HelloW">
-<meta name="twitter:image" content="https://nirvanada.github.io/images/Test/avatar.png">
+<meta name="twitter:title" content="Deep Learning的一些tricks">
+<meta name="twitter:description" content="看到一篇关于deep learning一些小trick的博客，感觉对于初学者可能帮助很大，但老司机应该对这些所谓的“黑魔法”烂熟于心。不管怎么说，还是囊括了大部分目前主流的一些tricks，就我本人而言也都在工作中用了这些小技巧，只不过平时都当做common sense了并没有太在意，因此也想着整理记录下来。
+
+在每一个epoch结束后，一定要对数据做shuffle。也就是说要确保每轮迭代时min">
 
 
 
@@ -132,9 +120,9 @@
 
 
 
-  <link rel="canonical" href="https://nirvanada.github.io/2016/06/27/Test/"/>
+  <link rel="canonical" href="https://nirvanada.github.io/2017/02/23/dl-trick/"/>
 
-  <title> Hexo Test | Andante </title>
+  <title> Deep Learning的一些tricks | Andante </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -264,7 +252,7 @@
             
             
               
-                Hexo Test
+                Deep Learning的一些tricks
               
             
           </h1>
@@ -276,8 +264,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-06-27T13:17:49+08:00" content="2016-06-27">
-              2016-06-27
+            <time itemprop="dateCreated" datetime="2017-02-23T23:10:15+08:00" content="2017-02-23">
+              2017-02-23
             </time>
           </span>
 
@@ -290,8 +278,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Entertainment/" itemprop="url" rel="index">
-                    <span itemprop="name">Entertainment</span>
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
                   </a>
                 </span>
 
@@ -323,21 +311,43 @@
       
 
       
-        <p>This is the first test.<br>中文测试</p>
-<h2 id="1"><a href="#1" class="headerlink" title="1"></a>1</h2><p>hahaha</p>
-<h3 id="1-1"><a href="#1-1" class="headerlink" title="1.1"></a>1.1</h3><p>Mist scheme中小图片无法居中，<a href="https://github.com/iissnan/hexo-theme-next/issues/765" target="_blank" rel="external">通过修改/themes/source/css/_schemes/Mist/_posts-expanded.styl 30行可解决</a></p>
-<h4 id="1-1-1-自定义图片大小"><a href="#1-1-1-自定义图片大小" class="headerlink" title="1.1.1 自定义图片大小"></a>1.1.1 自定义图片大小</h4><img src="/images/Test/avatar.png" width="400" height="400">
-<h4 id="1-1-2-为图片加caption"><a href="#1-1-2-为图片加caption" class="headerlink" title="1.1.2 为图片加caption"></a>1.1.2 为图片加caption</h4><img src="/images/Test/guitar.jpg" title="Epiphone Les Paul">
-<h3 id="1-2"><a href="#1-2" class="headerlink" title="1.2"></a>1.2</h3><p>代码测试<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Java Test</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span> </span>&#123; </div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</div><div class="line">    System.out.println(<span class="string">"HelloWorld!"</span>); </div><div class="line">  &#125; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Scala Test</span></div><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">HelloWorld</span> </span>&#123;</div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]): <span class="type">Unit</span> = &#123;</div><div class="line">    println(<span class="string">"Hello, world!"</span>)</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">// Python Test</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></div><div class="line">  <span class="keyword">print</span> <span class="string">"HelloWorld!"</span></div></pre></td></tr></table></figure>
-<h2 id="2"><a href="#2" class="headerlink" title="2"></a>2</h2><p>hahaha</p>
-<h3 id="2-1"><a href="#2-1" class="headerlink" title="2.1"></a>2.1</h3><p>Quote Test:<br><blockquote><p>Do not just seek happiness for yourself. Seek happiness for all. Through kindness. Through mercy.</p>
-</blockquote></p>
-<h3 id="2-2"><a href="#2-2" class="headerlink" title="2.2"></a>2.2</h3><p>Raw Test<br>
-content
-</p>
-<h3 id="2-3"><a href="#2-3" class="headerlink" title="2.3"></a>2.3</h3><p>Video Test<br>Video Plugin: <a href="https://github.com/m80126colin/hexo-tag-owl" target="_blank" rel="external">hexo-tag-owl</a><br><div class="owl-media owl-video owl-youku"><iframe src="http://player.youku.com/embed/XMTYxMDA4OTA5Ng==" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen></iframe></div></p>
+        <p>看到一篇关于deep learning一些小trick的博客，感觉对于初学者可能帮助很大，但老司机应该对这些所谓的“黑魔法”烂熟于心。不管怎么说，还是囊括了大部分目前主流的一些tricks，就我本人而言也都在工作中用了这些小技巧，只不过平时都当做common sense了并没有太在意，因此也想着整理记录下来。</p>
+<ul>
+<li><p>在每一个epoch结束后，一定要对数据做shuffle。也就是说要确保每轮迭代时mini-batch中的数据是不一致的</p>
+</li>
+<li><p>基于DL对大数据量的高可用性，尽可能的扩充数据。最常见的应该是图片分类问题，比如对图片进行旋转、镜像、加噪、白化等等（就像keras的image augmentation）。像在公司里比如提用户训练样本时候就可以通过滑动时间窗口的方法来获取更多数据</p>
+</li>
+<li><p>在训练大规模数据和模型前，先对数据进行一波小比例采样，如果采样数据能够使模型效果足够好的话，说明你的模型最终是可以收敛的——这个trick感觉真的没有太多人会做，如果做的话一般也都是在程序debug时候为了减少训练时间，大多数情况下都是拿到一批数据直接真刀真枪的干</p>
+</li>
+<li><p>永远都要使用dropout以防止过拟合，尤其是要在神经元比较多的全连接或卷积层后——现在一般都要随手加个dropout吧，要不总感觉少点什么</p>
+</li>
+<li><p>避免使用LRN pooling，尽量使用max pooling，因为快！</p>
+</li>
+<li><p>和sigmoid说bye-bye，和tanh说bye-bye，原因很简单：容易饱和，gradient vanishing，ReLU和PreLU明显是目前最好的选择</p>
+</li>
+<li><p>在max pooling层之后用ReLU或者PreLU，而不是之前，道理也很简单：max pooling之后维度减小，可以减少不少的计算量</p>
+</li>
+<li><p>尽量别用ReLU，过时啦！投入PreLU的怀抱！因为ReLU在初始阶段容易把训练卡死，PreLU的alpha选个0.1，完爆ReLU——这个结论感觉下的过于鲁莽，虽然理论上是这样的，但是实验里也没见过PreLU比ReLU好到哪里，但是对于训练初始阶段的情况还真没关注过，以后可以对比实验下</p>
+</li>
+<li><p>使用Batch Normalization。不多说，和dropout都差不多，加一下已经成习惯了。最近又看了BN的原作者新搞出了一个Batch Renormalization，消除了没个mini-batch中数据的差异性，据说更牛逼</p>
+</li>
+<li><p>对数据做预处理时映射到-1~1区间，而不是减去他们的均值——估计都是经验之谈，可能每份数据所呈现的结果都不太一样，个人习惯是做z-score，映射到0~1</p>
+</li>
+<li><p>尽量使用轻量级的模型，因为当你把一个庞大的model放到server上时效率的影响可能对用户体验并不是很好，即使这个工作会使你的模型准确率不够高</p>
+</li>
+<li><p>如果使用轻量级的模型，尽量做ensemble，如果ensemble了5个network，基本大约可以使准确度提搞3%——这玩意居然给量化出来了，感觉也得看是什么network吧</p>
+</li>
+<li><p>尽可能用xavier initialization做参数初始化，但是只用在全连接层，别用在CNN层上——应该就是告诉你初始化的时候weights的方差取个啥值</p>
+</li>
+<li><p>在CNN中可能的地方使用1*1卷积核，会增加spatial locality，可以自己控制升维或者降维，同时也可以把模型做的很deep——谷歌爸爸用了也说好</p>
+</li>
+<li><p>没有好的GPU，就别搞DL了</p>
+</li>
+<li><p>DL不是神，理解好你要解决的问题，别就会傻套现成的网络结构</p>
+</li>
+</ul>
+<p>以上。</p>
+<p>参考：<a href="http://nmarkou.blogspot.jp/2017/02/the-black-magic-of-deep-learning-tips.html" target="_blank" rel="external">The Black Magic of Deep Learning - Tips and Tricks for the practitioner</a></p>
 
       
     </div>
@@ -362,13 +372,13 @@ content
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2017/02/23/aa/" rel="next" title="">
+                <i class="fa fa-chevron-left"></i> 
+              </a>
+            
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/06/28/Epiphone 1960 Les Paul Tribute Plus/" rel="prev" title="Epiphone 1960 Les Paul Tribute Plus">
-                Epiphone 1960 Les Paul Tribute Plus <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -475,7 +485,7 @@ content
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1"><span class="nav-number">1.</span> <span class="nav-text">1</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1"><span class="nav-number">1.1.</span> <span class="nav-text">1.1</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-1-自定义图片大小"><span class="nav-number">1.1.1.</span> <span class="nav-text">1.1.1 自定义图片大小</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-2-为图片加caption"><span class="nav-number">1.1.2.</span> <span class="nav-text">1.1.2 为图片加caption</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2"><span class="nav-number">1.2.</span> <span class="nav-text">1.2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2"><span class="nav-number">2.</span> <span class="nav-text">2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1"><span class="nav-number">2.1.</span> <span class="nav-text">2.1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2"><span class="nav-number">2.2.</span> <span class="nav-text">2.2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3"><span class="nav-number">2.3.</span> <span class="nav-text">2.3</span></a></li></ol></li></ol></div>
+              <p class="post-toc-empty">此文章未包含目录</p>
             
           </div>
         </section>
