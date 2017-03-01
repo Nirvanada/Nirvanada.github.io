@@ -95,7 +95,7 @@
 原理最简单的神经网络基本上可以分为两个步骤：前向传播和后向误差传递。
 前向传播定义input layer与hidden layer之间的weights为$w_1$，hidden layer与output layer之间的weights为$w_2">
 <meta property="og:image" content="https://nirvanada.github.io/images/NN/fig.png">
-<meta property="og:updated_time" content="2017-02-21T14:09:44.000Z">
+<meta property="og:updated_time" content="2017-03-01T14:05:01.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="神经网络python简单实现">
 <meta name="twitter:description" content="最近团队在搞DNN，用的都是别人搭好的框架，因此想着自己来实现一下简单的神经网络模型，更好的理解其中foward和back propagation的过程。
@@ -334,7 +334,7 @@ w_{update} = w - \eta \frac{\partial loss} {\partial w}</script><p>针对$w_2$�
 \frac{\partial loss} {\partial w_2} = \frac{\partial loss} {\partial output} \frac{\partial output} {\partial w_2}= \frac{\partial loss} {\partial output} * \sigma^{'} * hidden</script><p>$w_1$由于需要再向后反向传播一层，求导显得更麻烦一点，不过依然是运用链式求导法则，</p>
 <script type="math/tex; mode=display">
 \frac{\partial loss} {\partial w_1} = \frac{\partial loss} {\partial output} \frac{\partial output} {\partial hidden} \frac{\partial hidden} {\partial w_1}=\frac{\partial loss} {\partial output} * \sigma^{'} * w_2 * \sigma^{'} * x</script><p>如果中间隐层增加，依然遵循这一法则向后传播误差，可以看到每向后跨越一层，就需要计算一次activation fuction的导数，这个导数最大值在0处为0.25，也就是说如果隐层为N层，最后误差向后传播到第一个隐层，误差信息最多为$\frac{\partial loss} {\partial output}*0.25^N$，已经所剩无几，这也解释了为什么sigmoid函数容易出现gradient vanishing（梯度消失现象），因此在实际应用中我们大多数是使用ReLU这种激活函数的。</p>
-<p>值得注意的是这里也要遵循维数相容原则，简单来讲就是链式求导时的前后相乘项需要维度互相匹配，并最终香橙后维度等于输出空间的维度。</p>
+<p>值得注意的是这里也要遵循维数相容原则，简单来讲就是链式求导时的前后相乘项需要维度互相匹配，并最终相乘后维度等于输出空间的维度。</p>
 <blockquote>
 <ul>
 <li>“将他们当做一维实数然后使用链式法则，最后做维数相容的调整，使之符合矩阵乘法原则并且维数相容即可”，这种方式是一种最快速准确的策略</li>
@@ -450,7 +450,7 @@ w_{update} = w - \eta \frac{\partial loss} {\partial w}</script><p>针对$w_2$�
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-count">7</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
