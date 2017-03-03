@@ -245,6 +245,125 @@
             
               
                 
+                <a class="post-title-link" href="/2017/03/03/gcForest/" itemprop="url">
+                  挑战深度学习——Deep Forest
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-03-03T21:17:02+08:00" content="2017-03-03">
+              2017-03-03
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Paper/" itemprop="url" rel="index">
+                    <span itemprop="name">Paper</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>两天前南大周志华教授在arXiv上放了一篇文章：Deep Forest: Towards An Alternative to Deep Neural Networks。国内机器学习界瞬间爆炸，业内著名非著名人士纷纷前来解读，有说即将取代DNN的，有说其实没什么新玩意就是那么回事的。我们这里只阐述这个model的基本结构和原理，不做任何评价（个人认为在相同资历和学术水平上才真正有资格去评价，反正我是没资格）。</p>
+<h3 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h3><p>首先，Deep Forest，换一种叫法，gcForest(multi-Grained Cascade forest)，可以翻译为多粒度级联随机森林。通俗的来讲就是把若干个随机森林合并起来作为类似于神经网络中的一个layer，然后将这些layer串联起来，形成一个基于组合随机森林的、相对deep的模型。通过这个描述，模型的主体结构就已经基本形成了，如下图<br><img src="/images/gcForest/1.png"></p>
+<p>这里level就是layer的概念，而我们发现Forest有黑色和蓝色两种，其中黑色代表传统意义上的随机森林，即每次选择sqrt(#Features)数量的特征作为候选特征进行分裂；蓝色代表“完全随机森林”，其中每个森林中包含1000棵树，每棵树随机选择特征进行节点的分裂使树一直生长到叶节点只包含同类样本或小于是个样本。因为随机森林本质上就一种ensemble method，而每一个layer又引入了若干个两种随机形式的随机森林，因此在layer层面上可以认为是“ensemble of ensemble”。<br>现在具体到一个layer，如下图，假设现在是个三分类问题，那么每个随机森林的输出都是这三个类别的概率值，因此对于任何一个样本而言，在每一个layer的每一个forest输的都是3维的向量，如果每一个layer有4个forest，那么在这个layer上就输出4<em>3维的新特征灌到下一个layer里。注意，如果不是最后一层，那么每一层接收的特征还要加上raw feature，也就是第N+1层比第N层多出了4</em>3个特征。如果是最后一层，就不再接收原始特征，把上一层的输出结果做平均再取最大值，作为最后的prediction。还有一点很重要，也是区别于DNN的最显著因素，就是gcForest每一层都是监督学习，都利用到了label的信息，而非像DNN一样只在最有一层才是有监督而进行误差传播。这样的好处就是可以每向后训练一层就用validation set评估一下accuracy和loss，因为每一层的输出结果都是可解释的，都可以拿来当做预测得分，因此如果训练N+1层时验证效果提高不大或有降低时，可以自适应的终止训练。在这点上DNN必须在训练前就指定layer的层数，相当于变相多了一个超参数。<br><img src="/images/gcForest/2.png"></p>
+<h3 id="Multi-Grained-Scanning"><a href="#Multi-Grained-Scanning" class="headerlink" title="Multi-Grained Scanning"></a>Multi-Grained Scanning</h3><p>这算是论文的另一个亮点吧，主要描述了如何由原始数据生成样本和特征，依然还是先看下图。对于序列数据，假设特征是400维，现在我们用一个100维的滑动窗口（实际上窗口也是可变的，并不是只有一个窗）来做window-slide（比较类似于1D-convolution），每滑动一次生成100维向量就作为一个新的样本，这里相当于把原始数据做了滑动拆分，最终形成301个100维特征的子样本。接下来把这些样本灌到Deep Forest的第一层，一个Random Forest为301个子样本生成3个新特征，一个Complete Random Forest也为301个子样本生成3个新特征，然后再将这些特征做一个concat，这样一来一个真正的400维特的样本在第一层输出的高阶特征就是2<em>3</em>301维。后面的训练过程就和上面写的一样，一层接一层，直到模型精度改善不明显的时候就终止。而对于图像数据也同理，只不过window-slide由一维变为二维（类似于2D-convolution），不再赘述。整体流程如下图，画的非常明白。<br><img src="/images/gcForest/3.png"></p>
+<h3 id="DF-vs-DNN"><a href="#DF-vs-DNN" class="headerlink" title="DF vs DNN"></a>DF vs DNN</h3><p>再来看DF与对标对象DNN的参数对比，也是文章比较骄傲的一点。在训练DNN时候我们需要指定一大堆超参数，最常见的比如layer数、neuron数、dropout rate、batch size等等。但DF完全不用考虑这些超参，只用默认的参数就很好了。<br><img src="/images/gcForest/4.png"></p>
+<h3 id="Performance"><a href="#Performance" class="headerlink" title="Performance"></a>Performance</h3><p>不多说，直接上图。<br><img src="/images/gcForest/5.png"></p>
+<p>总的来说，这些评估结果都是基于小数据集的，在大数据集上还没测试过。但不可否认的是，相对于DL来讲效率还是要快不少，而且也没用到GPU资源。要知道现在普遍大公司里计算资源已经不是瓶颈了，而是如何把这些复杂的算法在线或是移动端应用起来，所以在这种趋势下，文章提出的这种方法还是极有意义的。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2017/03/01/mf/" itemprop="url">
                   矩阵分解：从入门到高级入门
                 </a>
@@ -1313,6 +1432,239 @@ content
 
 
     
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2014/09/03/hydro/" itemprop="url">
+                  关于水动力模型
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2014-09-03T20:27:42+08:00" content="2014-09-03">
+              2014-09-03
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/研究生/" itemprop="url" rel="index">
+                    <span itemprop="name">研究生</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>水动力是关于描述水体的微观运动的研究，而水动力模型则是一种探寻其中物理过程的方法。</p>
+<p>水动力模型的基础是计算流体力学（Computational Fluid Dynamics, CFD），更深层的就是纳维斯托克斯方程（Navier-Stokes Equations），如果将CFD运用到真实、自然的水体中便形成了水动力模型。</p>
+<p>模型的区分可以从多方面来看，比如在计算网格方面，主要可以分为结构网格和非机构网格（简单理解为四边形网格和三角网格）；在数值计算方法上，可以分为有限元、有限差分和有限体积法。而每一种方法对应也拥有自身的优缺点。</p>
+<p>一个理想的模型通常可以描述、重复甚至预测自然界水体（河流、湖泊、河口、海岸、水库、湾等）详细的运动过程，如在某事某刻某个地理位置的水流走向、水面高度等信息。而想要准确的模拟出这些物理参量，模型的输入数据的准确性至关重要，如地形数据、气象数据（风、降水、日照、蒸散发等）的空间分辨率、出流、入流、潮/水位的时间分辨率等。但即使这些输入数据足够精准，也未必能够得到理想的结果，通常来说与模型相关的水动力参数也是影响模拟效果的主要因素，对模型参数进行设置以得到最为理想结果的过程成为参数率定（Calibration）；另一方面，上面提到的模型网格剖分以及计算方法也会对结果有着微小的影响。</p>
+<p>在水动力模型的基础上，我们可以耦合其他模块，如藻类运动、营养盐输运、泥沙输移、污染物行迹追踪等，以达到对感兴趣水体进行必要的环境变化监测或对紧急事件进行风险评估等。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2014/08/29/rs_refl/" itemprop="url">
+                  获取遥感反射率
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2014-08-29T15:24:52+08:00" content="2014-08-29">
+              2014-08-29
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/研究生/" itemprop="url" rel="index">
+                    <span itemprop="name">研究生</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>对于基于光谱仪（spectroradiometer）测得的遥感反射率（remote sensing reflectance）而言，简单来讲，观测时只需要记录三个变量即可，水体辐亮度、参考板（plaque, 灰板）辐亮度以及天空光辐亮度，测量后即可对遥感反射率进行计算：</p>
+<script type="math/tex; mode=display">
+R_{rs} = \rho_{plaque} (L_u - \rho_f L_{sky})/(\pi L_{plaque})</script><p>其中灰板反射率由商家提供，水面反射率通过经验获取，文献看的不多，有0.022，0.028，还有0.02~0.05，基本视水体情况决定。</p>
+<p>而对于从遥感影像上获取遥感反射率，由于卫星传感器与野外观测所用传感器对感兴趣目标的距离不同，所以需要考虑的因素有很多，如某些气体对光的吸收作用、大气中的锐利散射作用等等。一般而言，先对影像DN值进行辐射校正，转换为传感器接收的辐亮度，继而进行大气校正并去除瑞利散射影响，获得离水反射率或遥感反射率。但就大气校正模型来看，目前较多针对陆地区域，且较复杂，于是就看不懂了。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
   </section>
 
   
@@ -1354,7 +1706,7 @@ content
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-count">10</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1362,7 +1714,7 @@ content
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>

@@ -84,32 +84,22 @@
 
 
 
-<meta name="description" content="相应的Kaggle比赛在这里
-简介　　美国的宠物收容所每年会接纳七百余万只宠物，在这当中有一些是被主人所遗弃的，有一部分是走失后被他人捡到的。这其中一些比较幸运的少数宠物会最终重回一个温暖的家，不过由于要控制收容所宠物数量，每年大概有近三百万的汪星人和喵星人会被安乐死。
-数据　　数据来源于Austin Animal Center，包含喵星人和汪星人的名字、品种、年龄等信息，目的是为了预测具有不同特">
+<meta name="description" content="引言两天前南大周志华教授在arXiv上放了一篇文章：Deep Forest: Towards An Alternative to Deep Neural Networks。国内机器学习界瞬间爆炸，业内著名非著名人士纷纷前来解读，有说即将取代DNN的，有说其实没什么新玩意就是那么回事的。我们这里只阐述这个model的基本结构和原理，不做任何评价（个人认为在相同资历和学术水平上才真正有资格去评价，反正">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Shelter Annimal Outcome">
-<meta property="og:url" content="https://nirvanada.github.io/2016/06/29/Shelter/index.html">
+<meta property="og:title" content="挑战深度学习——Deep Forest">
+<meta property="og:url" content="https://nirvanada.github.io/2017/03/03/gcForest/index.html">
 <meta property="og:site_name" content="Andante">
-<meta property="og:description" content="相应的Kaggle比赛在这里
-简介　　美国的宠物收容所每年会接纳七百余万只宠物，在这当中有一些是被主人所遗弃的，有一部分是走失后被他人捡到的。这其中一些比较幸运的少数宠物会最终重回一个温暖的家，不过由于要控制收容所宠物数量，每年大概有近三百万的汪星人和喵星人会被安乐死。
-数据　　数据来源于Austin Animal Center，包含喵星人和汪星人的名字、品种、年龄等信息，目的是为了预测具有不同特">
-<meta property="og:image" content="https://nirvanada.github.io/images/Shelter/type&mix.png">
-<meta property="og:image" content="https://nirvanada.github.io/images/Shelter/sex&neutered.png">
-<meta property="og:image" content="https://nirvanada.github.io/images/Shelter/color&age.png">
-<meta property="og:image" content="https://nirvanada.github.io/images/Shelter/name.png">
-<meta property="og:image" content="https://nirvanada.github.io/images/Shelter/animaltype.png">
-<meta property="og:image" content="https://nirvanada.github.io/images/Shelter/outcome1.png">
-<meta property="og:image" content="https://nirvanada.github.io/images/Shelter/outcome2.png">
-<meta property="og:image" content="https://nirvanada.github.io/images/Shelter/outcome3.png">
-<meta property="og:image" content="https://nirvanada.github.io/images/Shelter/dogbreed.png">
-<meta property="og:updated_time" content="2017-02-17T13:36:41.000Z">
+<meta property="og:description" content="引言两天前南大周志华教授在arXiv上放了一篇文章：Deep Forest: Towards An Alternative to Deep Neural Networks。国内机器学习界瞬间爆炸，业内著名非著名人士纷纷前来解读，有说即将取代DNN的，有说其实没什么新玩意就是那么回事的。我们这里只阐述这个model的基本结构和原理，不做任何评价（个人认为在相同资历和学术水平上才真正有资格去评价，反正">
+<meta property="og:image" content="https://nirvanada.github.io/images/gcForest/1.png">
+<meta property="og:image" content="https://nirvanada.github.io/images/gcForest/2.png">
+<meta property="og:image" content="https://nirvanada.github.io/images/gcForest/3.png">
+<meta property="og:image" content="https://nirvanada.github.io/images/gcForest/4.png">
+<meta property="og:image" content="https://nirvanada.github.io/images/gcForest/5.png">
+<meta property="og:updated_time" content="2017-03-03T13:32:38.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Shelter Annimal Outcome">
-<meta name="twitter:description" content="相应的Kaggle比赛在这里
-简介　　美国的宠物收容所每年会接纳七百余万只宠物，在这当中有一些是被主人所遗弃的，有一部分是走失后被他人捡到的。这其中一些比较幸运的少数宠物会最终重回一个温暖的家，不过由于要控制收容所宠物数量，每年大概有近三百万的汪星人和喵星人会被安乐死。
-数据　　数据来源于Austin Animal Center，包含喵星人和汪星人的名字、品种、年龄等信息，目的是为了预测具有不同特">
-<meta name="twitter:image" content="https://nirvanada.github.io/images/Shelter/type&mix.png">
+<meta name="twitter:title" content="挑战深度学习——Deep Forest">
+<meta name="twitter:description" content="引言两天前南大周志华教授在arXiv上放了一篇文章：Deep Forest: Towards An Alternative to Deep Neural Networks。国内机器学习界瞬间爆炸，业内著名非著名人士纷纷前来解读，有说即将取代DNN的，有说其实没什么新玩意就是那么回事的。我们这里只阐述这个model的基本结构和原理，不做任何评价（个人认为在相同资历和学术水平上才真正有资格去评价，反正">
+<meta name="twitter:image" content="https://nirvanada.github.io/images/gcForest/1.png">
 
 
 
@@ -130,9 +120,9 @@
 
 
 
-  <link rel="canonical" href="https://nirvanada.github.io/2016/06/29/Shelter/"/>
+  <link rel="canonical" href="https://nirvanada.github.io/2017/03/03/gcForest/"/>
 
-  <title> Shelter Annimal Outcome | Andante </title>
+  <title> 挑战深度学习——Deep Forest | Andante </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -262,7 +252,7 @@
             
             
               
-                Shelter Annimal Outcome
+                挑战深度学习——Deep Forest
               
             
           </h1>
@@ -274,8 +264,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-06-29T09:52:17+08:00" content="2016-06-29">
-              2016-06-29
+            <time itemprop="dateCreated" datetime="2017-03-03T21:17:02+08:00" content="2017-03-03">
+              2017-03-03
             </time>
           </span>
 
@@ -288,8 +278,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Kaggle/" itemprop="url" rel="index">
-                    <span itemprop="name">Kaggle</span>
+                  <a href="/categories/Paper/" itemprop="url" rel="index">
+                    <span itemprop="name">Paper</span>
                   </a>
                 </span>
 
@@ -321,19 +311,13 @@
       
 
       
-        <p><a href="https://www.kaggle.com/c/shelter-animal-outcomes" target="_blank" rel="external">相应的Kaggle比赛在这里</a></p>
-<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>　　美国的宠物收容所每年会接纳七百余万只宠物，在这当中有一些是被主人所遗弃的，有一部分是走失后被他人捡到的。这其中一些比较幸运的少数宠物会最终重回一个温暖的家，不过由于要控制收容所宠物数量，每年大概有近三百万的汪星人和喵星人会被安乐死。</p>
-<h3 id="数据"><a href="#数据" class="headerlink" title="数据"></a>数据</h3><p>　　数据来源于<a href="http://www.austintexas.gov/department/animal-services" target="_blank" rel="external">Austin Animal Center</a>，包含喵星人和汪星人的名字、品种、年龄等信息，目的是为了预测具有不同特征的宠物最终去向（被收养、安乐死等），并且期望能够帮助收养机构了解到具有哪些特征的宠物需要一些额外的关注。</p>
-<h3 id="统计结果"><a href="#统计结果" class="headerlink" title="统计结果"></a>统计结果</h3><p>　　我们先对数据进行一些简单直观的可视化(Trainset + Testset)</p>
-<h4 id="宠物类型及品种"><a href="#宠物类型及品种" class="headerlink" title="宠物类型及品种"></a>宠物类型及品种</h4><p>　　喵星人和汪星人数量相当，Mixed品种的占大多数。<br><img src="/images/Shelter/type&mix.png"></p>
-<h4 id="性别信息"><a href="#性别信息" class="headerlink" title="性别信息"></a>性别信息</h4><p>　　公母数量相当，但绝大部分是neutered（公：被阉割的，母：被摘除卵巢的）。<br><img src="/images/Shelter/sex&neutered.png"></p>
-<h4 id="颜色及年龄信息"><a href="#颜色及年龄信息" class="headerlink" title="颜色及年龄信息"></a>颜色及年龄信息</h4><p>　　排名前三位的颜色分别为黑白、黑色和棕色斑点，而宠物年龄大多都不满一岁。<br><img src="/images/Shelter/color&age.png"></p>
-<h4 id="姓名"><a href="#姓名" class="headerlink" title="姓名"></a>姓名</h4><p>　　还有一个比较有趣，关于名字的信息，排名前三位分别为Bella, Max和Charlie。<br><img src="/images/Shelter/name.png"></p>
-<h4 id="阿猫阿狗的区别"><a href="#阿猫阿狗的区别" class="headerlink" title="阿猫阿狗的区别"></a>阿猫阿狗的区别</h4><p>　　喵星人和汪星人的区别主要体现三个方面：年龄、neutered situation和Mixed状况——喵星人的年龄更小，汪星人neutered的更多，几乎所有喵星人都是mixed。<br><img src="/images/Shelter/animaltype.png"></p>
-<h4 id="宠物去向（Trainset-Only）"><a href="#宠物去向（Trainset-Only）" class="headerlink" title="宠物去向（Trainset Only）"></a>宠物去向（Trainset Only）</h4><p>　　汪星人最终返回主人身边和被收养的比例出奇的高，而喵星人最多的去向是被转移到别的地方，难道狗真的比猫要更受人欢迎么；而Sex不同的宠物最终归宿差别极小。<br><img src="/images/Shelter/outcome1.png"></p>
-<p>　　从比例上来看，mixed与unmixed宠物的outcome区别也并不大；而neutered的宠物更容易被收养，而intact的宠物更多的被transfer，另外安乐死的比例也略高。<br><img src="/images/Shelter/outcome2.png"></p>
-<p>　　宠物的年龄越大，就约容易返回主人身边；而排名前三花色的宠物最终outcome无显著差异。<br><img src="/images/Shelter/outcome3.png"></p>
-<p>　　在品种数量排名前三位汪星人中，相比较吉娃娃和拉布拉多犬，收容所中比特犬虽然数量最多，但其安乐死比例非常高，而被收养率很低。<br><img src="/images/Shelter/dogbreed.png"></p>
+        <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>两天前南大周志华教授在arXiv上放了一篇文章：Deep Forest: Towards An Alternative to Deep Neural Networks。国内机器学习界瞬间爆炸，业内著名非著名人士纷纷前来解读，有说即将取代DNN的，有说其实没什么新玩意就是那么回事的。我们这里只阐述这个model的基本结构和原理，不做任何评价（个人认为在相同资历和学术水平上才真正有资格去评价，反正我是没资格）。</p>
+<h3 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h3><p>首先，Deep Forest，换一种叫法，gcForest(multi-Grained Cascade forest)，可以翻译为多粒度级联随机森林。通俗的来讲就是把若干个随机森林合并起来作为类似于神经网络中的一个layer，然后将这些layer串联起来，形成一个基于组合随机森林的、相对deep的模型。通过这个描述，模型的主体结构就已经基本形成了，如下图<br><img src="/images/gcForest/1.png"></p>
+<p>这里level就是layer的概念，而我们发现Forest有黑色和蓝色两种，其中黑色代表传统意义上的随机森林，即每次选择sqrt(#Features)数量的特征作为候选特征进行分裂；蓝色代表“完全随机森林”，其中每个森林中包含1000棵树，每棵树随机选择特征进行节点的分裂使树一直生长到叶节点只包含同类样本或小于是个样本。因为随机森林本质上就一种ensemble method，而每一个layer又引入了若干个两种随机形式的随机森林，因此在layer层面上可以认为是“ensemble of ensemble”。<br>现在具体到一个layer，如下图，假设现在是个三分类问题，那么每个随机森林的输出都是这三个类别的概率值，因此对于任何一个样本而言，在每一个layer的每一个forest输的都是3维的向量，如果每一个layer有4个forest，那么在这个layer上就输出4<em>3维的新特征灌到下一个layer里。注意，如果不是最后一层，那么每一层接收的特征还要加上raw feature，也就是第N+1层比第N层多出了4</em>3个特征。如果是最后一层，就不再接收原始特征，把上一层的输出结果做平均再取最大值，作为最后的prediction。还有一点很重要，也是区别于DNN的最显著因素，就是gcForest每一层都是监督学习，都利用到了label的信息，而非像DNN一样只在最有一层才是有监督而进行误差传播。这样的好处就是可以每向后训练一层就用validation set评估一下accuracy和loss，因为每一层的输出结果都是可解释的，都可以拿来当做预测得分，因此如果训练N+1层时验证效果提高不大或有降低时，可以自适应的终止训练。在这点上DNN必须在训练前就指定layer的层数，相当于变相多了一个超参数。<br><img src="/images/gcForest/2.png"></p>
+<h3 id="Multi-Grained-Scanning"><a href="#Multi-Grained-Scanning" class="headerlink" title="Multi-Grained Scanning"></a>Multi-Grained Scanning</h3><p>这算是论文的另一个亮点吧，主要描述了如何由原始数据生成样本和特征，依然还是先看下图。对于序列数据，假设特征是400维，现在我们用一个100维的滑动窗口（实际上窗口也是可变的，并不是只有一个窗）来做window-slide（比较类似于1D-convolution），每滑动一次生成100维向量就作为一个新的样本，这里相当于把原始数据做了滑动拆分，最终形成301个100维特征的子样本。接下来把这些样本灌到Deep Forest的第一层，一个Random Forest为301个子样本生成3个新特征，一个Complete Random Forest也为301个子样本生成3个新特征，然后再将这些特征做一个concat，这样一来一个真正的400维特的样本在第一层输出的高阶特征就是2<em>3</em>301维。后面的训练过程就和上面写的一样，一层接一层，直到模型精度改善不明显的时候就终止。而对于图像数据也同理，只不过window-slide由一维变为二维（类似于2D-convolution），不再赘述。整体流程如下图，画的非常明白。<br><img src="/images/gcForest/3.png"></p>
+<h3 id="DF-vs-DNN"><a href="#DF-vs-DNN" class="headerlink" title="DF vs DNN"></a>DF vs DNN</h3><p>再来看DF与对标对象DNN的参数对比，也是文章比较骄傲的一点。在训练DNN时候我们需要指定一大堆超参数，最常见的比如layer数、neuron数、dropout rate、batch size等等。但DF完全不用考虑这些超参，只用默认的参数就很好了。<br><img src="/images/gcForest/4.png"></p>
+<h3 id="Performance"><a href="#Performance" class="headerlink" title="Performance"></a>Performance</h3><p>不多说，直接上图。<br><img src="/images/gcForest/5.png"></p>
+<p>总的来说，这些评估结果都是基于小数据集的，在大数据集上还没测试过。但不可否认的是，相对于DL来讲效率还是要快不少，而且也没用到GPU资源。要知道现在普遍大公司里计算资源已经不是瓶颈了，而是如何把这些复杂的算法在线或是移动端应用起来，所以在这种趋势下，文章提出的这种方法还是极有意义的。</p>
 
       
     </div>
@@ -358,17 +342,13 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/06/28/Epiphone 1960 Les Paul Tribute Plus/" rel="next" title="Epiphone 1960 Les Paul Tribute Plus">
-                <i class="fa fa-chevron-left"></i> Epiphone 1960 Les Paul Tribute Plus
+              <a href="/2017/03/01/mf/" rel="next" title="矩阵分解：从入门到高级入门">
+                <i class="fa fa-chevron-left"></i> 矩阵分解：从入门到高级入门
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/02/16/NN/" rel="prev" title="神经网络python简单实现">
-                神经网络python简单实现 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -475,7 +455,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据"><span class="nav-number">2.</span> <span class="nav-text">数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#统计结果"><span class="nav-number">3.</span> <span class="nav-text">统计结果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#宠物类型及品种"><span class="nav-number">3.1.</span> <span class="nav-text">宠物类型及品种</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#性别信息"><span class="nav-number">3.2.</span> <span class="nav-text">性别信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#颜色及年龄信息"><span class="nav-number">3.3.</span> <span class="nav-text">颜色及年龄信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#姓名"><span class="nav-number">3.4.</span> <span class="nav-text">姓名</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#阿猫阿狗的区别"><span class="nav-number">3.5.</span> <span class="nav-text">阿猫阿狗的区别</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#宠物去向（Trainset-Only）"><span class="nav-number">3.6.</span> <span class="nav-text">宠物去向（Trainset Only）</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Architecture"><span class="nav-number">2.</span> <span class="nav-text">Architecture</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Multi-Grained-Scanning"><span class="nav-number">3.</span> <span class="nav-text">Multi-Grained Scanning</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DF-vs-DNN"><span class="nav-number">4.</span> <span class="nav-text">DF vs DNN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Performance"><span class="nav-number">5.</span> <span class="nav-text">Performance</span></a></li></ol></div>
             
           </div>
         </section>
