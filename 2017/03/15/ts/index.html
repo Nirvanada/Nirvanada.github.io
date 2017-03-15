@@ -84,34 +84,33 @@
 
 
 
-<meta name="description" content="This is the first test.中文测试
-1hahaha
-1.1Mist scheme中小图片无法居中，通过修改/themes/source/css/_schemes/Mist/_posts-expanded.styl 30行可解决
-1.1.1 自定义图片大小
-1.1.2 为图片加caption
-1.2代码测试123456// Java Testpublic class HelloW">
+<meta name="description" content="平稳性平稳性是大多数时间序列分析问题中的一个大前提，而通常我们讨论的都是弱平稳，需要满足以下几个条件：
+1）在任意时间点变量的均值函数是一个常数
+2）在任意时间点变量的方差函数是一个常数
+3）在任意两个时间点的自协方差函数只与两点时间间隔有关，而与这两点具体的时间点无关
+典型的平稳时间序列：白噪声 $N(t)$
+典型的非平稳时间序列：random walk（$R(t) = \sum_1^t N(i">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hexo Test">
-<meta property="og:url" content="https://nirvanada.github.io/2016/06/27/Test/index.html">
+<meta property="og:title" content="关于时间序列的一些概念">
+<meta property="og:url" content="https://nirvanada.github.io/2017/03/15/ts/index.html">
 <meta property="og:site_name" content="Andante">
-<meta property="og:description" content="This is the first test.中文测试
-1hahaha
-1.1Mist scheme中小图片无法居中，通过修改/themes/source/css/_schemes/Mist/_posts-expanded.styl 30行可解决
-1.1.1 自定义图片大小
-1.1.2 为图片加caption
-1.2代码测试123456// Java Testpublic class HelloW">
-<meta property="og:image" content="https://nirvanada.github.io/images/Test/avatar.png">
-<meta property="og:image" content="https://nirvanada.github.io/images/Test/guitar.jpg">
-<meta property="og:updated_time" content="2017-02-17T13:35:33.000Z">
+<meta property="og:description" content="平稳性平稳性是大多数时间序列分析问题中的一个大前提，而通常我们讨论的都是弱平稳，需要满足以下几个条件：
+1）在任意时间点变量的均值函数是一个常数
+2）在任意时间点变量的方差函数是一个常数
+3）在任意两个时间点的自协方差函数只与两点时间间隔有关，而与这两点具体的时间点无关
+典型的平稳时间序列：白噪声 $N(t)$
+典型的非平稳时间序列：random walk（$R(t) = \sum_1^t N(i">
+<meta property="og:image" content="https://nirvanada.github.io/images/ts/autocorr.png">
+<meta property="og:updated_time" content="2017-03-15T14:34:28.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo Test">
-<meta name="twitter:description" content="This is the first test.中文测试
-1hahaha
-1.1Mist scheme中小图片无法居中，通过修改/themes/source/css/_schemes/Mist/_posts-expanded.styl 30行可解决
-1.1.1 自定义图片大小
-1.1.2 为图片加caption
-1.2代码测试123456// Java Testpublic class HelloW">
-<meta name="twitter:image" content="https://nirvanada.github.io/images/Test/avatar.png">
+<meta name="twitter:title" content="关于时间序列的一些概念">
+<meta name="twitter:description" content="平稳性平稳性是大多数时间序列分析问题中的一个大前提，而通常我们讨论的都是弱平稳，需要满足以下几个条件：
+1）在任意时间点变量的均值函数是一个常数
+2）在任意时间点变量的方差函数是一个常数
+3）在任意两个时间点的自协方差函数只与两点时间间隔有关，而与这两点具体的时间点无关
+典型的平稳时间序列：白噪声 $N(t)$
+典型的非平稳时间序列：random walk（$R(t) = \sum_1^t N(i">
+<meta name="twitter:image" content="https://nirvanada.github.io/images/ts/autocorr.png">
 
 
 
@@ -132,9 +131,9 @@
 
 
 
-  <link rel="canonical" href="https://nirvanada.github.io/2016/06/27/Test/"/>
+  <link rel="canonical" href="https://nirvanada.github.io/2017/03/15/ts/"/>
 
-  <title> Hexo Test | Andante </title>
+  <title> 关于时间序列的一些概念 | Andante </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -264,7 +263,7 @@
             
             
               
-                Hexo Test
+                关于时间序列的一些概念
               
             
           </h1>
@@ -276,8 +275,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-06-27T13:17:49+08:00" content="2016-06-27">
-              2016-06-27
+            <time itemprop="dateCreated" datetime="2017-03-15T22:33:53+08:00" content="2017-03-15">
+              2017-03-15
             </time>
           </span>
 
@@ -290,8 +289,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Entertainment/" itemprop="url" rel="index">
-                    <span itemprop="name">Entertainment</span>
+                  <a href="/categories/Data-Analysis/" itemprop="url" rel="index">
+                    <span itemprop="name">Data Analysis</span>
                   </a>
                 </span>
 
@@ -323,21 +322,20 @@
       
 
       
-        <p>This is the first test.<br>中文测试</p>
-<h2 id="1"><a href="#1" class="headerlink" title="1"></a>1</h2><p>hahaha</p>
-<h3 id="1-1"><a href="#1-1" class="headerlink" title="1.1"></a>1.1</h3><p>Mist scheme中小图片无法居中，<a href="https://github.com/iissnan/hexo-theme-next/issues/765" target="_blank" rel="external">通过修改/themes/source/css/_schemes/Mist/_posts-expanded.styl 30行可解决</a></p>
-<h4 id="1-1-1-自定义图片大小"><a href="#1-1-1-自定义图片大小" class="headerlink" title="1.1.1 自定义图片大小"></a>1.1.1 自定义图片大小</h4><img src="/images/Test/avatar.png" width="400" height="400">
-<h4 id="1-1-2-为图片加caption"><a href="#1-1-2-为图片加caption" class="headerlink" title="1.1.2 为图片加caption"></a>1.1.2 为图片加caption</h4><img src="/images/Test/guitar.jpg" title="Epiphone Les Paul">
-<h3 id="1-2"><a href="#1-2" class="headerlink" title="1.2"></a>1.2</h3><p>代码测试<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Java Test</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span> </span>&#123; </div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</div><div class="line">    System.out.println(<span class="string">"HelloWorld!"</span>); </div><div class="line">  &#125; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Scala Test</span></div><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">HelloWorld</span> </span>&#123;</div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]): <span class="type">Unit</span> = &#123;</div><div class="line">    println(<span class="string">"Hello, world!"</span>)</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">// Python Test</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></div><div class="line">  <span class="keyword">print</span> <span class="string">"HelloWorld!"</span></div></pre></td></tr></table></figure>
-<h2 id="2"><a href="#2" class="headerlink" title="2"></a>2</h2><p>hahaha</p>
-<h3 id="2-1"><a href="#2-1" class="headerlink" title="2.1"></a>2.1</h3><p>Quote Test:<br><blockquote><p>Do not just seek happiness for yourself. Seek happiness for all. Through kindness. Through mercy.</p>
-</blockquote></p>
-<h3 id="2-2"><a href="#2-2" class="headerlink" title="2.2"></a>2.2</h3><p>Raw Test<br>
-content
-</p>
-<h3 id="2-3"><a href="#2-3" class="headerlink" title="2.3"></a>2.3</h3><p>Video Test<br>Video Plugin: <a href="https://github.com/m80126colin/hexo-tag-owl" target="_blank" rel="external">hexo-tag-owl</a><br><div class="owl-media owl-video owl-youku"><iframe src="http://player.youku.com/embed/XMTYxMDA4OTA5Ng==" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen></iframe></div></p>
+        <h4 id="平稳性"><a href="#平稳性" class="headerlink" title="平稳性"></a>平稳性</h4><p>平稳性是大多数时间序列分析问题中的一个大前提，而通常我们讨论的都是弱平稳，需要满足以下几个条件：</p>
+<p>1）在任意时间点变量的均值函数是一个常数</p>
+<p>2）在任意时间点变量的方差函数是一个常数</p>
+<p>3）在任意两个时间点的自协方差函数只与两点时间间隔有关，而与这两点具体的时间点无关</p>
+<p>典型的平稳时间序列：白噪声 $N(t)$</p>
+<p>典型的非平稳时间序列：random walk（$R(t) = \sum_1^t N(i)$，方差随时间改变）</p>
+<p>如果时间序列不满足平稳性，可以做N阶差分运算。</p>
+<h4 id="自相关"><a href="#自相关" class="headerlink" title="自相关"></a>自相关</h4><p>时间序列的自相关性，从字面上就可以看出来，就是看这个序列平移一段距离后与这个原始信号有多相似。</p>
+<script type="math/tex; mode=display">
+R(\tau) = \sum x(t) x(t-\tau)dt</script><p>有点类似于卷积，但符号刚好相反。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</div><div class="line">t = np.linspace(<span class="number">0</span>, <span class="number">20</span>, <span class="number">10000</span>)</div><div class="line">ts = np.sin(<span class="number">2</span>*np.pi*<span class="number">0.2</span>*t)</div><div class="line">ts = ts - ts.mean()</div><div class="line">autocorr = np.correlate(ts, ts, mode = <span class="string">'full'</span>)</div><div class="line">autocorr = autocorr[ts.size:] / autocorr.max() <span class="comment">#归一化</span></div><div class="line">plt.plot(autocorr)</div></pre></td></tr></table></figure>
+<img src="/images/ts/autocorr.png">
+<p>一般来说，平稳时间序列的自相关函数会随时间快速衰减。</p>
+<p>其实本来是想看看关于时间序列分析的资料来应用到KDD CUP 2017的比赛上，而且之前天池上O2O口碑商家销量预测也是一个类似的时间序列问题。但是反复琢磨了一下，题目最终的预测只是在rush hours中的一两组数据，真正关于时序的信息可能真的用不大，而且之前口碑比赛里也有相应的反应，像ARIMA这种模型效果并不理想，所以下一步可能会考虑模式匹配的方法来做。</p>
 
       
     </div>
@@ -362,17 +360,13 @@ content
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2014/09/03/hydro/" rel="next" title="关于水动力模型">
-                <i class="fa fa-chevron-left"></i> 关于水动力模型
+              <a href="/2017/03/12/w2v/" rel="next" title="Word2Vec原理简介">
+                <i class="fa fa-chevron-left"></i> Word2Vec原理简介
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/06/28/Epiphone 1960 Les Paul Tribute Plus/" rel="prev" title="Epiphone 1960 Les Paul Tribute Plus">
-                Epiphone 1960 Les Paul Tribute Plus <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -479,7 +473,7 @@ content
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1"><span class="nav-number">1.</span> <span class="nav-text">1</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1"><span class="nav-number">1.1.</span> <span class="nav-text">1.1</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-1-自定义图片大小"><span class="nav-number">1.1.1.</span> <span class="nav-text">1.1.1 自定义图片大小</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-2-为图片加caption"><span class="nav-number">1.1.2.</span> <span class="nav-text">1.1.2 为图片加caption</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2"><span class="nav-number">1.2.</span> <span class="nav-text">1.2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2"><span class="nav-number">2.</span> <span class="nav-text">2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1"><span class="nav-number">2.1.</span> <span class="nav-text">2.1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2"><span class="nav-number">2.2.</span> <span class="nav-text">2.2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3"><span class="nav-number">2.3.</span> <span class="nav-text">2.3</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#平稳性"><span class="nav-number">1.</span> <span class="nav-text">平稳性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#自相关"><span class="nav-number">2.</span> <span class="nav-text">自相关</span></a></li></ol></div>
             
           </div>
         </section>
