@@ -245,6 +245,124 @@
             
               
                 
+                <a class="post-title-link" href="/2017/03/22/w_n_d/" itemprop="url">
+                  Wide & Deep Learning for Recommender Systems解读
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-03-22T22:59:53+08:00" content="2017-03-22">
+              2017-03-22
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Data-Analysis/" itemprop="url" rel="index">
+                    <span itemprop="name">Data Analysis</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Google在去年6月份在arxiv上放出了”Wide &amp; Deep Learning for Recommender Systems”这篇文章，应用场景是Google Play上App安装预测，线上效果提升显著（相比较于Wide only和Deep only的model）。与此同时，Google也开源了这一模型框架并将其集成在Tensorflow的高级封装Tflearn中，今年开年的谷歌开发者大会上也专门有一个section是讲wide and deep model的，作者的意图也很明显，一方面推广tensorflow，另一方面是显示模型的强大。</p>
+<p>通读文章后，发现其实模型的基本原理很简单，就是wide model + deep model。分别来讲，wide model就是一个LR，在特征方面除了原始特征外还有分类特征稀疏表达后的交叉特征，例如将分类特征做完one-hot后再进行cross product。个人理解，这里一方面是利用类似于FM模型原理来增强分类特征的特征交互（co-occurrence），另一方面是利用LR对高维稀疏特征的学习能力，而作者把wide model所具备的能力称为“memorization”；而deep model则是一个DNN，特征上除了原始特征还增加了分类特征的embedding，这个embedding在模型中属于独立的一层，embedding后的向量也是通过不断迭代学习出来的。将高维稀疏分类特征映射到低维embedding特征这种方式有助于模型进行“generalization”。Memerization和Generalization这两个概念中文还真没找到特别合适的诠释，如果非要翻译一下，我觉得应该是推理和演绎，一个是通过特征交互关系来训练浅层模型，另一个则是通过特征在映射空间中的信息训练深层模型。</p>
+<p>模型结构采用joint的方式而非传统的ensemble方式。如果是ensemble方式，那么这两个模型就针对label进行单独训练，然后再加权到一起；而joint方式则是将这两个模型的输出加起来，然后再针对label进行联合训练。这样的好处是在train model的时候可以同时最优化两个model的参数，而且两个model可以起到互相补充的作用。下面的公式也很好的解释了wide and deep model的结构原理，即两个model的output在通过sigmoid函数之前把结果相加，然后再经过sigmoid实现分类。这里$x$指原始特征，$\phi(x)$分别表示wide模型的cross product feature和deep模型的embedding feature，而$w_{deep}$则泛指DNN各层weights和bias集合表示。</p>
+<script type="math/tex; mode=display">
+ P(Y=1|x) = \sigma(w_{wide}[x, \phi_1(x)] + w_{deep}[x, \phi_2(x)])</script><img src="/images/w_n_d/1.png">
+<p>最终模型在离线评测上效果并不明显，但在在线评测上提升还算显著。前几天在电梯里听到广告部同事说他们也在搞这个模型，离线效果提升了10%+，但在线serving技术上目前比较头疼，但也不知道具体是什么指标提升了10%+。但在我们团队内部客户拉新预测问题的离线应用上，同样的数据效果只和xgboost持平。另外，官方提供的tutorial原生代码并不能很好的应用于大数据量，于是进行了改写，读取数据方式变成了队列读取，也是参考了stackoverflow上的一些反馈。核心就是wide_and_deep函数，cross product的实现方式是直接在预处理数据时对分类特征进行字符串拼接，然后再做one-hot，相对contrib中crossed_column的实现方式略显复杂，但以个人能力也只能先这样做，日后再去探索。另外，由于目前团队业务只涉及线下模型，因此对于模型的线上更新并没有太多关注，但大的技术框架来看应该也是用tf serving的方式实现。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</div><div class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</div><div class="line"><span class="keyword">import</span> tensorflow.contrib.learn <span class="keyword">as</span> tf_learn</div><div class="line"><span class="keyword">import</span> tensorflow.contrib.layers <span class="keyword">as</span> tf_layers</div><div class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> accuracy_score</div><div class="line"><span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> LabelEncoder</div><div class="line"><span class="keyword">from</span> sklearn.cross_validation <span class="keyword">import</span> train_test_split</div><div class="line"><span class="keyword">import</span> os</div><div class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</div><div class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> roc_auc_score</div><div class="line"><span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> StandardScaler</div><div class="line"></div><div class="line"></div><div class="line"><span class="keyword">from</span> feat <span class="keyword">import</span> CONTINUOUS_COLUMNS</div><div class="line"><span class="keyword">from</span> feat <span class="keyword">import</span> CATEGORICAL_COLUMNS</div><div class="line"><span class="keyword">from</span> feat <span class="keyword">import</span> COLUMNS</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">add_columns</span><span class="params">(x)</span>:</span></div><div class="line">    <span class="keyword">return</span> <span class="string">':'</span>.join(x)</div><div class="line"></div><div class="line"><span class="comment"># Define the column names for the data sets.</span></div><div class="line">LABEL_COLUMN = <span class="string">'target'</span></div><div class="line"><span class="comment">#second order</span></div><div class="line">CROSSED_COLUMNS = []</div><div class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(CATEGORICAL_COLUMNS) <span class="number">-1</span>):</div><div class="line">  <span class="keyword">for</span> j <span class="keyword">in</span> range(i+<span class="number">1</span>, len(CATEGORICAL_COLUMNS)):</div><div class="line">     CROSSED_COLUMNS.append([CATEGORICAL_COLUMNS[i], CATEGORICAL_COLUMNS[j]])</div><div class="line"></div><div class="line">CATEGORICAL_COLUMNS_DNN = CATEGORICAL_COLUMNS[:]</div><div class="line">CATEGORICAL_COLUMNS += map(add_columns, CROSSED_COLUMNS)</div><div class="line">CATEGORICAL_ID_COLUMNS = [col + <span class="string">'_ids'</span> <span class="keyword">for</span> col <span class="keyword">in</span> CATEGORICAL_COLUMNS]</div><div class="line"></div><div class="line"></div><div class="line">HIDDEN_UNITS = [<span class="number">512</span>, <span class="number">512</span>, <span class="number">512</span>]</div><div class="line">CATEGORICAL_EMBED_SIZE = <span class="number">10</span></div><div class="line"></div><div class="line">LABEL_ENCODERS = &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">pandas_input_fn</span><span class="params">(X, y=None, batch_size=<span class="number">1024</span>, num_epochs=None)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">input_fn</span><span class="params">()</span>:</span></div><div class="line">        <span class="keyword">if</span> y <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</div><div class="line">            X[<span class="string">'target'</span>] = y</div><div class="line">        queue = tf_learn.dataframe.queues.feeding_functions.enqueue_data(</div><div class="line">            X, <span class="number">1000</span>, shuffle=num_epochs <span class="keyword">is</span> <span class="keyword">None</span>, num_epochs=num_epochs)</div><div class="line">        <span class="keyword">if</span> num_epochs <span class="keyword">is</span> <span class="keyword">None</span>:</div><div class="line">            features = queue.dequeue_many(batch_size)</div><div class="line">        <span class="keyword">else</span>:</div><div class="line">            features = queue.dequeue_up_to(batch_size)</div><div class="line"></div><div class="line">        features = dict(zip([<span class="string">'index'</span>] + list(X.columns), features))</div><div class="line"></div><div class="line">        <span class="keyword">if</span> y <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</div><div class="line">            target = features.pop(<span class="string">'target'</span>)</div><div class="line">            <span class="keyword">return</span> features, target</div><div class="line">        <span class="keyword">return</span> features</div><div class="line"></div><div class="line">    <span class="keyword">return</span> input_fn</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">encode_categorical_cross</span><span class="params">(df)</span>:</span></div><div class="line">    <span class="keyword">global</span> LABEL_ENCODERS</div><div class="line">    <span class="keyword">for</span> col <span class="keyword">in</span> CATEGORICAL_COLUMNS:</div><div class="line">        <span class="keyword">if</span> <span class="string">":"</span> <span class="keyword">in</span> col:</div><div class="line">            df[col] = df[col.split(<span class="string">":"</span>)[<span class="number">0</span>]].fillna(<span class="number">-1</span>).astype(str) + <span class="string">":"</span> + df[col.split(<span class="string">":"</span>)[<span class="number">1</span>]].fillna(<span class="number">-1</span>).astype(str)</div><div class="line">        <span class="keyword">else</span>:</div><div class="line">            df[col] = df[col].fillna(<span class="number">-1</span>).astype(str)</div><div class="line">        encoder = LabelEncoder().fit(df[col])</div><div class="line">        df[col + <span class="string">'_ids'</span>] = encoder.transform(df[col])</div><div class="line">        LABEL_ENCODERS[col] = encoder</div><div class="line">    <span class="keyword">for</span> col <span class="keyword">in</span> CATEGORICAL_COLUMNS:</div><div class="line">        df.pop(col)</div><div class="line">    <span class="keyword">return</span> df, LABEL_ENCODERS</div><div class="line"></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_input_df</span><span class="params">(df)</span>:</span></div><div class="line">    df, label_encoders = encode_categorical_cross(df)</div><div class="line"><span class="keyword">for</span> col <span class="keyword">in</span> CATEGORICAL_COLUMNS:</div><div class="line">    y = df.pop(LABEL_COLUMN)</div><div class="line">    X = df[CATEGORICAL_ID_COLUMNS + CONTINUOUS_COLUMNS].fillna(<span class="number">0</span>)</div><div class="line">    <span class="keyword">return</span> X, y</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">wide_and_deep</span><span class="params">(features, target, hidden_units=HIDDEN_UNITS)</span>:</span></div><div class="line">    <span class="keyword">global</span> LABEL_ENCODERS</div><div class="line">    target = tf.one_hot(target, <span class="number">2</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)</div><div class="line"></div><div class="line">    <span class="comment"># DNN</span></div><div class="line">    final_features_nn = [tf.expand_dims(tf.cast(features[col], tf.float32), <span class="number">1</span>) <span class="keyword">for</span></div><div class="line">                      col <span class="keyword">in</span> CONTINUOUS_COLUMNS]</div><div class="line"></div><div class="line">    <span class="comment"># Embed categorical variables into distributed representation.</span></div><div class="line">    <span class="keyword">for</span> col <span class="keyword">in</span> CATEGORICAL_COLUMNS_DNN:</div><div class="line">        feature_tmp = tf_learn.ops.categorical_variable(</div><div class="line">            features[col + <span class="string">'_ids'</span>],</div><div class="line">            len(LABEL_ENCODERS[col].classes_),</div><div class="line">            embedding_size=CATEGORICAL_EMBED_SIZE,</div><div class="line">            name=col)</div><div class="line">        final_features_nn.append(feature_tmp)</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    <span class="comment"># Concatenate all features into one vector.</span></div><div class="line">    features_nn = tf.concat(<span class="number">1</span>, final_features_nn)</div><div class="line"></div><div class="line">    logits_nn = tf_layers.stack(features_nn,</div><div class="line">                             tf_layers.fully_connected,</div><div class="line">                             stack_args=hidden_units,</div><div class="line">                             activation_fn=tf.nn.relu)</div><div class="line"></div><div class="line">    <span class="comment"># LR</span></div><div class="line">    final_features_lr = [tf.expand_dims(tf.cast(features[col], tf.float32), <span class="number">1</span>) <span class="keyword">for</span></div><div class="line">                      col <span class="keyword">in</span> CONTINUOUS_COLUMNS]</div><div class="line"></div><div class="line">    <span class="keyword">for</span> col <span class="keyword">in</span> CATEGORICAL_COLUMNS:</div><div class="line">        final_features_lr.append(tf.one_hot(features[col + <span class="string">'_ids'</span>],</div><div class="line">            len(LABEL_ENCODERS[col].classes_),</div><div class="line">            on_value = <span class="number">1.0</span>,</div><div class="line">            off_value = <span class="number">0.0</span>))</div><div class="line"></div><div class="line"></div><div class="line">    logits_lr = tf_layers.stack(tf.concat(<span class="number">1</span>, final_features_lr),</div><div class="line">                             tf_layers.fully_connected,</div><div class="line">                             stack_args=[<span class="number">1</span>],</div><div class="line">                             activation_fn=<span class="keyword">None</span>)</div><div class="line"></div><div class="line">    <span class="comment"># add logits</span></div><div class="line">    logits = logits_lr + logits_nn</div><div class="line"></div><div class="line">    prediction, loss = tf_learn.models.logistic_regression(logits, target)</div><div class="line">    train_op = tf_layers.optimize_loss(loss,</div><div class="line">                                       tf.contrib.framework.get_global_step(),</div><div class="line">                                       optimizer=<span class="string">'Adam'</span>,</div><div class="line">                                       learning_rate=<span class="number">0.001</span>)</div><div class="line">    <span class="keyword">return</span> prediction[:,<span class="number">1</span>], loss, train_op</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span><span class="params">(X, y, steps=<span class="number">100</span>)</span>:</span></div><div class="line">    print(<span class="string">"model dir: "</span>, model_dir)</div><div class="line">    classifier = tf_learn.Estimator(model_fn=wide_and_deep, model_dir=model_dir)</div><div class="line">    classifier.fit(input_fn=pandas_input_fn(X, y), steps=steps)</div><div class="line"></div><div class="line">    <span class="keyword">return</span> classifier</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">predict</span><span class="params">(classifier, X)</span>:</span></div><div class="line">    <span class="keyword">return</span> list(classifier.predict(input_fn=pandas_input_fn(X, num_epochs=<span class="number">1</span>),</div><div class="line">                                   as_iterable=<span class="keyword">True</span>))</div><div class="line"></div><div class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</div><div class="line">    model_dir = <span class="string">"./wnd"</span></div><div class="line">    os.system(<span class="string">"rm -rf ./wnd"</span>)</div><div class="line"></div><div class="line">    trainFile = <span class="string">'train.csv'</span></div><div class="line">    testFile = <span class="string">'test.csv'</span></div><div class="line"></div><div class="line">    data_train = pd.read_csv(trainFile, names=COLUMNS)  <span class="comment"># LOAD DATA</span></div><div class="line">    data_test = pd.read_csv(testFile, names=COLUMNS)  <span class="comment"># LOAD DATA</span></div><div class="line"></div><div class="line">    train_size = data_train.shape[<span class="number">0</span>]</div><div class="line"></div><div class="line">    X_train, y_train = process_input_df(data_train)</div><div class="line">    X_test, y_test = process_input_df(data_test)</div><div class="line"></div><div class="line">    <span class="comment"># data scale</span></div><div class="line">    data_continuous = pd.concat([X_train[CONTINUOUS_COLUMNS], X_test[CONTINUOUS_COLUMNS]])</div><div class="line">    scaler = StandardScaler()</div><div class="line">    data_continuous_scale = scaler.fit_transform(data_continuous)</div><div class="line">    X_train[CONTINUOUS_COLUMNS] = pd.DataFrame(data_continuous_scale[:train_size])</div><div class="line">    X_test[CONTINUOUS_COLUMNS] = pd.DataFrame(data_continuous_scale[train_size:])</div><div class="line"></div><div class="line">    classifier = train(X_train, y_train, steps=<span class="number">5000</span>)</div><div class="line">    pred = predict(classifier, X_test)</div><div class="line">    print(<span class="string">"auc"</span>, roc_auc_score(y_test, np.array(pred)))</div></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2017/03/15/ts/" itemprop="url">
                   关于时间序列的一些概念
                 </a>
@@ -1579,133 +1697,6 @@ w_{update} = w - \eta \frac{\partial loss} {\partial w}</script><p>针对$w_2$�
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/06/27/Test/" itemprop="url">
-                  Hexo Test
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-06-27T13:17:49+08:00" content="2016-06-27">
-              2016-06-27
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Entertainment/" itemprop="url" rel="index">
-                    <span itemprop="name">Entertainment</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>This is the first test.<br>中文测试</p>
-<h2 id="1"><a href="#1" class="headerlink" title="1"></a>1</h2><p>hahaha</p>
-<h3 id="1-1"><a href="#1-1" class="headerlink" title="1.1"></a>1.1</h3><p>Mist scheme中小图片无法居中，<a href="https://github.com/iissnan/hexo-theme-next/issues/765" target="_blank" rel="external">通过修改/themes/source/css/_schemes/Mist/_posts-expanded.styl 30行可解决</a></p>
-<h4 id="1-1-1-自定义图片大小"><a href="#1-1-1-自定义图片大小" class="headerlink" title="1.1.1 自定义图片大小"></a>1.1.1 自定义图片大小</h4><img src="/images/Test/avatar.png" width="400" height="400">
-<h4 id="1-1-2-为图片加caption"><a href="#1-1-2-为图片加caption" class="headerlink" title="1.1.2 为图片加caption"></a>1.1.2 为图片加caption</h4><img src="/images/Test/guitar.jpg" title="Epiphone Les Paul">
-<h3 id="1-2"><a href="#1-2" class="headerlink" title="1.2"></a>1.2</h3><p>代码测试<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Java Test</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span> </span>&#123; </div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</div><div class="line">    System.out.println(<span class="string">"HelloWorld!"</span>); </div><div class="line">  &#125; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Scala Test</span></div><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">HelloWorld</span> </span>&#123;</div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]): <span class="type">Unit</span> = &#123;</div><div class="line">    println(<span class="string">"Hello, world!"</span>)</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">// Python Test</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></div><div class="line">  <span class="keyword">print</span> <span class="string">"HelloWorld!"</span></div></pre></td></tr></table></figure>
-<h2 id="2"><a href="#2" class="headerlink" title="2"></a>2</h2><p>hahaha</p>
-<h3 id="2-1"><a href="#2-1" class="headerlink" title="2.1"></a>2.1</h3><p>Quote Test:<br><blockquote><p>Do not just seek happiness for yourself. Seek happiness for all. Through kindness. Through mercy.</p>
-</blockquote></p>
-<h3 id="2-2"><a href="#2-2" class="headerlink" title="2.2"></a>2.2</h3><p>Raw Test<br>
-content
-</p>
-<h3 id="2-3"><a href="#2-3" class="headerlink" title="2.3"></a>2.3</h3><p>Video Test<br>Video Plugin: <a href="https://github.com/m80126colin/hexo-tag-owl" target="_blank" rel="external">hexo-tag-owl</a><br><div class="owl-media owl-video owl-youku"><iframe src="http://player.youku.com/embed/XMTYxMDA4OTA5Ng==" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen></iframe></div></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1751,7 +1742,7 @@ content
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">12</span>
+              <span class="site-state-item-count">13</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
