@@ -245,6 +245,128 @@
             
               
                 
+                <a class="post-title-link" href="/2017/04/10/DSSM/" itemprop="url">
+                  Multi-Rate Deep Learning for Temporal Recommendation解读
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-04-10T20:47:53+08:00" content="2017-04-10">
+              2017-04-10
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Paper/" itemprop="url" rel="index">
+                    <span itemprop="name">Paper</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>在推荐系统里有一个比较重要的问题：如何能把一个user的长期兴趣和短期兴趣综合起来考虑进行内容推荐？一个人的兴趣总会随着时间发生变化，特定日期、事件都会使长期兴趣发生波动从而促生短期兴趣。一个比较直观的例子：如果在一个世界杯期间的新闻推荐场景下，推足球新闻很有可能比推荐长期兴趣的内容更使人满意。而目前的很多推荐方法都没有考虑与时间有关的短期信息，因此这篇文章主要针对将长短兴趣结合来提高推荐效果。</p>
+<p>模型的基础利用deep semantic structured model (DSSM)。简言之，DSSM可以视为把从两个或多个角度所构建的神经网络模型整合到一个角度进行学习。假设一个两个角度的DSSM，其中一个网络表示query，另一个网络表示document，两个网络的输入可以是由各自角度所代表的特征（query-based features和document-based features），输出为比输入维度低的embedding vectors，而两个网络综合学习的目标是最大化两个输出vectors的cosine相似度。在具体的训练过程中，在每个mini-batch中随机负采样后再与正样本组合，然后再最小化正样本上的cosine loss（使正样本中的两个网络输出vectors最匹配）。在推荐场景里，可以认为其中一个网络是user的query history，即用户特征，另一个网络为系统中item的隠反馈，比如新闻的点击或是app的下载。</p>
+<p>上面所说的是DSSM的基本概念，但是这里有一个问题，就是user相关的features都是不随时间发生改变的，于是作者引入了Temporal的概念，也就是将user的feautures进行拆分和细化，分为static和temporal，分别代表长期兴趣和短期兴趣。 下图可以很好的表示整个推荐系统的架构，其中item features和user static features全都利用全连接的神经网络构造embeddings，而user temporal features则利用LSTM构造embedding（文中的实验表明GRU的效果并不理想），然后将static和temporal的vectors通过函数$f$做成组合向量（$f$可以是multiplication或concatenation），再与item的向量做cosine similarity生成一个user-item相似度，预测的时候取与user相似度最大的topK item进行推荐。（这里有个问题，如果考虑item的temporal features会是什么样？）</p>
+<img src="/images/DSSM/1.png">
+<p>给出的优化目标为似然形式，即使给定user和时刻t时item概率最大,</p>
+<script type="math/tex; mode=display">
+min_{W_{user}, W_{item}} -log \prod_{user, item^+, t_i} p(item^+|user, t_i) \\
+p(item^+|user, t_i) = \frac{exp(cos(E(user, t_i), E_{item^+}))}{\sum_{item} exp(cos(E(user, t_i), E_{item}))}</script><p>这里概率依然还是由softmax得到，只不过用user的temporal+static向量和item向量之间的相似度来表现。</p>
+<p>不过仔细想一下，模型在细节上还是有些问题，那就是如何选择时间窗口t。选大了，兴趣不够“短期”，选小了，模型参数太多，训练不来，因此作者又引入了multi-rate的概念，也就是选择几个窗口，分别代表短期兴趣和中短期兴趣，然后再训练不同的LSTM，称为“Fast-RNNs”和“Slow-RNNs”，然后将几个LSTMs用全连接层串到一起就OK了。不过这样RNN所带来的训练参数还是太多，文中采用的方法是在训练之前先用上文提到基本的DSSM做pre-train。</p>
+<p>理论部分基本就是这些，就是在DSSM基础上引入了Temporal的概念——解决用户短期兴趣的问题，再引入了multi-rate的概念——对短期兴趣的粒度和模型训练效率做trade-off，因此称为MR-TDSSM。说实话，这篇文章并没有DSSM那篇惊艳，只能算是前者的进一步扩展，但实验结果确实很不赖，在新闻数据上多个指标上能够碾压传统推荐算法和DSSM。值得一提的是，实现工具是keras（一直以为微软的工程师都会用自己的轮子），一些传统方法的baseline用的都是LibRec，可以看到这个开源工具还是挺流行的。</p>
+<img src="/images/DSSM/2.png">
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2017/03/22/w_n_d/" itemprop="url">
                   Wide & Deep Learning for Recommender Systems解读
                 </a>
@@ -273,8 +395,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Data-Analysis/" itemprop="url" rel="index">
-                    <span itemprop="name">Data Analysis</span>
+                  <a href="/categories/Paper/" itemprop="url" rel="index">
+                    <span itemprop="name">Paper</span>
                   </a>
                 </span>
 
@@ -1485,218 +1607,6 @@ w_{update} = w - \eta \frac{\partial loss} {\partial w}</script><p>针对$w_2$�
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/06/28/Epiphone 1960 Les Paul Tribute Plus/" itemprop="url">
-                  Epiphone 1960 Les Paul Tribute Plus
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-06-28T14:46:53+08:00" content="2016-06-28">
-              2016-06-28
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Entertainment/" itemprop="url" rel="index">
-                    <span itemprop="name">Entertainment</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><p>Epiphone’s long friendship with innovator Les Paul dates back to the late 30s and early 40s when Les and fellow guitarists such as Charlie Christian and George Barnes were at the forefront of jazz guitar. Epi Stathopoulos and Les were good friends and Epi would let Les use the Epiphone factory on 14th Street in New York City at night after hours to experiment on guitar and pickup designs. This also was the era when Les, inspired by the stinging sustain heard in electric steel guitars, began dreaming of making a solidbody guitar. He built his first, the legendary “Log,” at the Epi factory in 1941. Over the years, Les continued to work closely with Epiphone luthiers, reviewing new product ideas and offering suggestions.</p>
-<img src="/images/Epiphone/LP.jpg">
-<p>Now, the Epiphone Les Paul Tribute Plus honors Epiphone’s friendship with Les by combining his classic design features with legendary Epiphone quality and value with the added power of Gibson USA 57 Classic humbuckers. But this guitar is not just about recreating the “old”, it’s also about looking ahead, just as Les himself continued to do throughout his lifetime. Using 4-conductor pickup wiring, Epiphone has added two push/pull tone pots to allow for series/parallel pickup switching. The result is a Les Paul with all the standard sounds plus a huge palette of tonal possibilities at your fingertips. The Les Paul Tribute Plus also features Epiphone’s famous built-to-last hardware and electronics including a U.S. Switchcraft 3-way toggle, Mallory-150 tone capacitors, Epiphone StrapLocks, 16:1 ratio premium Grover locking tuners, and a premium hardshell case.</p>
-<img src="/images/Epiphone/color.jpg">
-<h3 id="Body"><a href="#Body" class="headerlink" title="Body"></a>Body</h3><p>The Epiphone Tribute Les Paul features a solid Mahogany back with a solid, carved hard Maple cap to create the ultimate combination of warmth and bite. The solid mahogany neck with a hand-fitted, glued-in joint extends well into the neck pickup cavity, creating maximum neck-to-body contact and acting almost like one continuous piece of wood. Combined with the Mahogany/Maple body, the result is a tribute to Les’ timeless guitar design with the sound that you can only get from a Les Paul. Color finishes include Black Cherry, Faded Cherry, Midnight Ebony, Midnight Sapphire, and Vintage Sunburst.</p>
-<img src="/images/Epiphone/body.jpg">
-<h3 id="Electronics"><a href="#Electronics" class="headerlink" title="Electronics"></a>Electronics</h3><p>Capturing all the power and nuances of the “Tribute’s” tonewoods is a pair of authentic Gibson USA 57 Classic humbucker pickups. With their “Patent Applied For” decal on the base plate, the 57 Classic and 57 Classic Plus are faithful replicas of the famous PAF Gibson humbuckers created by Seth Lover that helped define the “Les Paul” sound. The 57 Classic gives you a tone that is warm and subtle with full, even response that doesn’t hold back when you need that classic Gibson humbucker crunch! The 57 Classic Plus is the perfect bridge pickup and mimics humbuckers from the late 50s that often received a few extra turns of wire. This treatment gives the pickup a slightly higher output without sacrificing its rich, vintage tone. When combined, these humbuckers overdrive tube preamps to a smooth level of saturation without becoming overpowering. Both 57s Classic humbuckers feature Gibson’s special Alnico II magnets, vintage enamel coated wire, nickel plated pole pieces, nickel slugs, maple spacers and vintage-style braided wiring.</p>
-<img src="/images/Epiphone/elec.jpg">
-<h3 id="SPECIFICATIONS"><a href="#SPECIFICATIONS" class="headerlink" title="SPECIFICATIONS"></a>SPECIFICATIONS</h3><div class="table-container">
-<table>
-<thead>
-<tr>
-<th style="text-align:left"></th>
-<th style="text-align:left"></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left">Body Material</td>
-<td style="text-align:left">Mahogany</td>
-</tr>
-<tr>
-<td style="text-align:left">Top Material</td>
-<td style="text-align:left"><strong>Carved Hard Maple w/AAA Flame Maple Veneer</strong></td>
-</tr>
-<tr>
-<td style="text-align:left">Neck Material</td>
-<td style="text-align:left">Mahogany</td>
-</tr>
-<tr>
-<td style="text-align:left">Neck Shape Options</td>
-<td style="text-align:left">1960 SlimTaper™, D Profile</td>
-</tr>
-<tr>
-<td style="text-align:left">Neck Joint</td>
-<td style="text-align:left"><strong>Vintage “Deep-Set”, Glued-In</strong></td>
-</tr>
-<tr>
-<td style="text-align:left">Truss Rod</td>
-<td style="text-align:left">Adjustable</td>
-</tr>
-<tr>
-<td style="text-align:left">Scale Length</td>
-<td style="text-align:left">24.75”</td>
-</tr>
-<tr>
-<td style="text-align:left">Fingerboard Material</td>
-<td style="text-align:left">Rosewood w/Mother-Of-Pearl Trapezoid Inlays</td>
-</tr>
-<tr>
-<td style="text-align:left">Neck Pickup</td>
-<td style="text-align:left"><strong>Gibson USA 57 Classic™ Humbucker (4-Wire)</strong></td>
-</tr>
-<tr>
-<td style="text-align:left">Bridge Pickup</td>
-<td style="text-align:left"><strong>Gibson USA 57 Classic Plus™ Humbucker (4-Wire)</strong></td>
-</tr>
-<tr>
-<td style="text-align:left">Controls</td>
-<td style="text-align:left">Switchcraft™ 3-Way Pickup Selector, Neck Pickup Volume, Bridge Pickup Volume, <strong>Neck Pickup Tone (push/pull - series/parallel), B ridge Pickup Tone (push/pull - series/parallel)</strong></td>
-</tr>
-<tr>
-<td style="text-align:left">Electronics</td>
-<td style="text-align:left">Mallory-150 Tone Capacitors</td>
-</tr>
-<tr>
-<td style="text-align:left">Binding</td>
-<td style="text-align:left">Fingerboard-1-Ply (Cream), Body - 1-Ply (Cream)</td>
-</tr>
-<tr>
-<td style="text-align:left">Fingerboard Radius</td>
-<td style="text-align:left">12”</td>
-</tr>
-<tr>
-<td style="text-align:left">Frets</td>
-<td style="text-align:left">22, Medium-Jumbo</td>
-</tr>
-<tr>
-<td style="text-align:left">Bridge</td>
-<td style="text-align:left">LockTone™ Tune-o-Matic/Stopbar</td>
-</tr>
-<tr>
-<td style="text-align:left">Nut Width</td>
-<td style="text-align:left">1-11/16”</td>
-</tr>
-<tr>
-<td style="text-align:left">Hardware</td>
-<td style="text-align:left">Nickel</td>
-</tr>
-<tr>
-<td style="text-align:left">Machine Heads</td>
-<td style="text-align:left">Grover™ Locking</td>
-</tr>
-<tr>
-<td style="text-align:left">Colors</td>
-<td style="text-align:left">Black Cherry (BC), Faded Cherry Sunburst (FC), Midnight Ebony (ME), Midnight Sapphire (MS), Vintage Sunburst (VS)</td>
-</tr>
-</tbody>
-</table>
-</div>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1742,7 +1652,7 @@ w_{update} = w - \eta \frac{\partial loss} {\partial w}</script><p>针对$w_2$�
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">13</span>
+              <span class="site-state-item-count">14</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
