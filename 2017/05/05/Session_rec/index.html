@@ -84,22 +84,19 @@
 
 
 
-<meta name="description" content="看到一篇关于deep learning一些小trick的博客，感觉对于初学者可能帮助很大，但老司机应该对这些所谓的“黑魔法”烂熟于心。不管怎么说，还是囊括了大部分目前主流的一些tricks，就我本人而言也都在工作中用了这些小技巧，只不过平时都当做common sense了并没有太在意，因此也想着整理记录下来。
-
-在每一个epoch结束后，一定要对数据做shuffle。也就是说要确保每轮迭代时min">
+<meta name="description" content="最近在做站内新用户推荐相关的项目，由于新用户历史行为相对较少，传统的neighborhood method和factor method models上对于user profile的利用少之又少，而如果当做一个传统的二分类问题，即预测购买/不购买，同样也存在相似的问题——特征不足，model能力上限有瓶颈，因此想着挖掘一下会话的time series pattern，从而变成一个基于session的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Deep Learning的一些tricks">
-<meta property="og:url" content="https://nirvanada.github.io/2017/02/23/dl-trick/index.html">
+<meta property="og:title" content="利用RNN做session-based推荐">
+<meta property="og:url" content="https://nirvanada.github.io/2017/05/05/Session_rec/index.html">
 <meta property="og:site_name" content="Andante">
-<meta property="og:description" content="看到一篇关于deep learning一些小trick的博客，感觉对于初学者可能帮助很大，但老司机应该对这些所谓的“黑魔法”烂熟于心。不管怎么说，还是囊括了大部分目前主流的一些tricks，就我本人而言也都在工作中用了这些小技巧，只不过平时都当做common sense了并没有太在意，因此也想着整理记录下来。
-
-在每一个epoch结束后，一定要对数据做shuffle。也就是说要确保每轮迭代时min">
-<meta property="og:updated_time" content="2017-02-23T15:12:37.000Z">
+<meta property="og:description" content="最近在做站内新用户推荐相关的项目，由于新用户历史行为相对较少，传统的neighborhood method和factor method models上对于user profile的利用少之又少，而如果当做一个传统的二分类问题，即预测购买/不购买，同样也存在相似的问题——特征不足，model能力上限有瓶颈，因此想着挖掘一下会话的time series pattern，从而变成一个基于session的">
+<meta property="og:image" content="https://nirvanada.github.io/images/Session_Rec/fig1.png">
+<meta property="og:image" content="https://nirvanada.github.io/images/Session_Rec/fig2.png">
+<meta property="og:updated_time" content="2017-05-06T07:32:46.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Deep Learning的一些tricks">
-<meta name="twitter:description" content="看到一篇关于deep learning一些小trick的博客，感觉对于初学者可能帮助很大，但老司机应该对这些所谓的“黑魔法”烂熟于心。不管怎么说，还是囊括了大部分目前主流的一些tricks，就我本人而言也都在工作中用了这些小技巧，只不过平时都当做common sense了并没有太在意，因此也想着整理记录下来。
-
-在每一个epoch结束后，一定要对数据做shuffle。也就是说要确保每轮迭代时min">
+<meta name="twitter:title" content="利用RNN做session-based推荐">
+<meta name="twitter:description" content="最近在做站内新用户推荐相关的项目，由于新用户历史行为相对较少，传统的neighborhood method和factor method models上对于user profile的利用少之又少，而如果当做一个传统的二分类问题，即预测购买/不购买，同样也存在相似的问题——特征不足，model能力上限有瓶颈，因此想着挖掘一下会话的time series pattern，从而变成一个基于session的">
+<meta name="twitter:image" content="https://nirvanada.github.io/images/Session_Rec/fig1.png">
 
 
 
@@ -120,9 +117,9 @@
 
 
 
-  <link rel="canonical" href="https://nirvanada.github.io/2017/02/23/dl-trick/"/>
+  <link rel="canonical" href="https://nirvanada.github.io/2017/05/05/Session_rec/"/>
 
-  <title> Deep Learning的一些tricks | Andante </title>
+  <title> 利用RNN做session-based推荐 | Andante </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -252,7 +249,7 @@
             
             
               
-                Deep Learning的一些tricks
+                利用RNN做session-based推荐
               
             
           </h1>
@@ -264,8 +261,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-02-23T23:10:15+08:00" content="2017-02-23">
-              2017-02-23
+            <time itemprop="dateCreated" datetime="2017-05-05T15:05:42+08:00" content="2017-05-05">
+              2017-05-05
             </time>
           </span>
 
@@ -278,8 +275,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
+                  <a href="/categories/Paper/" itemprop="url" rel="index">
+                    <span itemprop="name">Paper</span>
                   </a>
                 </span>
 
@@ -311,44 +308,24 @@
       
 
       
-        <p>看到一篇关于deep learning一些小trick的博客，感觉对于初学者可能帮助很大，但老司机应该对这些所谓的“黑魔法”烂熟于心。不管怎么说，还是囊括了大部分目前主流的一些tricks，就我本人而言也都在工作中用了这些小技巧，只不过平时都当做common sense了并没有太在意，因此也想着整理记录下来。</p>
-<ul>
-<li><p>在每一个epoch结束后，一定要对数据做shuffle。也就是说要确保每轮迭代时mini-batch中的数据是不一致的</p>
-</li>
-<li><p>基于DL对大数据量的高可用性，尽可能的扩充数据。最常见的应该是图片分类问题，比如对图片进行旋转、镜像、加噪、白化等等（就像keras的image augmentation）。像在公司里比如提用户训练样本时候就可以通过滑动时间窗口的方法来获取更多数据</p>
-</li>
-<li><p>在训练大规模数据和模型前，先对数据进行一波小比例采样，如果采样数据能够使模型效果足够好的话，说明你的模型最终是可以收敛的——这个trick感觉真的没有太多人会做，如果做的话一般也都是在程序debug时候为了减少训练时间，大多数情况下都是拿到一批数据直接真刀真枪的干</p>
-</li>
-<li><p>永远都要使用dropout以防止过拟合，尤其是要在神经元比较多的全连接或卷积层后——现在一般都要随手加个dropout吧，要不总感觉少点什么</p>
-</li>
-<li><p>避免使用LRN pooling，尽量使用max pooling，因为快！</p>
-</li>
-<li><p>和sigmoid说bye-bye，和tanh说bye-bye，原因很简单：容易饱和，gradient vanishing，ReLU和PreLU明显是目前最好的选择</p>
-</li>
-<li><p>在max pooling层之后用ReLU或者PreLU，而不是之前，道理也很简单：max pooling之后维度减小，可以减少不少的计算量</p>
-</li>
-<li><p>尽量别用ReLU，过时啦！投入PreLU的怀抱！因为ReLU在初始阶段容易把训练卡死，PreLU的alpha选个0.1，完爆ReLU——这个结论感觉下的过于鲁莽，虽然理论上是这样的，但是实验里也没见过PreLU比ReLU好到哪里，但是对于训练初始阶段的情况还真没关注过，以后可以对比实验下</p>
-</li>
-<li><p>使用Batch Normalization。不多说，和dropout都差不多，加一下已经成习惯了。最近又看了BN的原作者新搞出了一个Batch Renormalization，消除了没个mini-batch中数据的差异性，据说更牛逼</p>
-</li>
-<li><p>对数据做预处理时映射到-1~1区间，而不是减去他们的均值——估计都是经验之谈，可能每份数据所呈现的结果都不太一样，个人习惯是做z-score，映射到0~1</p>
-</li>
-<li><p>尽量使用轻量级的模型，因为当你把一个庞大的model放到server上时效率的影响可能对用户体验并不是很好，即使这个工作会使你的模型准确率不够高</p>
-</li>
-<li><p>如果使用轻量级的模型，尽量做ensemble，如果ensemble了5个network，基本大约可以使准确度提搞3%——这玩意居然给量化出来了，感觉也得看是什么network吧</p>
-</li>
-<li><p>尽可能用xavier initialization做参数初始化，但是只用在全连接层，别用在CNN层上——应该就是告诉你初始化的时候weights的方差取个啥值</p>
-</li>
-<li><p>在CNN中可能的地方使用1*1卷积核，会增加spatial locality，可以自己控制升维或者降维，同时也可以把模型做的很deep——谷歌爸爸用了也说好</p>
-</li>
-<li><p>没有好的GPU，就别搞DL了</p>
-</li>
-<li><p>DL不是神，理解好你要解决的问题，别就会傻套现成的网络结构</p>
-</li>
-</ul>
-<p>以上。</p>
-<p>参考：<a href="http://nmarkou.blogspot.jp/2017/02/the-black-magic-of-deep-learning-tips.html" target="_blank" rel="external">The Black Magic of Deep Learning - Tips and Tricks for the practitioner</a></p>
-
+        <p>最近在做站内新用户推荐相关的项目，由于新用户历史行为相对较少，传统的neighborhood method和factor method models上对于user profile的利用少之又少，而如果当做一个传统的二分类问题，即预测购买/不购买，同样也存在相似的问题——特征不足，model能力上限有瓶颈，因此想着挖掘一下会话的time series pattern，从而变成一个基于session的预测问题，主要参考了ICLR 2016的一篇文章，个人感觉这篇文章可以算是利用RNN做基于session推荐比较早期的实现，而且作者也开源了基于theano的实现，后续一些improved版本，包括网易在考拉上的session推荐实践也都借鉴了这篇文章的一些思想，接下来对这篇文章进行一个简单的梳理。</p>
+<p>文章中解决的问题是：给定一个session中的item点击流（click streaming events），来预测这个点击流后的下一个点击会是什么item，并最终由目标item完成推荐。需要注意的是，作者虽然用到了recsys 2015的数据来做model evaluation，但实际上并没有用到购买数据，因此这篇文章所解决的问题只是通过session的item序列模式挖掘可能感兴趣的item，并不是最终会发生购买行为的item。按照这个模型结构来看，输入数据就是某个session的当前状态，即前N个item click sequences所携带的序列信息，输出就是当前session第N+1个item。所以在一个点击流中的一个特定点击事件的网络结构可以表达为如下图所示，输入为已点击item的one-hot编码，经过一层embedding层来进行降维，再通过多层GRU（Gated Recurrent Unit）单元，最后通过一个前馈映射层来输出下一个item的likelihood。</p>
+<p>简要描述一下GRU的原理（这里作者用GRU的原因是在GRU、LSTM和传统RNN单元中发现GRU效果最好）。传统RNN的hidden state数学表达为</p>
+<script type="math/tex; mode=display">
+h_t = g(Wx_t + Uh_{t-1})</script><p>也就是某一个时间点上的hidden state与当前时间点的输入和上一个时间点的hidden state有关，并且是二者线性组合的形式，但当时间序列过长时，会面临严重的梯度消失问题，而GRU和LSTM由于网络结构的变化可以有效的解决传统RNN中的时间维度梯度消失问题。其中GRU引入了update gate $z_t$和reset gate $r_t$的概念，两个gate控制当前时刻输入和上一时刻的记忆信息哪部分需要保留，哪部分需要丢弃，表达形式一致，分别表示为</p>
+<script type="math/tex; mode=display">
+z_t = \sigma(W_z x_t + U_z h_{t-1}) \\
+r_t = \sigma(W_r x_t + U_r h_{t-1})</script><p>而输出的hidden state为</p>
+<script type="math/tex; mode=display">
+\hat h_t = tanh(W x_t + U(r_t \odot h_{t-1}))\\
+h_t = (1 - z_t)h_{t-1} + z_t \hat h_t</script><p>在构造数据集时，文章采用了session后补齐再划分mini-batch的方法（如下图）。具体来讲，就是当一个session结束时，用一个新的session接到当前session的末尾，当这个事件发生时，hidden state就被重新置零。</p>
+<img src="/images/Session_Rec/fig1.png">
+<p>虽然可以把上述问题作为一个多分类问题，但最后文章在实验中发现用cross-entropy做loss在100个左右hidden units时效果不错，但一旦units数量增大效果就不如ranking loss的形式，因此采用了pairwise ranking loss作为损失函数，并分别列举了BPR（Bayesian Personalized Ranking）和TOP1，其中某一个特定session中的一个点击预测loss为</p>
+<script type="math/tex; mode=display">
+L_S^{BPR} = -\frac{1}{N_S} \sum_{j=1}^{N_S} log(\sigma(\hat{r}_{S,i} - \hat{r}_{S,j})) \\
+L_S^{TOP1} = -\frac{1}{N_S} \sum_{j=1}^{N_S} log(\sigma(\hat{r}_{S,i} - \hat{r}_{S,j})) + \sigma(\hat{r}_{S,j}^2)</script><p>这里$\hat{r}<em>{S,j}$为第$j$个negative sample item的score，$\hat{r}</em>{S,i}$为postive sample item的score，值得注意的是这里对负样本做了一定程度的负采样，以消除一些用户可能感兴趣但并没有展示商品的影响。</p>
+<p>实验在Recsys 2015数据集和另一个视频点击数据集上进行，以MRR@20和Recall@20作为指标评估，分别比较了不同mini-batch大小、dropout大小、learning-rate大小和momentum和loss形式下的效果，并与一些传统流行的推荐算法baseline进行对比，均有提升，细节不详谈，有兴趣的可以自己去看一下（<a href="https://arxiv.org/abs/1511.06939）。" target="_blank" rel="external">https://arxiv.org/abs/1511.06939）。</a></p>
+<img src="/images/Session_Rec/fig2.png">
       
     </div>
 
@@ -372,17 +349,13 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/02/21/xgb/" rel="next" title="Xgboost梳理">
-                <i class="fa fa-chevron-left"></i> Xgboost梳理
+              <a href="/2017/04/10/DSSM/" rel="next" title="Multi-Rate Deep Learning for Temporal Recommendation解读">
+                <i class="fa fa-chevron-left"></i> Multi-Rate Deep Learning for Temporal Recommendation解读
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/03/01/mf/" rel="prev" title="矩阵分解：从入门到高级入门">
-                矩阵分解：从入门到高级入门 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>

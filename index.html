@@ -245,6 +245,135 @@
             
               
                 
+                <a class="post-title-link" href="/2017/05/05/Session_rec/" itemprop="url">
+                  利用RNN做session-based推荐
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-05-05T15:05:42+08:00" content="2017-05-05">
+              2017-05-05
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Paper/" itemprop="url" rel="index">
+                    <span itemprop="name">Paper</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>最近在做站内新用户推荐相关的项目，由于新用户历史行为相对较少，传统的neighborhood method和factor method models上对于user profile的利用少之又少，而如果当做一个传统的二分类问题，即预测购买/不购买，同样也存在相似的问题——特征不足，model能力上限有瓶颈，因此想着挖掘一下会话的time series pattern，从而变成一个基于session的预测问题，主要参考了ICLR 2016的一篇文章，个人感觉这篇文章可以算是利用RNN做基于session推荐比较早期的实现，而且作者也开源了基于theano的实现，后续一些improved版本，包括网易在考拉上的session推荐实践也都借鉴了这篇文章的一些思想，接下来对这篇文章进行一个简单的梳理。</p>
+<p>文章中解决的问题是：给定一个session中的item点击流（click streaming events），来预测这个点击流后的下一个点击会是什么item，并最终由目标item完成推荐。需要注意的是，作者虽然用到了recsys 2015的数据来做model evaluation，但实际上并没有用到购买数据，因此这篇文章所解决的问题只是通过session的item序列模式挖掘可能感兴趣的item，并不是最终会发生购买行为的item。按照这个模型结构来看，输入数据就是某个session的当前状态，即前N个item click sequences所携带的序列信息，输出就是当前session第N+1个item。所以在一个点击流中的一个特定点击事件的网络结构可以表达为如下图所示，输入为已点击item的one-hot编码，经过一层embedding层来进行降维，再通过多层GRU（Gated Recurrent Unit）单元，最后通过一个前馈映射层来输出下一个item的likelihood。</p>
+<p>简要描述一下GRU的原理（这里作者用GRU的原因是在GRU、LSTM和传统RNN单元中发现GRU效果最好）。传统RNN的hidden state数学表达为</p>
+<script type="math/tex; mode=display">
+h_t = g(Wx_t + Uh_{t-1})</script><p>也就是某一个时间点上的hidden state与当前时间点的输入和上一个时间点的hidden state有关，并且是二者线性组合的形式，但当时间序列过长时，会面临严重的梯度消失问题，而GRU和LSTM由于网络结构的变化可以有效的解决传统RNN中的时间维度梯度消失问题。其中GRU引入了update gate $z_t$和reset gate $r_t$的概念，两个gate控制当前时刻输入和上一时刻的记忆信息哪部分需要保留，哪部分需要丢弃，表达形式一致，分别表示为</p>
+<script type="math/tex; mode=display">
+z_t = \sigma(W_z x_t + U_z h_{t-1}) \\
+r_t = \sigma(W_r x_t + U_r h_{t-1})</script><p>而输出的hidden state为</p>
+<script type="math/tex; mode=display">
+\hat h_t = tanh(W x_t + U(r_t \odot h_{t-1}))\\
+h_t = (1 - z_t)h_{t-1} + z_t \hat h_t</script><p>在构造数据集时，文章采用了session后补齐再划分mini-batch的方法（如下图）。具体来讲，就是当一个session结束时，用一个新的session接到当前session的末尾，当这个事件发生时，hidden state就被重新置零。</p>
+<img src="/images/Session_Rec/fig1.png">
+<p>虽然可以把上述问题作为一个多分类问题，但最后文章在实验中发现用cross-entropy做loss在100个左右hidden units时效果不错，但一旦units数量增大效果就不如ranking loss的形式，因此采用了pairwise ranking loss作为损失函数，并分别列举了BPR（Bayesian Personalized Ranking）和TOP1，其中某一个特定session中的一个点击预测loss为</p>
+<script type="math/tex; mode=display">
+L_S^{BPR} = -\frac{1}{N_S} \sum_{j=1}^{N_S} log(\sigma(\hat{r}_{S,i} - \hat{r}_{S,j})) \\
+L_S^{TOP1} = -\frac{1}{N_S} \sum_{j=1}^{N_S} log(\sigma(\hat{r}_{S,i} - \hat{r}_{S,j})) + \sigma(\hat{r}_{S,j}^2)</script><p>这里$\hat{r}<em>{S,j}$为第$j$个negative sample item的score，$\hat{r}</em>{S,i}$为postive sample item的score，值得注意的是这里对负样本做了一定程度的负采样，以消除一些用户可能感兴趣但并没有展示商品的影响。</p>
+<p>实验在Recsys 2015数据集和另一个视频点击数据集上进行，以MRR@20和Recall@20作为指标评估，分别比较了不同mini-batch大小、dropout大小、learning-rate大小和momentum和loss形式下的效果，并与一些传统流行的推荐算法baseline进行对比，均有提升，细节不详谈，有兴趣的可以自己去看一下（<a href="https://arxiv.org/abs/1511.06939）。" target="_blank" rel="external">https://arxiv.org/abs/1511.06939）。</a></p>
+<img src="/images/Session_Rec/fig2.png">
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2017/04/10/DSSM/" itemprop="url">
                   Multi-Rate Deep Learning for Temporal Recommendation解读
                 </a>
@@ -1482,131 +1611,6 @@ w_{update} = w - \eta \frac{\partial loss} {\partial w}</script><p>针对$w_2$�
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/06/29/Shelter/" itemprop="url">
-                  Shelter Annimal Outcome
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-06-29T09:52:17+08:00" content="2016-06-29">
-              2016-06-29
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Kaggle/" itemprop="url" rel="index">
-                    <span itemprop="name">Kaggle</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p><a href="https://www.kaggle.com/c/shelter-animal-outcomes" target="_blank" rel="external">相应的Kaggle比赛在这里</a></p>
-<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>　　美国的宠物收容所每年会接纳七百余万只宠物，在这当中有一些是被主人所遗弃的，有一部分是走失后被他人捡到的。这其中一些比较幸运的少数宠物会最终重回一个温暖的家，不过由于要控制收容所宠物数量，每年大概有近三百万的汪星人和喵星人会被安乐死。</p>
-<h3 id="数据"><a href="#数据" class="headerlink" title="数据"></a>数据</h3><p>　　数据来源于<a href="http://www.austintexas.gov/department/animal-services" target="_blank" rel="external">Austin Animal Center</a>，包含喵星人和汪星人的名字、品种、年龄等信息，目的是为了预测具有不同特征的宠物最终去向（被收养、安乐死等），并且期望能够帮助收养机构了解到具有哪些特征的宠物需要一些额外的关注。</p>
-<h3 id="统计结果"><a href="#统计结果" class="headerlink" title="统计结果"></a>统计结果</h3><p>　　我们先对数据进行一些简单直观的可视化(Trainset + Testset)</p>
-<h4 id="宠物类型及品种"><a href="#宠物类型及品种" class="headerlink" title="宠物类型及品种"></a>宠物类型及品种</h4><p>　　喵星人和汪星人数量相当，Mixed品种的占大多数。<br><img src="/images/Shelter/type&mix.png"></p>
-<h4 id="性别信息"><a href="#性别信息" class="headerlink" title="性别信息"></a>性别信息</h4><p>　　公母数量相当，但绝大部分是neutered（公：被阉割的，母：被摘除卵巢的）。<br><img src="/images/Shelter/sex&neutered.png"></p>
-<h4 id="颜色及年龄信息"><a href="#颜色及年龄信息" class="headerlink" title="颜色及年龄信息"></a>颜色及年龄信息</h4><p>　　排名前三位的颜色分别为黑白、黑色和棕色斑点，而宠物年龄大多都不满一岁。<br><img src="/images/Shelter/color&age.png"></p>
-<h4 id="姓名"><a href="#姓名" class="headerlink" title="姓名"></a>姓名</h4><p>　　还有一个比较有趣，关于名字的信息，排名前三位分别为Bella, Max和Charlie。<br><img src="/images/Shelter/name.png"></p>
-<h4 id="阿猫阿狗的区别"><a href="#阿猫阿狗的区别" class="headerlink" title="阿猫阿狗的区别"></a>阿猫阿狗的区别</h4><p>　　喵星人和汪星人的区别主要体现三个方面：年龄、neutered situation和Mixed状况——喵星人的年龄更小，汪星人neutered的更多，几乎所有喵星人都是mixed。<br><img src="/images/Shelter/animaltype.png"></p>
-<h4 id="宠物去向（Trainset-Only）"><a href="#宠物去向（Trainset-Only）" class="headerlink" title="宠物去向（Trainset Only）"></a>宠物去向（Trainset Only）</h4><p>　　汪星人最终返回主人身边和被收养的比例出奇的高，而喵星人最多的去向是被转移到别的地方，难道狗真的比猫要更受人欢迎么；而Sex不同的宠物最终归宿差别极小。<br><img src="/images/Shelter/outcome1.png"></p>
-<p>　　从比例上来看，mixed与unmixed宠物的outcome区别也并不大；而neutered的宠物更容易被收养，而intact的宠物更多的被transfer，另外安乐死的比例也略高。<br><img src="/images/Shelter/outcome2.png"></p>
-<p>　　宠物的年龄越大，就约容易返回主人身边；而排名前三花色的宠物最终outcome无显著差异。<br><img src="/images/Shelter/outcome3.png"></p>
-<p>　　在品种数量排名前三位汪星人中，相比较吉娃娃和拉布拉多犬，收容所中比特犬虽然数量最多，但其安乐死比例非常高，而被收养率很低。<br><img src="/images/Shelter/dogbreed.png"></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1652,7 +1656,7 @@ w_{update} = w - \eta \frac{\partial loss} {\partial w}</script><p>针对$w_2$�
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-count">15</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
