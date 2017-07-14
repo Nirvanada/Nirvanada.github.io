@@ -84,19 +84,21 @@
 
 
 
-<meta name="description" content="在推荐系统里有一个比较重要的问题：如何能把一个user的长期兴趣和短期兴趣综合起来考虑进行内容推荐？一个人的兴趣总会随着时间发生变化，特定日期、事件都会使长期兴趣发生波动从而促生短期兴趣。一个比较直观的例子：如果在一个世界杯期间的新闻推荐场景下，推足球新闻很有可能比推荐长期兴趣的内容更使人满意。而目前的很多推荐方法都没有考虑与时间有关的短期信息，因此这篇文章主要针对将长短兴趣结合来提高推荐效果。">
+<meta name="description" content="在CTR预估中，LR模型有着举足轻重的地位，而近几年FM（Factorization Machine）和FFM（Field Factorization Machine）开始在各大比赛和互联网公司广泛运用并取得了不俗的成绩和效果。实际上，FM算是LR的扩展，FFM算是FM的扩展，或者说FMM的一种特例是FM，而FM的一种特例就是LR，下面主要围绕着这两个算法的原理部分展开介绍。
+FM相对于LR模型来">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Multi-Rate Deep Learning for Temporal Recommendation解读">
-<meta property="og:url" content="https://nirvanada.github.io/2017/04/10/DSSM/index.html">
+<meta property="og:title" content="FM and FFM">
+<meta property="og:url" content="https://nirvanada.github.io/2017/07/14/FM and FFM/index.html">
 <meta property="og:site_name" content="Andante">
-<meta property="og:description" content="在推荐系统里有一个比较重要的问题：如何能把一个user的长期兴趣和短期兴趣综合起来考虑进行内容推荐？一个人的兴趣总会随着时间发生变化，特定日期、事件都会使长期兴趣发生波动从而促生短期兴趣。一个比较直观的例子：如果在一个世界杯期间的新闻推荐场景下，推足球新闻很有可能比推荐长期兴趣的内容更使人满意。而目前的很多推荐方法都没有考虑与时间有关的短期信息，因此这篇文章主要针对将长短兴趣结合来提高推荐效果。">
-<meta property="og:image" content="https://nirvanada.github.io/images/DSSM/1.png">
-<meta property="og:image" content="https://nirvanada.github.io/images/DSSM/2.png">
-<meta property="og:updated_time" content="2017-04-10T12:49:01.000Z">
+<meta property="og:description" content="在CTR预估中，LR模型有着举足轻重的地位，而近几年FM（Factorization Machine）和FFM（Field Factorization Machine）开始在各大比赛和互联网公司广泛运用并取得了不俗的成绩和效果。实际上，FM算是LR的扩展，FFM算是FM的扩展，或者说FMM的一种特例是FM，而FM的一种特例就是LR，下面主要围绕着这两个算法的原理部分展开介绍。
+FM相对于LR模型来">
+<meta property="og:image" content="https://nirvanada.github.io/images/FM/fm_ffm.png">
+<meta property="og:updated_time" content="2017-07-14T09:44:58.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Multi-Rate Deep Learning for Temporal Recommendation解读">
-<meta name="twitter:description" content="在推荐系统里有一个比较重要的问题：如何能把一个user的长期兴趣和短期兴趣综合起来考虑进行内容推荐？一个人的兴趣总会随着时间发生变化，特定日期、事件都会使长期兴趣发生波动从而促生短期兴趣。一个比较直观的例子：如果在一个世界杯期间的新闻推荐场景下，推足球新闻很有可能比推荐长期兴趣的内容更使人满意。而目前的很多推荐方法都没有考虑与时间有关的短期信息，因此这篇文章主要针对将长短兴趣结合来提高推荐效果。">
-<meta name="twitter:image" content="https://nirvanada.github.io/images/DSSM/1.png">
+<meta name="twitter:title" content="FM and FFM">
+<meta name="twitter:description" content="在CTR预估中，LR模型有着举足轻重的地位，而近几年FM（Factorization Machine）和FFM（Field Factorization Machine）开始在各大比赛和互联网公司广泛运用并取得了不俗的成绩和效果。实际上，FM算是LR的扩展，FFM算是FM的扩展，或者说FMM的一种特例是FM，而FM的一种特例就是LR，下面主要围绕着这两个算法的原理部分展开介绍。
+FM相对于LR模型来">
+<meta name="twitter:image" content="https://nirvanada.github.io/images/FM/fm_ffm.png">
 
 
 
@@ -117,9 +119,9 @@
 
 
 
-  <link rel="canonical" href="https://nirvanada.github.io/2017/04/10/DSSM/"/>
+  <link rel="canonical" href="https://nirvanada.github.io/2017/07/14/FM and FFM/"/>
 
-  <title> Multi-Rate Deep Learning for Temporal Recommendation解读 | Andante </title>
+  <title> FM and FFM | Andante </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -249,7 +251,7 @@
             
             
               
-                Multi-Rate Deep Learning for Temporal Recommendation解读
+                FM and FFM
               
             
           </h1>
@@ -261,8 +263,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-04-10T20:47:53+08:00" content="2017-04-10">
-              2017-04-10
+            <time itemprop="dateCreated" datetime="2017-07-14T17:11:02+08:00" content="2017-07-14">
+              2017-07-14
             </time>
           </span>
 
@@ -275,8 +277,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Paper/" itemprop="url" rel="index">
-                    <span itemprop="name">Paper</span>
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
                   </a>
                 </span>
 
@@ -308,17 +310,38 @@
       
 
       
-        <p>在推荐系统里有一个比较重要的问题：如何能把一个user的长期兴趣和短期兴趣综合起来考虑进行内容推荐？一个人的兴趣总会随着时间发生变化，特定日期、事件都会使长期兴趣发生波动从而促生短期兴趣。一个比较直观的例子：如果在一个世界杯期间的新闻推荐场景下，推足球新闻很有可能比推荐长期兴趣的内容更使人满意。而目前的很多推荐方法都没有考虑与时间有关的短期信息，因此这篇文章主要针对将长短兴趣结合来提高推荐效果。</p>
-<p>模型的基础利用deep semantic structured model (DSSM)。简言之，DSSM可以视为把从两个或多个角度所构建的神经网络模型整合到一个角度进行学习。假设一个两个角度的DSSM，其中一个网络表示query，另一个网络表示document，两个网络的输入可以是由各自角度所代表的特征（query-based features和document-based features），输出为比输入维度低的embedding vectors，而两个网络综合学习的目标是最大化两个输出vectors的cosine相似度。在具体的训练过程中，在每个mini-batch中随机负采样后再与正样本组合，然后再最小化正样本上的cosine loss（使正样本中的两个网络输出vectors最匹配）。在推荐场景里，可以认为其中一个网络是user的query history，即用户特征，另一个网络为系统中item的隠反馈，比如新闻的点击或是app的下载。</p>
-<p>上面所说的是DSSM的基本概念，但是这里有一个问题，就是user相关的features都是不随时间发生改变的，于是作者引入了Temporal的概念，也就是将user的feautures进行拆分和细化，分为static和temporal，分别代表长期兴趣和短期兴趣。 下图可以很好的表示整个推荐系统的架构，其中item features和user static features全都利用全连接的神经网络构造embeddings，而user temporal features则利用LSTM构造embedding（文中的实验表明GRU的效果并不理想），然后将static和temporal的vectors通过函数$f$做成组合向量（$f$可以是multiplication或concatenation），再与item的向量做cosine similarity生成一个user-item相似度，预测的时候取与user相似度最大的topK item进行推荐。（这里有个问题，如果考虑item的temporal features会是什么样？）</p>
-<img src="/images/DSSM/1.png">
-<p>给出的优化目标为似然形式，即使给定user和时刻t时item概率最大,</p>
+        <p>在CTR预估中，LR模型有着举足轻重的地位，而近几年FM（Factorization Machine）和FFM（Field Factorization Machine）开始在各大比赛和互联网公司广泛运用并取得了不俗的成绩和效果。实际上，FM算是LR的扩展，FFM算是FM的扩展，或者说FMM的一种特例是FM，而FM的一种特例就是LR，下面主要围绕着这两个算法的原理部分展开介绍。</p>
+<h4 id="FM"><a href="#FM" class="headerlink" title="FM"></a>FM</h4><p>相对于LR模型来说，FM就是考虑了每个特征之间的交互关系，而有些时候在实际场景中这些特征交互往往起到了关键性作用，这也是为什么现在深度学习火的原因之一。打个比方，在广告推荐场景下，一个男性用户可能会有2%的概率点击一条足球属性的广告，而一个年龄在20~40岁之间的男性用户可能会有3%的概率点击，更进一步，满足上面条件的用户在一个给定的上下文条件下，比如世界杯期间、傍晚、甚至在搜索query高度相关的条件下就会有10%的点击概率，这都说明了特征之间的交互作用会对最后的预测结果产生很重要的影响。回到LR模型，它只对每个特征单独赋予一个权重，即</p>
 <script type="math/tex; mode=display">
-min_{W_{user}, W_{item}} -log \prod_{user, item^+, t_i} p(item^+|user, t_i) \\
-p(item^+|user, t_i) = \frac{exp(cos(E(user, t_i), E_{item^+}))}{\sum_{item} exp(cos(E(user, t_i), E_{item}))}</script><p>这里概率依然还是由softmax得到，只不过用user的temporal+static向量和item向量之间的相似度来表现。</p>
-<p>不过仔细想一下，模型在细节上还是有些问题，那就是如何选择时间窗口t。选大了，兴趣不够“短期”，选小了，模型参数太多，训练不来，因此作者又引入了multi-rate的概念，也就是选择几个窗口，分别代表短期兴趣和中短期兴趣，然后再训练不同的LSTM，称为“Fast-RNNs”和“Slow-RNNs”，然后将几个LSTMs用全连接层串到一起就OK了。不过这样RNN所带来的训练参数还是太多，文中采用的方法是在训练之前先用上文提到基本的DSSM做pre-train。</p>
-<p>理论部分基本就是这些，就是在DSSM基础上引入了Temporal的概念——解决用户短期兴趣的问题，再引入了multi-rate的概念——对短期兴趣的粒度和模型训练效率做trade-off，因此称为MR-TDSSM。说实话，这篇文章并没有DSSM那篇惊艳，只能算是前者的进一步扩展，但实验结果确实很不赖，在新闻数据上多个指标上能够碾压传统推荐算法和DSSM。值得一提的是，实现工具是keras（一直以为微软的工程师都会用自己的轮子），一些传统方法的baseline用的都是LibRec，可以看到这个开源工具还是挺流行的。</p>
-<img src="/images/DSSM/2.png">
+\phi(x) = \sigma(w_0 + \sum_i w_i x_i)</script><p>如果把$\sigma$拿掉的话，只看内部的线性部分，FM模型所能带来的特征交互形式即为</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+y(x) =& w_0 + \sum_i w_i x_i +\sum_i \sum_{j = i + 1} w_{ij} x_i x_j\\
+= &w_0 + \sum_i w_i x_i +\sum_i \sum_{j = i + 1} <v_i, v_j> x_i x_j
+\end{aligned}</script><p>实际上，仅仅依靠$w_{ij}$就可以完成对特征的交互，但这里对$W$矩阵的构造并没有采用直接学习的方式，而是借鉴了矩阵分解的形式，构成形式为由$V \cdot V^T$。这样做的好处有两点，第一点是学习的参数量会显著减少。由于在CTR预估的任务中，会存在非常sparse的特征，百万千万维都有可能，如果直接学习$w_{ij}$的参数量是$N^2$，而如果$V\in R^{N*k}$，学习的参数量就是$kN$，而一般来说$k$的选取并不会太大，一方面是为了减少计算量，另一方面则是为了考虑在高维稀疏特征条件下的泛化性能；第二点是如果直接学习$w_{ij}$，会存在“没什么可学的”的窘境，因为如果是采用SGD的优化方式，$w_{ij}$的更新会依赖那些交互项都不为0的特征，而这样的交互极少，参数可能会学习不充分，但以这种矩阵分解的间接构建$w_{ij}$更新参数就不会出现这种问题。</p>
+<p>由于上式前半部分和LR一致，所以我们将重点放在后半部分特征交互项上，经过推导，最后一项可以化简为</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\sum_i \sum_{j = i+1} <v_i, v_j> x_i x_j \\
+=&\frac{1}{2} \sum_i \sum_{j = 1} <v_i, v_j> x_i x_j - 1/2 \sum_i <v_i, v_i> x_i x_i \\
+=&\frac{1}{2}(\sum_i \sum_j \sum_{f=1}^{k} v_{i,f} v_{j, f} x_{i} x_{j} - \sum_i \sum_{f=1}^{k} v_{i, f} v_{i, f} x_i x_i) \\
+=&\frac{1}{2}\sum_{f = 1}^{k}((\sum_i v_{i,f} x_i)(\sum_j v_{j,f} x_j)) - \sum_i v_{i,f}^2 x_i^2))  \\
+=&\frac{1}{2}\sum_{f = 1}^{k}(( \sum_{i=1}^{N} v_{i,f} x_i)^2 -  \sum_{i=1}^{N} v_{i,f}^2 x_i^2))
+\end{aligned}</script><p>这里虽然看上去很绕，但只要自己动手写一写就一目了然了。最最重要的是，上面的式子的计算复杂度是线性的$O(kN)$，相比较于直接计算$W$矩阵的复杂度$O(kN^2)$，明显要高效许多。在优化参数时，采用传统的SGD方法，式中各项参数的梯度可求</p>
+<script type="math/tex; mode=display">
+\frac {\partial y(x)}{\partial \theta} = \begin{cases} 1 & \text {if $\theta$ is $w_0$}\\
+x_i & \text {if $\theta$ is $w_i$}\\
+x_i \sum_j v_{j,f}x_j - v_{i,f}x_i^2 & \text {if $\theta$ is $v_{i,f}$} \end{cases}</script><p>最后，假设对于一个具体的分类问题，最终带正则的优化目标就变成了</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\theta^* &= argmin_\theta \sum (loss(y(x_i), \hat y_i) + \sum_\theta \lambda \theta^2) \\ 
+&= argmin_\theta \sum -\hat y_i log\sigma(y_i) - (1 - \hat y_i) log(1 - \sigma(y_i)) + \sum_\theta \lambda \theta^2)
+\end{aligned}</script><h4 id="FFM"><a href="#FFM" class="headerlink" title="FFM"></a>FFM</h4><p>FFM是在FM的基础上引入了Field的概念。从上面的公式中可以看到，FM在处理$x_i$和$x_j$的特征交互时，所使用的隐向量$V$是$v_i$和$v_j$，而在处理$x_i$和$x_k$的特征交互时，所使用的隐向量$V$是$v_i$和$v_k$，这样的局限就是$x_i$和其他所有特征交互时用的都是一个隐向量$v_i$，而FFM对这个问题的处理方法就是引入field的概念，或者说把特征分组，比如年龄特征是一个field，性别特征是一个field，职业特征又是一个field，在FM模型中年龄与性别、职业特征交互项的隐因子$v_{age}$是一样的，但在FFM中性别职业的交互隐因子为$v_{age, sex}$，而性别职业的交互隐因子为$v_{age, prof}$。更一般地，之前的交互项系数的表达为&lt;$v_i, v_j$&gt;，而现在又加入了field这一因素，表达为&lt;$v_{i, f_j}, v_{j, f_i}$&gt;，也就是说在模型的表达式上只需要修改这一项就可以，其余都不变。在实际应用中，我们一般指定分类特征中的每一类特征为一个field，而连续特征每个都为一个field。</p>
+<p>我们可以看到，加入field概念之后对特征的交互考虑得更加周全，不同类型的特征交互体现出了多样性，但是由于有这样一个因素的存在，使得我们模型的参数量也随之提高。FM的参数量为$kN$，又由于公式可以化简，因此计算复杂度由初始的$O(kN^2)$变为$O(kN)$，然而FM的参数量则变为了$kfN$，其中$f$为field个数，公式无法化简，计算复杂度为$O(kN^2)$。虽然说由于有field带来的多样性，在$k$的选取上FFM要比FM小，但总体上看FFM的学习速率还是要比FM慢一截。</p>
+<p>从FM和FFM在公开数据集上的表现来看，FM和FFM各有千秋，但相比于原始未进行特征交互的LM和直接计算特征交互矩阵$W$的Poly2方法还是有一定程度的提升。</p>
+<img src="/images/FM/fm_ffm.png">
+<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><p><a href="http://www.csie.ntu.edu.tw/~b97053/paper/Rendle2010FM.pdf" target="_blank" rel="external">Factorization Machines</a><br><a href="http://www.csie.ntu.edu.tw/~cjlin/papers/ffm.pdf" target="_blank" rel="external">Field-aware Factorization Machines for CTR Prediction</a></p>
+
       
     </div>
 
@@ -342,17 +365,13 @@ p(item^+|user, t_i) = \frac{exp(cos(E(user, t_i), E_{item^+}))}{\sum_{item} exp(
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/03/22/w_n_d/" rel="next" title="Wide & Deep Learning for Recommender Systems解读">
-                <i class="fa fa-chevron-left"></i> Wide & Deep Learning for Recommender Systems解读
+              <a href="/2017/07/14/Tensorflow/" rel="next" title="Tensorflow简介">
+                <i class="fa fa-chevron-left"></i> Tensorflow简介
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/05/05/Session_rec/" rel="prev" title="利用RNN做session-based推荐">
-                利用RNN做session-based推荐 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -459,7 +478,7 @@ p(item^+|user, t_i) = \frac{exp(cos(E(user, t_i), E_{item^+}))}{\sum_{item} exp(
               
             
             
-              <p class="post-toc-empty">此文章未包含目录</p>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#FM"><span class="nav-number">1.</span> <span class="nav-text">FM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FFM"><span class="nav-number">2.</span> <span class="nav-text">FFM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#参考资料"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
             
           </div>
         </section>

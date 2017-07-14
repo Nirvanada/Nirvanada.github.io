@@ -245,6 +245,276 @@
             
               
                 
+                <a class="post-title-link" href="/2017/07/14/FM and FFM/" itemprop="url">
+                  FM and FFM
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-07-14T17:11:02+08:00" content="2017-07-14">
+              2017-07-14
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>在CTR预估中，LR模型有着举足轻重的地位，而近几年FM（Factorization Machine）和FFM（Field Factorization Machine）开始在各大比赛和互联网公司广泛运用并取得了不俗的成绩和效果。实际上，FM算是LR的扩展，FFM算是FM的扩展，或者说FMM的一种特例是FM，而FM的一种特例就是LR，下面主要围绕着这两个算法的原理部分展开介绍。</p>
+<h4 id="FM"><a href="#FM" class="headerlink" title="FM"></a>FM</h4><p>相对于LR模型来说，FM就是考虑了每个特征之间的交互关系，而有些时候在实际场景中这些特征交互往往起到了关键性作用，这也是为什么现在深度学习火的原因之一。打个比方，在广告推荐场景下，一个男性用户可能会有2%的概率点击一条足球属性的广告，而一个年龄在20~40岁之间的男性用户可能会有3%的概率点击，更进一步，满足上面条件的用户在一个给定的上下文条件下，比如世界杯期间、傍晚、甚至在搜索query高度相关的条件下就会有10%的点击概率，这都说明了特征之间的交互作用会对最后的预测结果产生很重要的影响。回到LR模型，它只对每个特征单独赋予一个权重，即</p>
+<script type="math/tex; mode=display">
+\phi(x) = \sigma(w_0 + \sum_i w_i x_i)</script><p>如果把$\sigma$拿掉的话，只看内部的线性部分，FM模型所能带来的特征交互形式即为</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+y(x) =& w_0 + \sum_i w_i x_i +\sum_i \sum_{j = i + 1} w_{ij} x_i x_j\\
+= &w_0 + \sum_i w_i x_i +\sum_i \sum_{j = i + 1} <v_i, v_j> x_i x_j
+\end{aligned}</script><p>实际上，仅仅依靠$w_{ij}$就可以完成对特征的交互，但这里对$W$矩阵的构造并没有采用直接学习的方式，而是借鉴了矩阵分解的形式，构成形式为由$V \cdot V^T$。这样做的好处有两点，第一点是学习的参数量会显著减少。由于在CTR预估的任务中，会存在非常sparse的特征，百万千万维都有可能，如果直接学习$w_{ij}$的参数量是$N^2$，而如果$V\in R^{N*k}$，学习的参数量就是$kN$，而一般来说$k$的选取并不会太大，一方面是为了减少计算量，另一方面则是为了考虑在高维稀疏特征条件下的泛化性能；第二点是如果直接学习$w_{ij}$，会存在“没什么可学的”的窘境，因为如果是采用SGD的优化方式，$w_{ij}$的更新会依赖那些交互项都不为0的特征，而这样的交互极少，参数可能会学习不充分，但以这种矩阵分解的间接构建$w_{ij}$更新参数就不会出现这种问题。</p>
+<p>由于上式前半部分和LR一致，所以我们将重点放在后半部分特征交互项上，经过推导，最后一项可以化简为</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\sum_i \sum_{j = i+1} <v_i, v_j> x_i x_j \\
+=&\frac{1}{2} \sum_i \sum_{j = 1} <v_i, v_j> x_i x_j - 1/2 \sum_i <v_i, v_i> x_i x_i \\
+=&\frac{1}{2}(\sum_i \sum_j \sum_{f=1}^{k} v_{i,f} v_{j, f} x_{i} x_{j} - \sum_i \sum_{f=1}^{k} v_{i, f} v_{i, f} x_i x_i) \\
+=&\frac{1}{2}\sum_{f = 1}^{k}((\sum_i v_{i,f} x_i)(\sum_j v_{j,f} x_j)) - \sum_i v_{i,f}^2 x_i^2))  \\
+=&\frac{1}{2}\sum_{f = 1}^{k}(( \sum_{i=1}^{N} v_{i,f} x_i)^2 -  \sum_{i=1}^{N} v_{i,f}^2 x_i^2))
+\end{aligned}</script><p>这里虽然看上去很绕，但只要自己动手写一写就一目了然了。最最重要的是，上面的式子的计算复杂度是线性的$O(kN)$，相比较于直接计算$W$矩阵的复杂度$O(kN^2)$，明显要高效许多。在优化参数时，采用传统的SGD方法，式中各项参数的梯度可求</p>
+<script type="math/tex; mode=display">
+\frac {\partial y(x)}{\partial \theta} = \begin{cases} 1 & \text {if $\theta$ is $w_0$}\\
+x_i & \text {if $\theta$ is $w_i$}\\
+x_i \sum_j v_{j,f}x_j - v_{i,f}x_i^2 & \text {if $\theta$ is $v_{i,f}$} \end{cases}</script><p>最后，假设对于一个具体的分类问题，最终带正则的优化目标就变成了</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\theta^* &= argmin_\theta \sum (loss(y(x_i), \hat y_i) + \sum_\theta \lambda \theta^2) \\ 
+&= argmin_\theta \sum -\hat y_i log\sigma(y_i) - (1 - \hat y_i) log(1 - \sigma(y_i)) + \sum_\theta \lambda \theta^2)
+\end{aligned}</script><h4 id="FFM"><a href="#FFM" class="headerlink" title="FFM"></a>FFM</h4><p>FFM是在FM的基础上引入了Field的概念。从上面的公式中可以看到，FM在处理$x_i$和$x_j$的特征交互时，所使用的隐向量$V$是$v_i$和$v_j$，而在处理$x_i$和$x_k$的特征交互时，所使用的隐向量$V$是$v_i$和$v_k$，这样的局限就是$x_i$和其他所有特征交互时用的都是一个隐向量$v_i$，而FFM对这个问题的处理方法就是引入field的概念，或者说把特征分组，比如年龄特征是一个field，性别特征是一个field，职业特征又是一个field，在FM模型中年龄与性别、职业特征交互项的隐因子$v_{age}$是一样的，但在FFM中性别职业的交互隐因子为$v_{age, sex}$，而性别职业的交互隐因子为$v_{age, prof}$。更一般地，之前的交互项系数的表达为&lt;$v_i, v_j$&gt;，而现在又加入了field这一因素，表达为&lt;$v_{i, f_j}, v_{j, f_i}$&gt;，也就是说在模型的表达式上只需要修改这一项就可以，其余都不变。在实际应用中，我们一般指定分类特征中的每一类特征为一个field，而连续特征每个都为一个field。</p>
+<p>我们可以看到，加入field概念之后对特征的交互考虑得更加周全，不同类型的特征交互体现出了多样性，但是由于有这样一个因素的存在，使得我们模型的参数量也随之提高。FM的参数量为$kN$，又由于公式可以化简，因此计算复杂度由初始的$O(kN^2)$变为$O(kN)$，然而FM的参数量则变为了$kfN$，其中$f$为field个数，公式无法化简，计算复杂度为$O(kN^2)$。虽然说由于有field带来的多样性，在$k$的选取上FFM要比FM小，但总体上看FFM的学习速率还是要比FM慢一截。</p>
+<p>从FM和FFM在公开数据集上的表现来看，FM和FFM各有千秋，但相比于原始未进行特征交互的LM和直接计算特征交互矩阵$W$的Poly2方法还是有一定程度的提升。</p>
+<img src="/images/FM/fm_ffm.png">
+<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><p><a href="http://www.csie.ntu.edu.tw/~b97053/paper/Rendle2010FM.pdf" target="_blank" rel="external">Factorization Machines</a><br><a href="http://www.csie.ntu.edu.tw/~cjlin/papers/ffm.pdf" target="_blank" rel="external">Field-aware Factorization Machines for CTR Prediction</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/07/14/Tensorflow/" itemprop="url">
+                  Tensorflow简介
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-07-14T17:08:42+08:00" content="2017-07-14">
+              2017-07-14
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>接触Tensorflow也有好一段时间了，但总是对这个项目庞大的代码量和复杂的设计结构望而生畏，一直觉得它可以和某些原生的编程语言相提并论，所以大多时候也都是照着一些现成的模板去套用然后再不断调试，对内部的一些基本概念其实并没有太多了解。最近想着好好把官方给的get started和tutorial过一遍，对以后使用应该也更有帮助。</p>
+<h3 id="Tensors"><a href="#Tensors" class="headerlink" title="Tensors"></a>Tensors</h3><p>张量就是高维数组的另一种表达形式，数组是几维的，张量的rank就是几。比如[1,2,3]是一维向量，rank=1；[[1,2,3], [2,3,4]]是二维矩阵，rank=2；[[[1,2,3], [2,3,4]]]是三维张量，rank=3，就这么简单。</p>
+<h3 id="Computational-Graph"><a href="#Computational-Graph" class="headerlink" title="Computational Graph"></a>Computational Graph</h3><p>有了tensor，要形成flow，就必须借助图，张量和图起来就基本构成了Tensorflow的基本框架。图中的每个node可以是tensor，也可以是加减乘除之类的算子。其实回想一下，神经网络本质上就是这种神经元之间互相有向连接的结构，所以在我们定义好每个node后把这些node连接成图，理论上就可以搭建任何模式的结构。但是如果要查看某个图最终node的输出结果，还必须要通过一个session的运行环境来run。下面举个简单的小例子就会一目了然：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">node1 = tf.constant(<span class="number">3.0</span>, tf.float32)</div><div class="line">node2 = tf.constant(<span class="number">4.0</span>) <span class="comment"># also tf.float32 implicitly</span></div><div class="line">print(node1, node2)</div><div class="line"><span class="comment">#Output: Tensor("Const:0", shape=(), dtype=float32) Tensor("Const_1:0", shape=(), dtype=float32)</span></div><div class="line">sess = tf.Session()</div><div class="line">print(sess.run([node1, node2]))</div><div class="line"><span class="comment">#Output:[3.0, 4.0]</span></div><div class="line">node3 = tf.add(node1, node2)</div><div class="line">print(<span class="string">"node3: "</span>, node3)</div><div class="line">print(<span class="string">"sess.run(node3): "</span>,sess.run(node3))</div><div class="line"><span class="comment">#Output:7.0</span></div></pre></td></tr></table></figure>
+<p>上面的code只是把node1和node2定义为tf.constant()的常量形式，更普遍的我们将输入定义为类似于函数形式的变量，这时就需要利用到tf.placeholder()方法，可以理解为占位符，这类似于python中lambda匿名函数的形式，占位符就是传入匿名函数的输入参数，再看例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">a = tf.placeholder(tf.float32)</div><div class="line">b = tf.placeholder(tf.float32)</div><div class="line">adder_node = a + b  <span class="comment"># + provides a shortcut for tf.add(a, b)</span></div><div class="line">print(sess.run(adder_node, feed_dict = &#123;a: <span class="number">3</span>, b:<span class="number">4.5</span>&#125;))</div><div class="line"><span class="comment">#Output:7.5</span></div><div class="line">print(sess.run(adder_node, feed_dict = &#123;a: [<span class="number">1</span>,<span class="number">3</span>], b: [<span class="number">2</span>, <span class="number">4</span>]&#125;))</div><div class="line"><span class="comment">#Output:[ 3.  7.]</span></div><div class="line">add_and_triple = adder_node * <span class="number">3.</span></div><div class="line">print(sess.run(add_and_triple, feed_dict = &#123;a: <span class="number">3</span>, b:<span class="number">4.5</span>&#125;))</div><div class="line"><span class="comment">#Output:22.5</span></div></pre></td></tr></table></figure>
+<p>上面提到的tensor都是不可变，但是在大多machine learning的应用中需要通过不断的迭代来调整参数，比如网络中的weight和bias，这时需要利用tf.Variable()来给定初始值并定义这些需要train的变量。有了trainable的参数和输入数据，最后一步就是定义loss，我们以linear regression为例，定义square loss 为$loss  = (Wx + b - \hat y)^2$，大多数常见的loss在Tensorflow中都已经被封装好，直接调用即可。接下来的代码相对来说复杂一点，但逻辑在Tensorflow的框架下十分清晰：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">W = tf.Variable([<span class="number">.3</span>], tf.float32) <span class="comment">#Trainable param</span></div><div class="line">b = tf.Variable([<span class="number">-.3</span>], tf.float32) <span class="comment">#Trainable param</span></div><div class="line">x = tf.placeholder(tf.float32) <span class="comment">#Input placeholder</span></div><div class="line">y = tf.placeholder(tf.float32) <span class="comment">#Input placeholder</span></div><div class="line"></div><div class="line">linear_model = W * x + b <span class="comment"># Linear Regression</span></div><div class="line">squared_deltas = tf.square(linear_model - y) <span class="comment">#Define square loss</span></div><div class="line">loss = tf.reduce_sum(squared_deltas) <span class="comment">#Add loss on all samples</span></div><div class="line"></div><div class="line">init = tf.global_variables_initializer() <span class="comment"># You must explicitly initilize the variables</span></div><div class="line">sess.run(init) <span class="comment"># Until we call sess.run, the variables are uninitialized</span></div><div class="line">print(sess.run(loss, &#123;x:[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>], y:[<span class="number">0</span>,<span class="number">-1</span>,<span class="number">-2</span>,<span class="number">-3</span>]&#125;))</div><div class="line"><span class="comment">#Output:23.66</span></div></pre></td></tr></table></figure>
+<h3 id="Train"><a href="#Train" class="headerlink" title="Train"></a>Train</h3><p>到现在为止，我们还只是简单的手动构建了图，做了几个简单运算，还没有涉及到神经网路的梯度反向传播、参数更新过程。Tensorflow的强大之处在于，在用户构建完成网络结构（图）后，就可以通过简单的函数调用来自动计算梯度。这里我们以最常见的梯度下降为例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">optimizer = tf.train.GradientDescentOptimizer(<span class="number">0.01</span>) <span class="comment"># define gradient descent method</span></div><div class="line">train = optimizer.minimize(loss) <span class="comment"># minize loss using gradient descent</span></div><div class="line"></div><div class="line">sess.run(init) <span class="comment"># reset values to incorrect defaults.</span></div><div class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1000</span>): <span class="comment"># run gradient descent for 1000 steps</span></div><div class="line">  sess.run(train, &#123;x:[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>], y:[<span class="number">0</span>,<span class="number">-1</span>,<span class="number">-2</span>,<span class="number">-3</span>]&#125;)</div><div class="line"></div><div class="line">print(sess.run([W, b]))</div><div class="line"><span class="comment">#Output:[array([-0.9999969], dtype=float32), array([ 0.99999082],dtype=float32)]</span></div></pre></td></tr></table></figure>
+<h3 id="Reading-Data"><a href="#Reading-Data" class="headerlink" title="Reading Data"></a>Reading Data</h3><p>Tensorflow读取数据的方式大体上说有三种，第一种是和上述例子中一样的方式，先在图中定义好placeholder，再通过feed_dict方式在run session时传入placeholder对应的数据；第二种适用于小数据量，直接将数据定义为constant或variable，个人感觉本质上和第一种没有太大区别；第三种在数据量比较大时候十分常用，就是直接从文件中按照队列的方式进行读取，以目前一般企业级机器学习的数据量来看，前两种方式会受限于内存和图的大小，因此简单介绍下这种比较通用的方式。</p>
+<p>首先将要读取的小文件名形成一个列表，然后通过<a href="https://www.tensorflow.org/api_docs/python/tf/train/string_input_producer" target="_blank" rel="external">tf.train.string_input_producer</a>函数建立一个关于这些文件名的队列queue。接下来会有若干个reader实体去从这个queue中读取文件名，然后对于不同形式的文件（比如csv、二进制等）再通过不同的decoder对当前文件名下的内容进行解析，这样就可以不断的从文件列表中的每个文件读数，下面是一个涉及到batch read的例子。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">read_my_file_format</span><span class="params">(filename_queue)</span>:</span></div><div class="line">  reader = tf.SomeReader() <span class="comment"># define reader</span></div><div class="line">  key, record_string = reader.read(filename_queue) <span class="comment"># read file from file_queue using reader, each execution of read reads a single line from the file</span></div><div class="line">  example, label = tf.some_decoder(record_string) <span class="comment"># decode file</span></div><div class="line">  processed_example = some_processing(example) <span class="comment"># do some preprocessing</span></div><div class="line">  <span class="keyword">return</span> processed_example, label</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">input_pipeline</span><span class="params">(filenames, batch_size, num_epochs=None)</span>:</span></div><div class="line">  filename_queue = tf.train.string_input_producer(</div><div class="line">      filenames, num_epochs=num_epochs, shuffle=<span class="keyword">True</span>)</div><div class="line">  example, label = read_my_file_format(filename_queue)</div><div class="line">  min_after_dequeue = <span class="number">10000</span> <span class="comment"># define how big a buffer we will randomly sample from</span></div><div class="line">  capacity = min_after_dequeue + <span class="number">3</span> * batch_size <span class="comment"># larger than min_after_dequeue</span></div><div class="line">  example_batch, label_batch = tf.train.shuffle_batch(</div><div class="line">      [example, label], batch_size=batch_size, capacity=capacity,</div><div class="line">      min_after_dequeue=min_after_dequeue) <span class="comment"># make batch sample</span></div><div class="line">  <span class="keyword">return</span> example_batch, label_batch</div></pre></td></tr></table></figure>
+<p>一般来说牵扯到了queue，我们就必须要在tf.Session()中在任务run之前利用tf.train.start_queue_runners和tf.train.Coordinator来填充队列和管理线程，不然read进程就会因为从queue中等待读取文件名而发生阻塞。</p>
+<p>上面只是对tf做了一个非常非常浅显的介绍，但烂熟于心之后基本上也可以无障碍阅读github上大多数的tensorflow tutorial，而在实际的程序中依然有大量的坑和N多封装好的方法等待被发掘。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2017/05/05/Session_rec/" itemprop="url">
                   利用RNN做session-based推荐
                 </a>
@@ -1297,320 +1567,6 @@ y_i = (\lambda I + X_{I_u} X_{I_u}^T)^{-1}X_{I_u}R(i, I_u)</script><p>含义和�
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/02/21/xgb/" itemprop="url">
-                  Xgboost梳理
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-02-21T22:06:27+08:00" content="2017-02-21">
-              2017-02-21
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>从研究生时候搞Kaggle比赛到现在工作，一直接触xgboost，可以说是无论是用来直接用来做训练还是利用模型生成表达能力更强的特征然后与其他模型融合，目前来看在工业界应该是最流行和普遍使用的机器学习算法之一。文档、调参技巧和一些技术细节也看了很多次，索性把脑子里的东西整理出来作为学习笔记记录下来。</p>
-<p>Xgboost(Extreme Gradient Boosting)实际上是Gradient Boosting Decision Tree(GBDT)的一个变种或者称为升级，成名于Kaggle的一次比赛，后来作者Tianqi Chen不断迭代优化，最终形成了目前比较成熟的版本。</p>
-<h3 id="模型"><a href="#模型" class="headerlink" title="模型"></a>模型</h3><h4 id="目标函数"><a href="#目标函数" class="headerlink" title="目标函数"></a>目标函数</h4><p>首先，一个基于树的模型，基础肯定是Decision Tree。那么对于一个监督学习问题，无论是分类还是回归，如果有多棵不同tree的参与，一个样本最终所被预测的得分可以看成是这些tree每个预测结果的累加，数学上可以写为</p>
-<script type="math/tex; mode=display">
-\hat {y_i} = \sum_{k=1}^{K} f_k(x_i), f_k\in F</script><p>这里$K$为tree的个数，$f_k$为每棵树在函数空间$F$中所对应的预测函数，因此这个监督学习问题的目标函数就可以由损失函数和正则项的加和定义出来了</p>
-<script type="math/tex; mode=display">
-obj = \sum_{i=1}^{n} l(y_i, \hat{y_i}) + \sum_{k=1}^{K} \Omega(f_k)</script><p>这里如果我们回忆一下Random Forest，可以发现rf的损失函数其实也可以写成这种形式，即树的组合再加上正则约束，所以看上去gbdt和rf没什么两样嘛。但他们之间的本质区别就在于如何去优化这个$obj$。rf是并行训练每棵树作为弱分类/回归器，最后对这些树做了加权或是投票；而gbdt则是串行增量训练每棵树，最终将每棵树加到一起。换句话说，rf是Bagging的思想，gbdt是Boosting的思想。</p>
-<p>事实上，最终需要学习的函数就是包含树结构和叶子节点得分的$f_i$。我们利用一种增量学习的方法，也就是一棵树一棵树的迭代学习，每次学习完一棵树就保存下来，然后在此基础上再新加入一棵树来不断降低目标损失。因此在第$t$个step我们学习到的$\hat y_i^{(t)}$可以写成如下形式：</p>
-<script type="math/tex; mode=display">
-\hat y_i^{(0)} = 0\\
-\hat y_i^{(1)} = f_1(x_i) = \hat y^{(0)} + f_1(x_i)\\
-\hat y_i^{(2)} = f_1(x_i) + f_2(x_i) = \hat y_i^{(1)} + f_2(x_i)\\
-\ldots\\
-\hat y_i^{(t)} =\sum_{k=1}^{t} f_k(x_i) = \hat y_{i}^{(t-1)} + f_t(x_i)</script><p>如果我们的损失函数定义为MSE的话，那么目标函数就可以变为这种形式：</p>
-<script type="math/tex; mode=display">
-\begin{align}
-obj^{(t)} & =  \sum_{i=1}^{n} (y_i - (\hat y_{i}^{(t-1)} + f_t(x_i)))^2 + \sum_{i=1}^{t} \Omega(f_i)\\
-& = \sum_{i=1}^{n} [2(\hat y_i^{t-1} - y_i) f_t(x_i) + f_t(x_i)^2 ] + \Omega(f_t) + constant
-\end{align}</script><p>其中$constant$是与$y_i$和$\hat y_i^{t-1}$有关的一坨。现在我们把目标函数搞成了这种形式比较优雅的形式：一个$f$的一阶项、二阶项组合，但是实际应用的时候，可能面对的损失函数多种多样，比如hinge、logloss等等，因此就需要一个比较general的表达式，即对loss function进行二阶<a href="https://zh.wikipedia.org/wiki/%E6%B3%B0%E5%8B%92%E5%85%AC%E5%BC%8F" target="_blank" rel="external">泰勒展开</a>，这里我个人认为也是xgboost的重点和亮点之一：</p>
-<script type="math/tex; mode=display">
-obj^{(t)}  =  \sum_{i=1}^{n} [l(y_i, \hat y_{i}^{(t-1)}) + g_if_t(x_i) + \frac{1}{2}h_if_t^2(x_i) ]+ \Omega(f_t) + constant\\
-g_i = \partial_{\hat y_i^{(t-1)}} l(y_i, y_i^{(t-1)})\\
-h_i = \partial^2_{\hat y_i^{(t-1)}} l(y_i, y_i^{(t-1)})</script><p>最终的在训练到第$t$棵树时的目标函数为</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^{n} [g_if_t(x_i) + \frac{1}{2}h_if_t^2(x_i)] + \Omega(f_t)</script><p>一旦我们自己定义好了损失函数，一阶微分和二阶微分$g_i$、$h_i$也就被唯一确定了，也就是变相定义了目标函数。regulation项$\Omega$还需要指定一下。对于每棵树$f$，其实可以表达为下面这种形式</p>
-<script type="math/tex; mode=display">
-f_t(x) = \omega_{q(x)}, \omega \in R^T, q: R^d \to \{1,2,\ldots , T\}</script><p>$w_q$为一棵树所有叶子节点（叶子数为$T$）的打分向量，$q$是每个样本所对应叶子节点的映射函数。我们将所有叶子节点向量的平方和与叶子节点数量的summation作为regulation term：</p>
-<script type="math/tex; mode=display">
-\Omega(f) = \gamma T + \frac{1}{2}\lambda \sum_{j=1}^{T}\omega^2_j</script><p>这里可能过于晦涩，举个例子。假设s_a被分到了leaf_1，打分为0.4；s_b被分到了leaf_2，打分为0.6；s_c、s_d、s_e被分到了leaf_3，打分为1.0，那么$q(s_a) = 1$，$q(s_b) = 1$，$q(s_c, s_d, s_e) = 1$，$\Omega = 3\gamma + \frac{1}{2}\lambda(0.4^2+0.6^2+1.0^2)$。虽然正则项的定义方式多种多样，但是作者提到了，这种定义方式在实际应用中效果是比较好的。</p>
-<h4 id="学习过程"><a href="#学习过程" class="headerlink" title="学习过程"></a>学习过程</h4><p>到这里，宏观问题基本已经解决了，接下来就要考察每棵树的最优树结构，换句话说就是最优化每个父节点分叉时所利用的信息。有了之前的一些定义，又可以将目标函数重写成如下形式</p>
-<script type="math/tex; mode=display">
-\begin{align}
-obj^{(t)} & = \sum_{i=1}^{n} [g_i w_{q(x_i)} + \frac{1}{2}h_i w_{q(x_i)}^2] +  \gamma T + \frac{1}{2}\lambda \sum_{j=1}^{T}\omega^2_j\\
-& = \sum_{j=1}^{T} [(\sum_{i \in I_j} g_i) w_i + \frac{1}{2}((\sum_{i \in I_j} h_i + \lambda) w_{j}^{2}] + \gamma T
-\end{align}</script><p>其中$I_j$定义为所有属于叶子节点$j$的样本集合。如果继续定义</p>
-<script type="math/tex; mode=display">
-G_i = \sum_{i \in I_j} g_i\\
-H_i = \sum_{i \in I_j} h_i</script><p>，这里可以理解为一棵树中落在其中一个叶子节点上所有样本的一阶导求和和二阶导求和项，那么上面的式子就可以化简为</p>
-<script type="math/tex; mode=display">
-obj^{(t)} = \sum_{j=1}^{T} [G_jw_j + \frac{1}{2}(H_j + \lambda) w_{j}^{2}] + \gamma T</script><p>优雅的形式再次出现，$w_j$代表第$j$个叶子节点上的得分，与上面式子中各种乱七八糟的东西都无关，quatratic形式$Ax^2 + Bx$使得$\omega$可解</p>
-<script type="math/tex; mode=display">
-\omega_{j}^{*} = -\frac{G_j}{H_j + \lambda}\\
-obj^* = -\frac{1}{2} \sum_{j=1}^{T} \frac{G_j}{H_j + \lambda} + \gamma T</script><p>很明显，$obj$越小，说明我们构建的这个树结构就越好，最好的方法就是我们遍历所有可能的树结构，which is impossible。所以针对每棵树利用这个目标函数作为节点分裂准则对每个节点进行分裂，只要分裂后的树结构比分裂前的树结构要好，那么就分裂，否则不分裂，在这一点上xgboost和decision tree通过熵增益的方法来分裂树的思想是一致的，只不过所采用的信息增益度量方法不同而已。由$obj^*$可以得到一个结点分裂后的信息增益为</p>
-<script type="math/tex; mode=display">
-Gain = \frac{1}{2} [\frac{G_L^2}{H_L + \lambda} + \frac{G_R^2}{H_R + \lambda} - \frac{(G_L + G_R)^2}{H_L + H_R + \lambda}] - \gamma</script><p>其中$L$和$R$分别代表左结点和右结点。这里规则就是：如果$Gain&gt;0$，结点分裂，否则不分裂。对于连续特征，最简单的做法就是先对所有样本进行特征排序，依次对排序后的序列样本分割后计算$G$和$H$，并找出$Gain$最大值所对应的最佳分割点；对于分类特征，可以one-hot编码后按照连续特征一样处理，最终找出最佳特征的最佳分割点即可完成依次结点分裂过程，当满足一定条件（如树最大深度为N或叶子节点样本个数最少为M）时，即可终止一棵树的学习过程，训练完成。</p>
-<h4 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h4><p>xgboost刚出来那会Kaggle的比赛几乎都在疯狂调参，所以对于一般结构化数据的classification/regression类比赛都可以变相的理解为xgboost调参+特征工程+model ensemble大赛，熟悉了之后基本调参的维度也就5~6维，参数具体含义作者也明确的给出了（<a href="https://github.com/dmlc/xgboost/blob/master/doc/parameter.md" target="_blank" rel="external">https://github.com/dmlc/xgboost/blob/master/doc/parameter.md</a>）。调参具体可以采用Grid Search或者Random Search大法，如果数据量大、学习率低、树深度深再加上树棵数又比较多，真的是比较耗时的一件事。而且实话实话说，如果不是搞比赛的话真的没必要去在tuning上花过多时间，即使调了一手好参数，得到一手好结果，数据量一大，之后上线后泛化能力真的不好说。</p>
-<p>不过另一方面，现在深度学习火起来之后大家对xgboost似乎也没有那么迷信了，都在用一些比较时髦的模型。但不可否认的是目前来看xgboost在工业界对于一些传统的分类问题地位感觉还是蛮高的，而且使用的方法也是五花八门，之前仿照Facebook在2014年提出的方法（Practical lessons from predicting clicks on adsat facebook），用xgboost生成的高维稀疏特征+ffm离线评测感觉也还可以接受，至少基本与xgboost的single model指标持平。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>最后简单一下整个xgboost的训练过程:</p>
-<ol>
-<li>建立第$t$棵树，从根节点分裂开始</li>
-<li>对于当前节点，计算$g_i$和$h_i$，并通过$Gain$来判断是否分裂和最佳分割点</li>
-<li>达到给定条件时，终止训练当前树结构，每个训练样本的新预测结果都是前N棵树与当前树预测结果的累加和$\hat y_i^{(t)} = \hat y_i^{(t-1)} +\eta f_t(x_i)$ ($\eta$为学习率，相当于对每棵树模型都指定一个衰减系数，减小模型variance，防止过拟合)</li>
-<li>回到1，训练第$t$+1棵树，直到等于指定最大树个数n_estimators</li>
-</ol>
-<p>参考资料<br><a href="https://homes.cs.washington.edu/~tqchen/pdf/BoostedTree.pdf" target="_blank" rel="external">Boosted Tree by Tianqi Chen</a><br><a href="http://xgboost.readthedocs.io/en/latest/model.html" target="_blank" rel="external">Xgboost Documentation</a></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/02/16/NN/" itemprop="url">
-                  神经网络python简单实现
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-02-16T23:17:42+08:00" content="2017-02-16">
-              2017-02-16
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>最近团队在搞DNN，用的都是别人搭好的框架，因此想着自己来实现一下简单的神经网络模型，更好的理解其中foward和back propagation的过程。</p>
-<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>最简单的神经网络基本上可以分为两个步骤：前向传播和后向误差传递。<br><img src="/images/NN/fig.png"></p>
-<h4 id="前向传播"><a href="#前向传播" class="headerlink" title="前向传播"></a>前向传播</h4><p>定义input layer与hidden layer之间的weights为$w_1$，hidden layer与output layer之间的weights为$w_2$。输入向量$x$与$w_1$相乘累加后通过一个非线性变换函数activation function (sigmoid, tanh, relu等)得到hidden layer中neuron的输出结果，然后hidden layer与$w_2$相乘累加后再通过activation function得到output layer中nueron的输出结果。如果中间有多个hidden layer，就不断重复这一过程（这里为了简化处理省略了bias项）。</p>
-<script type="math/tex; mode=display">
-hidden_{i} = \sigma (\sum_{j} w_{ij} * x_j) \\
-output_i =\sigma(\sum_j w_{ij} * hidden_j)</script><p>其中$\sigma$即为activation function，如果为sigmoid函数，</p>
-<script type="math/tex; mode=display">
-\sigma = \frac{1}{1+e^{-x}}</script><p>其导数具有良好的性质，</p>
-<script type="math/tex; mode=display">
-\sigma^{'} = \sigma(1 - \sigma)</script><p>而最终的output就是我们期待的输出y。</p>
-<h4 id="后向误差传递"><a href="#后向误差传递" class="headerlink" title="后向误差传递"></a>后向误差传递</h4><p>后向传播的目地在于将预测结果与真实结果进行对比，并根据预测误差来对每层的weights进行更新，最简单的更新方法就是梯度下降，也就是每次迭代时在误差梯度方向移动一小步，这样在经过若干步后参数逐渐更新，误差逐渐收敛，以达到训练效果。如果我们如果将问题视为一个regression问题来处理，那么一种常见的平方误差损失函数可以表示为</p>
-<script type="math/tex; mode=display">
-loss= \frac{1}{2}\sum (y - \hat{y})^2</script><p>求梯度，简单来讲就是求导数，在参数更新时，由于误差是在output layer才得到的，如果想对前若干层的weights求导，我们需要采取的是链式求导方法，也就是</p>
-<script type="math/tex; mode=display">
-(f(g(x)))' = f'(g(x))g'(x)</script><p>这样误差一层一层向前传递，最终每一层的weights都会得到相对于loss的变化$\Delta$，然后再减掉$\Delta * \eta$ (学习率)，这样就完成了一次所有参数的更新</p>
-<script type="math/tex; mode=display">
-w_{update} = w - \eta \frac{\partial loss} {\partial w}</script><p>针对$w_2$而言，运用链式求导法则，则有</p>
-<script type="math/tex; mode=display">
-\frac{\partial loss} {\partial w_2} = \frac{\partial loss} {\partial output} \frac{\partial output} {\partial w_2}= \frac{\partial loss} {\partial output} * \sigma^{'} * hidden</script><p>$w_1$由于需要再向后反向传播一层，求导显得更麻烦一点，不过依然是运用链式求导法则，</p>
-<script type="math/tex; mode=display">
-\frac{\partial loss} {\partial w_1} = \frac{\partial loss} {\partial output} \frac{\partial output} {\partial hidden} \frac{\partial hidden} {\partial w_1}=\frac{\partial loss} {\partial output} * \sigma^{'} * w_2 * \sigma^{'} * x</script><p>如果中间隐层增加，依然遵循这一法则向后传播误差，可以看到每向后跨越一层，就需要计算一次activation fuction的导数，这个导数最大值在0处为0.25，也就是说如果隐层为N层，最后误差向后传播到第一个隐层，误差信息最多为$\frac{\partial loss} {\partial output}*0.25^N$，已经所剩无几，这也解释了为什么sigmoid函数容易出现gradient vanishing（梯度消失现象），因此在实际应用中我们大多数是使用ReLU这种激活函数的。</p>
-<p>值得注意的是这里也要遵循维数相容原则，简单来讲就是链式求导时的前后相乘项需要维度互相匹配，并最终相乘后维度等于输出空间的维度。</p>
-<blockquote>
-<ul>
-<li>“将他们当做一维实数然后使用链式法则，最后做维数相容的调整，使之符合矩阵乘法原则并且维数相容即可”，这种方式是一种最快速准确的策略</li>
-<li>“对单个元素求导，再整理成矩阵形式”这种方式是困难、过程缓慢的</li>
-</ul>
-</blockquote>
-<p>完成一次向前预测和向后传递误差的过程称为一次epoch，如此反复的进行多轮迭代到一定次数或误差小于一定的阈值，即可完成模型的训练。</p>
-<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><p>假设现在测试数据共4个样本，每个样本有3维特征，输出为1维，因此input layer为(4, 3)，output layer为(4, 1)。设置1层4个neuron的hidden layer，其中$w_1$为(3, 4)，$w_2$为(4, 1)，代码十分简洁。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">sigmoid</span><span class="params">(x)</span>:</span></div><div class="line">	<span class="keyword">return</span> <span class="number">1</span>/(<span class="number">1</span>+np.exp(-x))</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">sigmoid_derivative</span><span class="params">(x)</span>:</span></div><div class="line">	<span class="keyword">return</span> x * (<span class="number">1</span> - x)</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">loss</span><span class="params">(y, y_hat)</span>:</span></div><div class="line">	<span class="keyword">return</span> np.sum(np.square(y_hat - y))	</div><div class="line"><span class="comment">#load data</span></div><div class="line">X = np.array([ [<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>],[<span class="number">0</span>,<span class="number">1</span>,<span class="number">1</span>],[<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>],[<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>] ])</div><div class="line">y = np.array([[<span class="number">0</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">0</span>]]).T</div><div class="line"><span class="comment"># weight initialization and learning rate</span></div><div class="line">w_l1 = <span class="number">2</span>*np.random.random((<span class="number">3</span>,<span class="number">4</span>)) - <span class="number">1</span></div><div class="line">w_l2 = <span class="number">2</span>*np.random.random((<span class="number">4</span>,<span class="number">1</span>)) - <span class="number">1</span></div><div class="line">lr = <span class="number">0.1</span></div><div class="line"></div><div class="line"><span class="keyword">for</span> j <span class="keyword">in</span> range(<span class="number">10000</span>):</div><div class="line">	<span class="comment">#forward propagation</span></div><div class="line">	layer_1 = sigmoid(np.dot(X,w_l1))</div><div class="line">	layer_2 = sigmoid(np.dot(layer_1,w_l2))</div><div class="line">	<span class="comment">#back propagation</span></div><div class="line">	delta_2 = (y - layer_2) * sigmoid_derivative(layer_2)</div><div class="line">	delta_1 = delta_2.dot(w_l2.T) * sigmoid_derivative(layer_1)</div><div class="line">	<span class="comment">#update weights</span></div><div class="line">	w_l2 += lr * layer_1.T.dot(delta_2)</div><div class="line">	w_l1 += lr * X.T.dot(delta_1)</div><div class="line">	<span class="comment">#print loss</span></div><div class="line">	<span class="keyword">if</span> j % <span class="number">2000</span> == <span class="number">0</span>:</div><div class="line">		print(<span class="string">"Iteration "</span>, j, <span class="string">": "</span>, loss(y, layer_2))</div></pre></td></tr></table></figure>
-<p>Loss随着epoch不断增加而减小，输出结果：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Iteration  0 :  1.00255859758</div><div class="line">Iteration  2000 :  0.875218177244</div><div class="line">Iteration  4000 :  0.111818055322</div><div class="line">Iteration  6000 :  0.028557004711</div><div class="line">Iteration  8000 :  0.0148779596401</div></pre></td></tr></table></figure>
-<p>加了nueron上的bias项、ReLU和learning rate，更加通用</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</div><div class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> datasets</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">sigmoid</span><span class="params">(x)</span>:</span></div><div class="line">	<span class="keyword">return</span> <span class="number">1</span>/(<span class="number">1</span>+np.exp(-x))</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">sigmoid_derivative</span><span class="params">(x)</span>:</span></div><div class="line">	<span class="keyword">return</span> x * (<span class="number">1</span> - x)</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">relu</span><span class="params">(x)</span>:</span></div><div class="line">	x[x &lt;= <span class="number">0</span>] = <span class="number">0</span></div><div class="line">	<span class="keyword">return</span> x</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">relu_derivative</span><span class="params">(x)</span>:</span></div><div class="line">	x[x &lt;= <span class="number">0</span>] = <span class="number">0</span></div><div class="line">	x[x &gt; <span class="number">0</span>] = <span class="number">1</span></div><div class="line">	<span class="keyword">return</span> x</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">mean_square</span><span class="params">(y, y_hat)</span>:</span></div><div class="line">	<span class="keyword">return</span> np.mean(np.square(y_hat - y))</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">cross_entropy</span><span class="params">(y, y_hat)</span>:</span></div><div class="line">	epsilon = <span class="number">1e-15</span></div><div class="line">	<span class="keyword">return</span> -np.mean(y * np.log(y_hat + epsilon) + (<span class="number">1</span> - y) * np.log(<span class="number">1</span> - y_hat + epsilon))</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span><span class="params">(X, y, activation = <span class="string">"sigmoid"</span>, hidden_units = <span class="number">128</span>)</span>:</span></div><div class="line">	<span class="comment"># weight initialization</span></div><div class="line">	w_l1 = <span class="number">2</span>*np.random.random((X.shape[<span class="number">1</span>],hidden_units)) - <span class="number">1</span></div><div class="line">	w_l2 = <span class="number">2</span>*np.random.random((hidden_units,y.shape[<span class="number">1</span>])) - <span class="number">1</span></div><div class="line">	<span class="comment"># bias initilization</span></div><div class="line">	b_l1 = np.zeros((<span class="number">1</span>, hidden_units))</div><div class="line">	b_l2 = np.zeros((<span class="number">1</span>, y.shape[<span class="number">1</span>]))</div><div class="line">    <span class="comment"># learning rate</span></div><div class="line">	lr = <span class="number">0.1</span></div><div class="line">	<span class="keyword">for</span> j <span class="keyword">in</span> range(<span class="number">10000</span>):</div><div class="line">		<span class="keyword">if</span> activation == <span class="string">"relu"</span>:</div><div class="line">			layer_1 = relu(np.dot(X,w_l1) + b_l1)</div><div class="line">			layer_2 = sigmoid(np.dot(layer_1,w_l2) + b_l2)</div><div class="line">			delta_2 = (y - layer_2) * sigmoid_derivative(layer_2)</div><div class="line">			delta_1 = delta_2.dot(w_l2.T) * relu_derivative(layer_1)</div><div class="line">		</div><div class="line">		<span class="keyword">else</span>:</div><div class="line">			layer_1 = sigmoid(np.dot(X,w_l1) + b_l1)</div><div class="line">			layer_2 = sigmoid(np.dot(layer_1,w_l2) + b_l2)</div><div class="line">			delta_2 = (y - layer_2) * sigmoid_derivative(layer_2)</div><div class="line">			delta_1 = delta_2.dot(w_l2.T) * sigmoid_derivative(layer_1)</div><div class="line">		<span class="comment">#update weights and biases</span></div><div class="line">		w_l2 += lr * layer_1.T.dot(delta_2)</div><div class="line">		w_l1 += lr * X.T.dot(delta_1)</div><div class="line">		b_l2 += lr * np.sum(delta_2, axis = <span class="number">0</span>, keepdims = <span class="keyword">True</span>)</div><div class="line">		b_l1 += lr * np.sum(delta_1, axis = <span class="number">0</span>, keepdims = <span class="keyword">True</span>)</div><div class="line">		<span class="comment">#print loss</span></div><div class="line">		<span class="keyword">if</span> j % <span class="number">2000</span> == <span class="number">0</span>:</div><div class="line">			print(<span class="string">"Iteration "</span>, j, <span class="string">": "</span>, cross_entropy(y, layer_2))</div><div class="line">			<span class="comment">#print(layer_2)</span></div><div class="line"></div><div class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</div><div class="line">	data = datasets.make_classification()</div><div class="line">	X = data[<span class="number">0</span>]</div><div class="line">	y = data[<span class="number">1</span>].reshape(<span class="number">-1</span>, <span class="number">1</span>)</div><div class="line">	train(X, y,<span class="string">'relu'</span>)</div></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1656,7 +1612,7 @@ w_{update} = w - \eta \frac{\partial loss} {\partial w}</script><p>针对$w_2$�
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">15</span>
+              <span class="site-state-item-count">17</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

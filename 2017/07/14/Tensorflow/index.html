@@ -1,0 +1,617 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="接触Tensorflow也有好一段时间了，但总是对这个项目庞大的代码量和复杂的设计结构望而生畏，一直觉得它可以和某些原生的编程语言相提并论，所以大多时候也都是照着一些现成的模板去套用然后再不断调试，对内部的一些基本概念其实并没有太多了解。最近想着好好把官方给的get started和tutorial过一遍，对以后使用应该也更有帮助。
+Tensors张量就是高维数组的另一种表达形式，数组是几维的，张">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tensorflow简介">
+<meta property="og:url" content="https://nirvanada.github.io/2017/07/14/Tensorflow/index.html">
+<meta property="og:site_name" content="Andante">
+<meta property="og:description" content="接触Tensorflow也有好一段时间了，但总是对这个项目庞大的代码量和复杂的设计结构望而生畏，一直觉得它可以和某些原生的编程语言相提并论，所以大多时候也都是照着一些现成的模板去套用然后再不断调试，对内部的一些基本概念其实并没有太多了解。最近想着好好把官方给的get started和tutorial过一遍，对以后使用应该也更有帮助。
+Tensors张量就是高维数组的另一种表达形式，数组是几维的，张">
+<meta property="og:updated_time" content="2017-07-14T09:29:37.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Tensorflow简介">
+<meta name="twitter:description" content="接触Tensorflow也有好一段时间了，但总是对这个项目庞大的代码量和复杂的设计结构望而生畏，一直觉得它可以和某些原生的编程语言相提并论，所以大多时候也都是照着一些现成的模板去套用然后再不断调试，对内部的一些基本概念其实并没有太多了解。最近想着好好把官方给的get started和tutorial过一遍，对以后使用应该也更有帮助。
+Tensors张量就是高维数组的另一种表达形式，数组是几维的，张">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Muse',
+    sidebar: {"position":"right","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://nirvanada.github.io/2017/07/14/Tensorflow/"/>
+
+  <title> Tensorflow简介 | Andante </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Andante</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Tensorflow简介
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-07-14T17:08:42+08:00" content="2017-07-14">
+              2017-07-14
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>接触Tensorflow也有好一段时间了，但总是对这个项目庞大的代码量和复杂的设计结构望而生畏，一直觉得它可以和某些原生的编程语言相提并论，所以大多时候也都是照着一些现成的模板去套用然后再不断调试，对内部的一些基本概念其实并没有太多了解。最近想着好好把官方给的get started和tutorial过一遍，对以后使用应该也更有帮助。</p>
+<h3 id="Tensors"><a href="#Tensors" class="headerlink" title="Tensors"></a>Tensors</h3><p>张量就是高维数组的另一种表达形式，数组是几维的，张量的rank就是几。比如[1,2,3]是一维向量，rank=1；[[1,2,3], [2,3,4]]是二维矩阵，rank=2；[[[1,2,3], [2,3,4]]]是三维张量，rank=3，就这么简单。</p>
+<h3 id="Computational-Graph"><a href="#Computational-Graph" class="headerlink" title="Computational Graph"></a>Computational Graph</h3><p>有了tensor，要形成flow，就必须借助图，张量和图起来就基本构成了Tensorflow的基本框架。图中的每个node可以是tensor，也可以是加减乘除之类的算子。其实回想一下，神经网络本质上就是这种神经元之间互相有向连接的结构，所以在我们定义好每个node后把这些node连接成图，理论上就可以搭建任何模式的结构。但是如果要查看某个图最终node的输出结果，还必须要通过一个session的运行环境来run。下面举个简单的小例子就会一目了然：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">node1 = tf.constant(<span class="number">3.0</span>, tf.float32)</div><div class="line">node2 = tf.constant(<span class="number">4.0</span>) <span class="comment"># also tf.float32 implicitly</span></div><div class="line">print(node1, node2)</div><div class="line"><span class="comment">#Output: Tensor("Const:0", shape=(), dtype=float32) Tensor("Const_1:0", shape=(), dtype=float32)</span></div><div class="line">sess = tf.Session()</div><div class="line">print(sess.run([node1, node2]))</div><div class="line"><span class="comment">#Output:[3.0, 4.0]</span></div><div class="line">node3 = tf.add(node1, node2)</div><div class="line">print(<span class="string">"node3: "</span>, node3)</div><div class="line">print(<span class="string">"sess.run(node3): "</span>,sess.run(node3))</div><div class="line"><span class="comment">#Output:7.0</span></div></pre></td></tr></table></figure>
+<p>上面的code只是把node1和node2定义为tf.constant()的常量形式，更普遍的我们将输入定义为类似于函数形式的变量，这时就需要利用到tf.placeholder()方法，可以理解为占位符，这类似于python中lambda匿名函数的形式，占位符就是传入匿名函数的输入参数，再看例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">a = tf.placeholder(tf.float32)</div><div class="line">b = tf.placeholder(tf.float32)</div><div class="line">adder_node = a + b  <span class="comment"># + provides a shortcut for tf.add(a, b)</span></div><div class="line">print(sess.run(adder_node, feed_dict = &#123;a: <span class="number">3</span>, b:<span class="number">4.5</span>&#125;))</div><div class="line"><span class="comment">#Output:7.5</span></div><div class="line">print(sess.run(adder_node, feed_dict = &#123;a: [<span class="number">1</span>,<span class="number">3</span>], b: [<span class="number">2</span>, <span class="number">4</span>]&#125;))</div><div class="line"><span class="comment">#Output:[ 3.  7.]</span></div><div class="line">add_and_triple = adder_node * <span class="number">3.</span></div><div class="line">print(sess.run(add_and_triple, feed_dict = &#123;a: <span class="number">3</span>, b:<span class="number">4.5</span>&#125;))</div><div class="line"><span class="comment">#Output:22.5</span></div></pre></td></tr></table></figure>
+<p>上面提到的tensor都是不可变，但是在大多machine learning的应用中需要通过不断的迭代来调整参数，比如网络中的weight和bias，这时需要利用tf.Variable()来给定初始值并定义这些需要train的变量。有了trainable的参数和输入数据，最后一步就是定义loss，我们以linear regression为例，定义square loss 为$loss  = (Wx + b - \hat y)^2$，大多数常见的loss在Tensorflow中都已经被封装好，直接调用即可。接下来的代码相对来说复杂一点，但逻辑在Tensorflow的框架下十分清晰：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">W = tf.Variable([<span class="number">.3</span>], tf.float32) <span class="comment">#Trainable param</span></div><div class="line">b = tf.Variable([<span class="number">-.3</span>], tf.float32) <span class="comment">#Trainable param</span></div><div class="line">x = tf.placeholder(tf.float32) <span class="comment">#Input placeholder</span></div><div class="line">y = tf.placeholder(tf.float32) <span class="comment">#Input placeholder</span></div><div class="line"></div><div class="line">linear_model = W * x + b <span class="comment"># Linear Regression</span></div><div class="line">squared_deltas = tf.square(linear_model - y) <span class="comment">#Define square loss</span></div><div class="line">loss = tf.reduce_sum(squared_deltas) <span class="comment">#Add loss on all samples</span></div><div class="line"></div><div class="line">init = tf.global_variables_initializer() <span class="comment"># You must explicitly initilize the variables</span></div><div class="line">sess.run(init) <span class="comment"># Until we call sess.run, the variables are uninitialized</span></div><div class="line">print(sess.run(loss, &#123;x:[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>], y:[<span class="number">0</span>,<span class="number">-1</span>,<span class="number">-2</span>,<span class="number">-3</span>]&#125;))</div><div class="line"><span class="comment">#Output:23.66</span></div></pre></td></tr></table></figure>
+<h3 id="Train"><a href="#Train" class="headerlink" title="Train"></a>Train</h3><p>到现在为止，我们还只是简单的手动构建了图，做了几个简单运算，还没有涉及到神经网路的梯度反向传播、参数更新过程。Tensorflow的强大之处在于，在用户构建完成网络结构（图）后，就可以通过简单的函数调用来自动计算梯度。这里我们以最常见的梯度下降为例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">optimizer = tf.train.GradientDescentOptimizer(<span class="number">0.01</span>) <span class="comment"># define gradient descent method</span></div><div class="line">train = optimizer.minimize(loss) <span class="comment"># minize loss using gradient descent</span></div><div class="line"></div><div class="line">sess.run(init) <span class="comment"># reset values to incorrect defaults.</span></div><div class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1000</span>): <span class="comment"># run gradient descent for 1000 steps</span></div><div class="line">  sess.run(train, &#123;x:[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>], y:[<span class="number">0</span>,<span class="number">-1</span>,<span class="number">-2</span>,<span class="number">-3</span>]&#125;)</div><div class="line"></div><div class="line">print(sess.run([W, b]))</div><div class="line"><span class="comment">#Output:[array([-0.9999969], dtype=float32), array([ 0.99999082],dtype=float32)]</span></div></pre></td></tr></table></figure>
+<h3 id="Reading-Data"><a href="#Reading-Data" class="headerlink" title="Reading Data"></a>Reading Data</h3><p>Tensorflow读取数据的方式大体上说有三种，第一种是和上述例子中一样的方式，先在图中定义好placeholder，再通过feed_dict方式在run session时传入placeholder对应的数据；第二种适用于小数据量，直接将数据定义为constant或variable，个人感觉本质上和第一种没有太大区别；第三种在数据量比较大时候十分常用，就是直接从文件中按照队列的方式进行读取，以目前一般企业级机器学习的数据量来看，前两种方式会受限于内存和图的大小，因此简单介绍下这种比较通用的方式。</p>
+<p>首先将要读取的小文件名形成一个列表，然后通过<a href="https://www.tensorflow.org/api_docs/python/tf/train/string_input_producer" target="_blank" rel="external">tf.train.string_input_producer</a>函数建立一个关于这些文件名的队列queue。接下来会有若干个reader实体去从这个queue中读取文件名，然后对于不同形式的文件（比如csv、二进制等）再通过不同的decoder对当前文件名下的内容进行解析，这样就可以不断的从文件列表中的每个文件读数，下面是一个涉及到batch read的例子。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">read_my_file_format</span><span class="params">(filename_queue)</span>:</span></div><div class="line">  reader = tf.SomeReader() <span class="comment"># define reader</span></div><div class="line">  key, record_string = reader.read(filename_queue) <span class="comment"># read file from file_queue using reader, each execution of read reads a single line from the file</span></div><div class="line">  example, label = tf.some_decoder(record_string) <span class="comment"># decode file</span></div><div class="line">  processed_example = some_processing(example) <span class="comment"># do some preprocessing</span></div><div class="line">  <span class="keyword">return</span> processed_example, label</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">input_pipeline</span><span class="params">(filenames, batch_size, num_epochs=None)</span>:</span></div><div class="line">  filename_queue = tf.train.string_input_producer(</div><div class="line">      filenames, num_epochs=num_epochs, shuffle=<span class="keyword">True</span>)</div><div class="line">  example, label = read_my_file_format(filename_queue)</div><div class="line">  min_after_dequeue = <span class="number">10000</span> <span class="comment"># define how big a buffer we will randomly sample from</span></div><div class="line">  capacity = min_after_dequeue + <span class="number">3</span> * batch_size <span class="comment"># larger than min_after_dequeue</span></div><div class="line">  example_batch, label_batch = tf.train.shuffle_batch(</div><div class="line">      [example, label], batch_size=batch_size, capacity=capacity,</div><div class="line">      min_after_dequeue=min_after_dequeue) <span class="comment"># make batch sample</span></div><div class="line">  <span class="keyword">return</span> example_batch, label_batch</div></pre></td></tr></table></figure>
+<p>一般来说牵扯到了queue，我们就必须要在tf.Session()中在任务run之前利用tf.train.start_queue_runners和tf.train.Coordinator来填充队列和管理线程，不然read进程就会因为从queue中等待读取文件名而发生阻塞。</p>
+<p>上面只是对tf做了一个非常非常浅显的介绍，但烂熟于心之后基本上也可以无障碍阅读github上大多数的tensorflow tutorial，而在实际的程序中依然有大量的坑和N多封装好的方法等待被发掘。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/05/Session_rec/" rel="next" title="利用RNN做session-based推荐">
+                <i class="fa fa-chevron-left"></i> 利用RNN做session-based推荐
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/14/FM and FFM/" rel="prev" title="FM and FFM">
+                FM and FFM <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Nirvanada" />
+          <p class="site-author-name" itemprop="name">Nirvanada</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">17</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Tensors"><span class="nav-number">1.</span> <span class="nav-text">Tensors</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Computational-Graph"><span class="nav-number">2.</span> <span class="nav-text">Computational Graph</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Train"><span class="nav-number">3.</span> <span class="nav-text">Train</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reading-Data"><span class="nav-number">4.</span> <span class="nav-text">Reading Data</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Nirvanada</span>
+</div>
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="http://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+  </script>
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for (i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+    });
+  </script>
+  <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  
+
+  
+
+</body>
+</html>
