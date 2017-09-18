@@ -245,6 +245,114 @@
             
               
                 
+                <a class="post-title-link" href="/2017/09/15/AFM/" itemprop="url">
+                  未命名
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-09-15T14:07:19+08:00" content="2017-09-15">
+              2017-09-15
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>title: Attentional FM及源码解析<br>date: 2017-09-18 18:17:15<br>categories: Machine Learning</p>
+<h4 id="原理部分"><a href="#原理部分" class="headerlink" title="原理部分"></a>原理部分</h4><p>书接上回，FM模型无论是对于交叉特征的捕捉能力上，还是在工业界大规模数据下的运用方面上，都具有出色的表现。因此，在深度学习火热的大背景下，各种基于FM模型和神经网络模型相结合的方法也开始频频出现。这里要说的是SIGIR 2017和IJCAI 2017的两篇文章<a href="http://www.comp.nus.edu.sg/~xiangnan/papers/sigir17-nfm.pdf" target="_blank" rel="external">Neural Factorization Machine</a>和<a href="http://www.comp.nus.edu.sg/~xiangnan/papers/ijcai17-afm.pdf，无一例外，它们都是在FM的基础上衍生出与深度学习相关的研究。由于两篇文章的是同一团队所著，所以工作有重叠和改进部分，前一篇网络结构相对简单，因此本文主要针对Attentional Facotrization Machine展开，但也会在其中涉及Neural Factorization Machine。不仅如此，作者也同样给出了开源实现，源码解析也会在此基础上进行（[Neural FM](https://github.com/hexiangnan/attentional_factorization_machine" target="_blank" rel="external">Attentional Facotrization Machine</a> and <a href="https://github.com/hexiangnan/neural_factorization_machine" target="_blank" rel="external">Attention FM</a>）。</p>
+<p>FM模型虽然存在了所有可能的二阶特征交叉项，但本质上，并不是所有的特征都是有效的，比如一个垃圾特征a和一个牛逼特征b做交叉可能会起到一些作用，但a和垃圾特征c再做交叉基本上不会有任何作用，因此Attentional Facotrization Machine解决的问题主要就是——利用目前比较流行的attention的概念，对每个特征交叉分配不同的attention，使没用的交叉特征权重降低，有用的交叉特征权重提高，加强模型预测能力。原始的FM模型，如果忽略一阶项，可以表示为</p>
+<script type="math/tex; mode=display">
+y_{fm} = \sum_i \sum_{j = i + 1} <v_i, v_j> x_i x_j</script><p>这里我们可以把$v_i$理解为特征$x_i$的feature embedding，而上式中交叉项的表达为embedding向量的内积，因此输入的$y$直接就为标量，不需要再次的映射；但是这种内积操作如果变换为哈达玛积的操作（element-wise product）$(v_i \odot v_j) x_i x_j$，这样从Neural Network的角度去看，每个特征都交叉之后上层就变成了一个embedding layer，然后再对这个layer做一次sum pooling和映射，便可以得到输出值，即</p>
+<script type="math/tex; mode=display">
+y = p^T\sum_i \sum_{j = i + 1} (v_i \odot v_j) x_i x_j</script><p>至此，Neural Factorization Machine中所描述的已经叙述完毕，就是这么简单。而来到了Attention这篇，思想一致，只是在embedding layer的sum pooling时为每个embedding加上对应的attention，也就是权重，即</p>
+<script type="math/tex; mode=display">
+y = p^T\sum_i \sum_{j = i + 1} \alpha_{ij}(v_i \odot v_j) x_i x_j</script><p>其中$\alpha$通过对embedding空间做了一次encoding并标准化得到，</p>
+<script type="math/tex; mode=display">
+\alpha_{ij}^{'} = h^TReLU(W(v_i \odot v_j) x_i x_j + b) \\
+\alpha_{ij} = \frac{exp(\alpha_{ij}^{'})}{\sum exp(\alpha_{ij}^{'})}</script><p>另外，由于这种attention的方式对训练数据的拟合表达更充分，但也更容易过拟合，因此作者除了在loss中加入正则项之外，在attention部分加入了dropout。具体模型结构如下图：</p>
+<img src="/images/AFM/net.jpeg">
+<p>作者在Frappe和MovieLens数据集上进行了实验，AFM的表现beat掉了所有fine tuned的对比模型（LibFm、HOFM、Wide&amp;Deep、DeepCross）。而且，使用这套框架的传统FM也要比LibFM的效果好，原因之一在于dropout的引入降低了过拟合的风险，第二在于LibFM在迭代优化时使用的是SGD方法，对每个参数的学习步长一致，很容易使后期的学习很快的止步，而Adagrad的引入使得学习率可变，因此性能更加优良。另外，attention的引入，一方面加速了收敛速度，另一方面也具有对交叉特征的可解释性（因为就是权重），类似于特征重要性。</p>
+<h4 id="代码部分"><a href="#代码部分" class="headerlink" title="代码部分"></a>代码部分</h4><p>截取了一部分关键代码，解析在注释中体现</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">_init_graph</span><span class="params">(self)</span>:</span></div><div class="line">    self.graph = tf.Graph()</div><div class="line">    <span class="keyword">with</span> self.graph.as_default(): </div><div class="line">        <span class="comment"># Input data.</span></div><div class="line">        self.train_features = tf.placeholder(tf.int32, shape=[<span class="keyword">None</span>, <span class="keyword">None</span>], name=<span class="string">"train_features_afm"</span>)  <span class="comment"># None * features_M</span></div><div class="line">        self.train_labels = tf.placeholder(tf.float32, shape=[<span class="keyword">None</span>, <span class="number">1</span>], name=<span class="string">"train_labels_afm"</span>)  <span class="comment"># None * 1</span></div><div class="line">        self.dropout_keep = tf.placeholder(tf.float32, shape=[<span class="keyword">None</span>], name=<span class="string">"dropout_keep_afm"</span>)</div><div class="line"></div><div class="line">        <span class="comment"># Variables.</span></div><div class="line">        self.weights = self._initialize_weights()</div><div class="line"></div><div class="line">        <span class="comment"># Model.</span></div><div class="line">         <span class="comment"># _________ Embedding part _____________</span></div><div class="line">        <span class="comment"># data为libsvm格式，且非none特征共有M‘个，且特征值均为1。data中每个feature都对应一个K维embedding</span></div><div class="line">        self.nonzero_embeddings = tf.nn.embedding_lookup(self.weights[<span class="string">'feature_embeddings'</span>], self.train_features) <span class="comment"># None * M' * K</span></div><div class="line">        </div><div class="line">        <span class="comment"># 交叉项embedding layer生成，对应equation(2)</span></div><div class="line">        element_wise_product_list = []</div><div class="line">        count = <span class="number">0</span></div><div class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, self.valid_dimension):</div><div class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> range(i+<span class="number">1</span>, self.valid_dimension):</div><div class="line">               element_wise_product_list.append(tf.multiply(self.nonzero_embeddings[:,i,:], self.nonzero_embeddings[:,j,:]))</div><div class="line">                count += <span class="number">1</span></div><div class="line">        self.element_wise_product = tf.stack(element_wise_product_list) <span class="comment"># (M'*(M'-1))/2 * None * K</span></div><div class="line">        self.element_wise_product = tf.transpose(self.element_wise_product, perm=[<span class="number">1</span>,<span class="number">0</span>,<span class="number">2</span>], name=<span class="string">"element_wise_product"</span>) <span class="comment"># None * (M'*(M'-1))/2 * K</span></div><div class="line">        </div><div class="line">        <span class="comment"># _________ MLP Layer / attention part _____________</span></div><div class="line">        <span class="comment"># self.attention == True时，模型为Attention FM;</span></div><div class="line">        <span class="comment"># self.attention == False时，就退化为Neural FM</span></div><div class="line">        num_interactions = self.valid_dimension*(self.valid_dimension<span class="number">-1</span>)/<span class="number">2</span></div><div class="line">        <span class="keyword">if</span> self.attention:</div><div class="line">            <span class="comment"># 对应equation(4)-1</span></div><div class="line">            self.attention_mul = tf.reshape(tf.matmul(tf.reshape(self.element_wise_product, shape=[<span class="number">-1</span>, self.hidden_factor[<span class="number">1</span>]]),self.weights[<span class="string">'attention_W'</span>]), shape=[<span class="number">-1</span>, num_interactions, self.hidden_factor[<span class="number">0</span>]])</div><div class="line">            self.attention_exp = tf.exp(tf.reduce_sum(tf.multiply(self.weights[<span class="string">'attention_p'</span>], tf.nn.relu(self.attention_mul + self.weights[<span class="string">'attention_b'</span>])), <span class="number">2</span>, keep_dims=<span class="keyword">True</span>)) <span class="comment"># None * (M'*(M'-1)) * 1</span></div><div class="line">            self.attention_sum = tf.reduce_sum(self.attention_exp, <span class="number">1</span>, keep_dims=<span class="keyword">True</span>) <span class="comment"># None * 1 * 1</span></div><div class="line">            <span class="comment"># 对应equation(4)-2</span></div><div class="line">            self.attention_out = tf.div(self.attention_exp, self.attention_sum, name=<span class="string">"attention_out"</span>) <span class="comment"># None * (M'*(M'-1)) * 1</span></div><div class="line">            <span class="comment"># 在attention部分引入dropout</span></div><div class="line">            self.attention_out = tf.nn.dropout(self.attention_out, self.dropout_keep[<span class="number">0</span>]) <span class="comment"># dropout</span></div><div class="line">            self.AFM = tf.reduce_sum(tf.multiply(self.attention_out, self.element_wise_product), <span class="number">1</span>, name=<span class="string">"afm"</span>) <span class="comment"># None * K</span></div><div class="line">        <span class="keyword">else</span>:              <span class="comment"># Neural FM</span></div><div class="line">            self.AFM = tf.reduce_sum(self.element_wise_product, <span class="number">1</span>, name=<span class="string">"afm"</span>) <span class="comment"># None * K</span></div><div class="line">        </div><div class="line">        <span class="comment"># 在全连接（映射）部分二次引入dropout</span></div><div class="line">        self.AFM = tf.nn.dropout(self.AFM, self.dropout_keep[<span class="number">1</span>]) <span class="comment"># dropout</span></div><div class="line"></div><div class="line">        <span class="comment"># _________ out _____________</span></div><div class="line">        self.prediction = tf.matmul(self.AFM, self.weights[<span class="string">'prediction'</span>]) <span class="comment"># None * 1</span></div><div class="line">        <span class="comment"># 引入传统FM中的一阶项和常数项</span></div><div class="line">        Bilinear = tf.reduce_sum(self.prediction, <span class="number">1</span>, keep_dims=<span class="keyword">True</span>)  <span class="comment"># None * 1</span></div><div class="line">        self.Feature_bias = tf.reduce_sum(tf.nn.embedding_lookup(self.weights[<span class="string">'feature_bias'</span>], self.train_features) , <span class="number">1</span>)  <span class="comment"># None * 1</span></div><div class="line">        Bias = self.weights[<span class="string">'bias'</span>] * tf.ones_like(self.train_labels)  <span class="comment"># None * 1</span></div><div class="line">        self.out = tf.add_n([Bilinear, self.Feature_bias, Bias], name=<span class="string">"out_afm"</span>)  <span class="comment"># None * 1</span></div><div class="line"></div><div class="line">        <span class="comment"># Compute the loss.</span></div><div class="line">        <span class="comment"># 在loss中加入L2正则项</span></div><div class="line">        self.loss = tf.nn.l2_loss(tf.subtract(self.train_labels, self.out)) + tf.contrib.layers.l2_regularizer(self.lamda_attention)(self.weights[<span class="string">'attention_W'</span>])  <span class="comment"># regulizer</span></div><div class="line"></div><div class="line">        <span class="comment"># Optimizer.</span></div><div class="line">        <span class="comment"># 传统FM为SGD方式迭代训练，可能会导致训练不充分的情况。Ada系列的迭代方式learning rate可变，会一定程度上缓解这个现象</span></div><div class="line">        <span class="keyword">if</span> self.optimizer_type == <span class="string">'AdamOptimizer'</span>:</div><div class="line">            self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate, beta1=<span class="number">0.9</span>, beta2=<span class="number">0.999</span>, epsilon=<span class="number">1e-8</span>).minimize(self.loss)</div><div class="line">        <span class="keyword">elif</span> self.optimizer_type == <span class="string">'AdagradOptimizer'</span>:</div><div class="line">            self.optimizer = tf.train.AdagradOptimizer(learning_rate=self.learning_rate, initial_accumulator_value=<span class="number">1e-8</span>).minimize(self.loss)</div><div class="line">        <span class="keyword">else</span>:</div><div class="line">            self.optimizer = tf.train.GradientDescentOptimizer(learning_rate=self.learning_rate).minimize(self.loss)</div><div class="line"></div><div class="line">        <span class="comment"># init</span></div><div class="line">        self.saver = tf.train.Saver()</div><div class="line">        init = tf.global_variables_initializer()</div><div class="line">        self.sess = self._init_session()</div><div class="line">        self.sess.run(init)</div></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2017/07/14/FM and FFM/" itemprop="url">
                   FM and FFM
                 </a>
@@ -1418,155 +1526,6 @@ y_i = (\lambda I + X_{I_u} X_{I_u}^T)^{-1}X_{I_u}R(i, I_u)</script><p>含义和�
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/02/23/dl-trick/" itemprop="url">
-                  Deep Learning的一些tricks
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-02-23T23:10:15+08:00" content="2017-02-23">
-              2017-02-23
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>看到一篇关于deep learning一些小trick的博客，感觉对于初学者可能帮助很大，但老司机应该对这些所谓的“黑魔法”烂熟于心。不管怎么说，还是囊括了大部分目前主流的一些tricks，就我本人而言也都在工作中用了这些小技巧，只不过平时都当做common sense了并没有太在意，因此也想着整理记录下来。</p>
-<ul>
-<li><p>在每一个epoch结束后，一定要对数据做shuffle。也就是说要确保每轮迭代时mini-batch中的数据是不一致的</p>
-</li>
-<li><p>基于DL对大数据量的高可用性，尽可能的扩充数据。最常见的应该是图片分类问题，比如对图片进行旋转、镜像、加噪、白化等等（就像keras的image augmentation）。像在公司里比如提用户训练样本时候就可以通过滑动时间窗口的方法来获取更多数据</p>
-</li>
-<li><p>在训练大规模数据和模型前，先对数据进行一波小比例采样，如果采样数据能够使模型效果足够好的话，说明你的模型最终是可以收敛的——这个trick感觉真的没有太多人会做，如果做的话一般也都是在程序debug时候为了减少训练时间，大多数情况下都是拿到一批数据直接真刀真枪的干</p>
-</li>
-<li><p>永远都要使用dropout以防止过拟合，尤其是要在神经元比较多的全连接或卷积层后——现在一般都要随手加个dropout吧，要不总感觉少点什么</p>
-</li>
-<li><p>避免使用LRN pooling，尽量使用max pooling，因为快！</p>
-</li>
-<li><p>和sigmoid说bye-bye，和tanh说bye-bye，原因很简单：容易饱和，gradient vanishing，ReLU和PreLU明显是目前最好的选择</p>
-</li>
-<li><p>在max pooling层之后用ReLU或者PreLU，而不是之前，道理也很简单：max pooling之后维度减小，可以减少不少的计算量</p>
-</li>
-<li><p>尽量别用ReLU，过时啦！投入PreLU的怀抱！因为ReLU在初始阶段容易把训练卡死，PreLU的alpha选个0.1，完爆ReLU——这个结论感觉下的过于鲁莽，虽然理论上是这样的，但是实验里也没见过PreLU比ReLU好到哪里，但是对于训练初始阶段的情况还真没关注过，以后可以对比实验下</p>
-</li>
-<li><p>使用Batch Normalization。不多说，和dropout都差不多，加一下已经成习惯了。最近又看了BN的原作者新搞出了一个Batch Renormalization，消除了没个mini-batch中数据的差异性，据说更牛逼</p>
-</li>
-<li><p>对数据做预处理时映射到-1~1区间，而不是减去他们的均值——估计都是经验之谈，可能每份数据所呈现的结果都不太一样，个人习惯是做z-score，映射到0~1</p>
-</li>
-<li><p>尽量使用轻量级的模型，因为当你把一个庞大的model放到server上时效率的影响可能对用户体验并不是很好，即使这个工作会使你的模型准确率不够高</p>
-</li>
-<li><p>如果使用轻量级的模型，尽量做ensemble，如果ensemble了5个network，基本大约可以使准确度提搞3%——这玩意居然给量化出来了，感觉也得看是什么network吧</p>
-</li>
-<li><p>尽可能用xavier initialization做参数初始化，但是只用在全连接层，别用在CNN层上——应该就是告诉你初始化的时候weights的方差取个啥值</p>
-</li>
-<li><p>在CNN中可能的地方使用1*1卷积核，会增加spatial locality，可以自己控制升维或者降维，同时也可以把模型做的很deep——谷歌爸爸用了也说好</p>
-</li>
-<li><p>没有好的GPU，就别搞DL了</p>
-</li>
-<li><p>DL不是神，理解好你要解决的问题，别就会傻套现成的网络结构</p>
-</li>
-</ul>
-<p>以上。</p>
-<p>参考：<a href="http://nmarkou.blogspot.jp/2017/02/the-black-magic-of-deep-learning-tips.html" target="_blank" rel="external">The Black Magic of Deep Learning - Tips and Tricks for the practitioner</a></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1612,7 +1571,7 @@ y_i = (\lambda I + X_{I_u} X_{I_u}^T)^{-1}X_{I_u}R(i, I_u)</script><p>含义和�
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">17</span>
+              <span class="site-state-item-count">18</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
