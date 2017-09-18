@@ -1,0 +1,611 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="原理部分书接上回，FM模型无论是对于交叉特征的捕捉能力上，还是在工业界大规模数据下的运用方面上，都具有出色的表现。因此，在深度学习火热的大背景下，各种基于FM模型和神经网络模型相结合的方法也开始频频出现。这里要说的是SIGIR 2017和IJCAI 2017的两篇文章Neural Factorization Machine和Attentional Facotrization Machine and">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Attentional FM及源码解析">
+<meta property="og:url" content="https://nirvanada.github.io/2017/09/18/AFM/index.html">
+<meta property="og:site_name" content="Andante">
+<meta property="og:description" content="原理部分书接上回，FM模型无论是对于交叉特征的捕捉能力上，还是在工业界大规模数据下的运用方面上，都具有出色的表现。因此，在深度学习火热的大背景下，各种基于FM模型和神经网络模型相结合的方法也开始频频出现。这里要说的是SIGIR 2017和IJCAI 2017的两篇文章Neural Factorization Machine和Attentional Facotrization Machine and">
+<meta property="og:image" content="https://nirvanada.github.io/images/AFM/net.jpeg">
+<meta property="og:updated_time" content="2017-09-18T10:20:05.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Attentional FM及源码解析">
+<meta name="twitter:description" content="原理部分书接上回，FM模型无论是对于交叉特征的捕捉能力上，还是在工业界大规模数据下的运用方面上，都具有出色的表现。因此，在深度学习火热的大背景下，各种基于FM模型和神经网络模型相结合的方法也开始频频出现。这里要说的是SIGIR 2017和IJCAI 2017的两篇文章Neural Factorization Machine和Attentional Facotrization Machine and">
+<meta name="twitter:image" content="https://nirvanada.github.io/images/AFM/net.jpeg">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Muse',
+    sidebar: {"position":"right","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://nirvanada.github.io/2017/09/18/AFM/"/>
+
+  <title> Attentional FM及源码解析 | Andante </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Andante</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Attentional FM及源码解析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-09-18T18:17:15+08:00" content="2017-09-18">
+              2017-09-18
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="原理部分"><a href="#原理部分" class="headerlink" title="原理部分"></a>原理部分</h4><p>书接上回，FM模型无论是对于交叉特征的捕捉能力上，还是在工业界大规模数据下的运用方面上，都具有出色的表现。因此，在深度学习火热的大背景下，各种基于FM模型和神经网络模型相结合的方法也开始频频出现。这里要说的是SIGIR 2017和IJCAI 2017的两篇文章<a href="http://www.comp.nus.edu.sg/~xiangnan/papers/sigir17-nfm.pdf" target="_blank" rel="external">Neural Factorization Machine</a>和<a href="http://www.comp.nus.edu.sg/~xiangnan/papers/ijcai17-afm.pdf，无一例外，它们都是在FM的基础上衍生出与深度学习相关的研究。由于两篇文章的是同一团队所著，所以工作有重叠和改进部分，前一篇网络结构相对简单，因此本文主要针对Attentional Facotrization Machine展开，但也会在其中涉及Neural Factorization Machine。不仅如此，作者也同样给出了开源实现，源码解析也会在此基础上进行（[Neural FM](https://github.com/hexiangnan/attentional_factorization_machine" target="_blank" rel="external">Attentional Facotrization Machine</a> and <a href="https://github.com/hexiangnan/neural_factorization_machine" target="_blank" rel="external">Attention FM</a>）。</p>
+<p>FM模型虽然存在了所有可能的二阶特征交叉项，但本质上，并不是所有的特征都是有效的，比如一个垃圾特征a和一个牛逼特征b做交叉可能会起到一些作用，但a和垃圾特征c再做交叉基本上不会有任何作用，因此Attentional Facotrization Machine解决的问题主要就是——利用目前比较流行的attention的概念，对每个特征交叉分配不同的attention，使没用的交叉特征权重降低，有用的交叉特征权重提高，加强模型预测能力。原始的FM模型，如果忽略一阶项，可以表示为</p>
+<script type="math/tex; mode=display">
+y_{fm} = \sum_i \sum_{j = i + 1} <v_i, v_j> x_i x_j</script><p>这里我们可以把$v_i$理解为特征$x_i$的feature embedding，而上式中交叉项的表达为embedding向量的内积，因此输入的$y$直接就为标量，不需要再次的映射；但是这种内积操作如果变换为哈达玛积的操作（element-wise product）$(v_i \odot v_j) x_i x_j$，这样从Neural Network的角度去看，每个特征都交叉之后上层就变成了一个embedding layer，然后再对这个layer做一次sum pooling和映射，便可以得到输出值，即</p>
+<script type="math/tex; mode=display">
+y = p^T\sum_i \sum_{j = i + 1} (v_i \odot v_j) x_i x_j</script><p>至此，Neural Factorization Machine中所描述的已经叙述完毕，就是这么简单。而来到了Attention这篇，思想一致，只是在embedding layer的sum pooling时为每个embedding加上对应的attention，也就是权重，即</p>
+<script type="math/tex; mode=display">
+y = p^T\sum_i \sum_{j = i + 1} \alpha_{ij}(v_i \odot v_j) x_i x_j</script><p>其中$\alpha$通过对embedding空间做了一次encoding并标准化得到，</p>
+<script type="math/tex; mode=display">
+\alpha_{ij}^{'} = h^TReLU(W(v_i \odot v_j) x_i x_j + b) \\
+\alpha_{ij} = \frac{exp(\alpha_{ij}^{'})}{\sum exp(\alpha_{ij}^{'})}</script><p>另外，由于这种attention的方式对训练数据的拟合表达更充分，但也更容易过拟合，因此作者除了在loss中加入正则项之外，在attention部分加入了dropout。具体模型结构如下图：</p>
+<img src="/images/AFM/net.jpeg">
+<p>作者在Frappe和MovieLens数据集上进行了实验，AFM的表现beat掉了所有fine tuned的对比模型（LibFm、HOFM、Wide&amp;Deep、DeepCross）。而且，使用这套框架的传统FM也要比LibFM的效果好，原因之一在于dropout的引入降低了过拟合的风险，第二在于LibFM在迭代优化时使用的是SGD方法，对每个参数的学习步长一致，很容易使后期的学习很快的止步，而Adagrad的引入使得学习率可变，因此性能更加优良。另外，attention的引入，一方面加速了收敛速度，另一方面也具有对交叉特征的可解释性（因为就是权重），类似于特征重要性。</p>
+<h4 id="代码部分"><a href="#代码部分" class="headerlink" title="代码部分"></a>代码部分</h4><p>截取了一部分关键代码，解析在注释中体现</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">_init_graph</span><span class="params">(self)</span>:</span></div><div class="line">    self.graph = tf.Graph()</div><div class="line">    <span class="keyword">with</span> self.graph.as_default(): </div><div class="line">        <span class="comment"># Input data.</span></div><div class="line">        self.train_features = tf.placeholder(tf.int32, shape=[<span class="keyword">None</span>, <span class="keyword">None</span>], name=<span class="string">"train_features_afm"</span>)  <span class="comment"># None * features_M</span></div><div class="line">        self.train_labels = tf.placeholder(tf.float32, shape=[<span class="keyword">None</span>, <span class="number">1</span>], name=<span class="string">"train_labels_afm"</span>)  <span class="comment"># None * 1</span></div><div class="line">        self.dropout_keep = tf.placeholder(tf.float32, shape=[<span class="keyword">None</span>], name=<span class="string">"dropout_keep_afm"</span>)</div><div class="line"></div><div class="line">        <span class="comment"># Variables.</span></div><div class="line">        self.weights = self._initialize_weights()</div><div class="line"></div><div class="line">        <span class="comment"># Model.</span></div><div class="line">         <span class="comment"># _________ Embedding part _____________</span></div><div class="line">        <span class="comment"># data为libsvm格式，且非none特征共有M‘个，且特征值均为1。data中每个feature都对应一个K维embedding</span></div><div class="line">        self.nonzero_embeddings = tf.nn.embedding_lookup(self.weights[<span class="string">'feature_embeddings'</span>], self.train_features) <span class="comment"># None * M' * K</span></div><div class="line">        </div><div class="line">        <span class="comment"># 交叉项embedding layer生成，对应equation(2)</span></div><div class="line">        element_wise_product_list = []</div><div class="line">        count = <span class="number">0</span></div><div class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, self.valid_dimension):</div><div class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> range(i+<span class="number">1</span>, self.valid_dimension):</div><div class="line">               element_wise_product_list.append(tf.multiply(self.nonzero_embeddings[:,i,:], self.nonzero_embeddings[:,j,:]))</div><div class="line">                count += <span class="number">1</span></div><div class="line">        self.element_wise_product = tf.stack(element_wise_product_list) <span class="comment"># (M'*(M'-1))/2 * None * K</span></div><div class="line">        self.element_wise_product = tf.transpose(self.element_wise_product, perm=[<span class="number">1</span>,<span class="number">0</span>,<span class="number">2</span>], name=<span class="string">"element_wise_product"</span>) <span class="comment"># None * (M'*(M'-1))/2 * K</span></div><div class="line">        </div><div class="line">        <span class="comment"># _________ MLP Layer / attention part _____________</span></div><div class="line">        <span class="comment"># self.attention == True时，模型为Attention FM;</span></div><div class="line">        <span class="comment"># self.attention == False时，就退化为Neural FM</span></div><div class="line">        num_interactions = self.valid_dimension*(self.valid_dimension<span class="number">-1</span>)/<span class="number">2</span></div><div class="line">        <span class="keyword">if</span> self.attention:</div><div class="line">            <span class="comment"># 对应equation(4)-1</span></div><div class="line">            self.attention_mul = tf.reshape(tf.matmul(tf.reshape(self.element_wise_product, shape=[<span class="number">-1</span>, self.hidden_factor[<span class="number">1</span>]]),self.weights[<span class="string">'attention_W'</span>]), shape=[<span class="number">-1</span>, num_interactions, self.hidden_factor[<span class="number">0</span>]])</div><div class="line">            self.attention_exp = tf.exp(tf.reduce_sum(tf.multiply(self.weights[<span class="string">'attention_p'</span>], tf.nn.relu(self.attention_mul + self.weights[<span class="string">'attention_b'</span>])), <span class="number">2</span>, keep_dims=<span class="keyword">True</span>)) <span class="comment"># None * (M'*(M'-1)) * 1</span></div><div class="line">            self.attention_sum = tf.reduce_sum(self.attention_exp, <span class="number">1</span>, keep_dims=<span class="keyword">True</span>) <span class="comment"># None * 1 * 1</span></div><div class="line">            <span class="comment"># 对应equation(4)-2</span></div><div class="line">            self.attention_out = tf.div(self.attention_exp, self.attention_sum, name=<span class="string">"attention_out"</span>) <span class="comment"># None * (M'*(M'-1)) * 1</span></div><div class="line">            <span class="comment"># 在attention部分引入dropout</span></div><div class="line">            self.attention_out = tf.nn.dropout(self.attention_out, self.dropout_keep[<span class="number">0</span>]) <span class="comment"># dropout</span></div><div class="line">            self.AFM = tf.reduce_sum(tf.multiply(self.attention_out, self.element_wise_product), <span class="number">1</span>, name=<span class="string">"afm"</span>) <span class="comment"># None * K</span></div><div class="line">        <span class="keyword">else</span>:              <span class="comment"># Neural FM</span></div><div class="line">            self.AFM = tf.reduce_sum(self.element_wise_product, <span class="number">1</span>, name=<span class="string">"afm"</span>) <span class="comment"># None * K</span></div><div class="line">        </div><div class="line">        <span class="comment"># 在全连接（映射）部分二次引入dropout</span></div><div class="line">        self.AFM = tf.nn.dropout(self.AFM, self.dropout_keep[<span class="number">1</span>]) <span class="comment"># dropout</span></div><div class="line"></div><div class="line">        <span class="comment"># _________ out _____________</span></div><div class="line">        self.prediction = tf.matmul(self.AFM, self.weights[<span class="string">'prediction'</span>]) <span class="comment"># None * 1</span></div><div class="line">        <span class="comment"># 引入传统FM中的一阶项和常数项</span></div><div class="line">        Bilinear = tf.reduce_sum(self.prediction, <span class="number">1</span>, keep_dims=<span class="keyword">True</span>)  <span class="comment"># None * 1</span></div><div class="line">        self.Feature_bias = tf.reduce_sum(tf.nn.embedding_lookup(self.weights[<span class="string">'feature_bias'</span>], self.train_features) , <span class="number">1</span>)  <span class="comment"># None * 1</span></div><div class="line">        Bias = self.weights[<span class="string">'bias'</span>] * tf.ones_like(self.train_labels)  <span class="comment"># None * 1</span></div><div class="line">        self.out = tf.add_n([Bilinear, self.Feature_bias, Bias], name=<span class="string">"out_afm"</span>)  <span class="comment"># None * 1</span></div><div class="line"></div><div class="line">        <span class="comment"># Compute the loss.</span></div><div class="line">        <span class="comment"># 在loss中加入L2正则项</span></div><div class="line">        self.loss = tf.nn.l2_loss(tf.subtract(self.train_labels, self.out)) + tf.contrib.layers.l2_regularizer(self.lamda_attention)(self.weights[<span class="string">'attention_W'</span>])  <span class="comment"># regulizer</span></div><div class="line"></div><div class="line">        <span class="comment"># Optimizer.</span></div><div class="line">        <span class="comment"># 传统FM为SGD方式迭代训练，可能会导致训练不充分的情况。Ada系列的迭代方式learning rate可变，会一定程度上缓解这个现象</span></div><div class="line">        <span class="keyword">if</span> self.optimizer_type == <span class="string">'AdamOptimizer'</span>:</div><div class="line">            self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate, beta1=<span class="number">0.9</span>, beta2=<span class="number">0.999</span>, epsilon=<span class="number">1e-8</span>).minimize(self.loss)</div><div class="line">        <span class="keyword">elif</span> self.optimizer_type == <span class="string">'AdagradOptimizer'</span>:</div><div class="line">            self.optimizer = tf.train.AdagradOptimizer(learning_rate=self.learning_rate, initial_accumulator_value=<span class="number">1e-8</span>).minimize(self.loss)</div><div class="line">        <span class="keyword">else</span>:</div><div class="line">            self.optimizer = tf.train.GradientDescentOptimizer(learning_rate=self.learning_rate).minimize(self.loss)</div><div class="line"></div><div class="line">        <span class="comment"># init</span></div><div class="line">        self.saver = tf.train.Saver()</div><div class="line">        init = tf.global_variables_initializer()</div><div class="line">        self.sess = self._init_session()</div><div class="line">        self.sess.run(init)</div></pre></td></tr></table></figure>
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/14/FM and FFM/" rel="next" title="FM and FFM">
+                <i class="fa fa-chevron-left"></i> FM and FFM
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Nirvanada" />
+          <p class="site-author-name" itemprop="name">Nirvanada</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">18</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#原理部分"><span class="nav-number">1.</span> <span class="nav-text">原理部分</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码部分"><span class="nav-number">2.</span> <span class="nav-text">代码部分</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Nirvanada</span>
+</div>
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="http://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+  </script>
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for (i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+    });
+  </script>
+  <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  
+
+  
+
+</body>
+</html>

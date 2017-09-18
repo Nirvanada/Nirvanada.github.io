@@ -245,8 +245,8 @@
             
               
                 
-                <a class="post-title-link" href="/2017/09/15/AFM/" itemprop="url">
-                  未命名
+                <a class="post-title-link" href="/2017/09/18/AFM/" itemprop="url">
+                  Attentional FM及源码解析
                 </a>
               
             
@@ -259,11 +259,30 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-09-15T14:07:19+08:00" content="2017-09-15">
-              2017-09-15
+            <time itemprop="dateCreated" datetime="2017-09-18T18:17:15+08:00" content="2017-09-18">
+              2017-09-18
             </time>
           </span>
 
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
           
 
           
@@ -289,8 +308,7 @@
       
         
           
-            <p>title: Attentional FM及源码解析<br>date: 2017-09-18 18:17:15<br>categories: Machine Learning</p>
-<h4 id="原理部分"><a href="#原理部分" class="headerlink" title="原理部分"></a>原理部分</h4><p>书接上回，FM模型无论是对于交叉特征的捕捉能力上，还是在工业界大规模数据下的运用方面上，都具有出色的表现。因此，在深度学习火热的大背景下，各种基于FM模型和神经网络模型相结合的方法也开始频频出现。这里要说的是SIGIR 2017和IJCAI 2017的两篇文章<a href="http://www.comp.nus.edu.sg/~xiangnan/papers/sigir17-nfm.pdf" target="_blank" rel="external">Neural Factorization Machine</a>和<a href="http://www.comp.nus.edu.sg/~xiangnan/papers/ijcai17-afm.pdf，无一例外，它们都是在FM的基础上衍生出与深度学习相关的研究。由于两篇文章的是同一团队所著，所以工作有重叠和改进部分，前一篇网络结构相对简单，因此本文主要针对Attentional Facotrization Machine展开，但也会在其中涉及Neural Factorization Machine。不仅如此，作者也同样给出了开源实现，源码解析也会在此基础上进行（[Neural FM](https://github.com/hexiangnan/attentional_factorization_machine" target="_blank" rel="external">Attentional Facotrization Machine</a> and <a href="https://github.com/hexiangnan/neural_factorization_machine" target="_blank" rel="external">Attention FM</a>）。</p>
+            <h4 id="原理部分"><a href="#原理部分" class="headerlink" title="原理部分"></a>原理部分</h4><p>书接上回，FM模型无论是对于交叉特征的捕捉能力上，还是在工业界大规模数据下的运用方面上，都具有出色的表现。因此，在深度学习火热的大背景下，各种基于FM模型和神经网络模型相结合的方法也开始频频出现。这里要说的是SIGIR 2017和IJCAI 2017的两篇文章<a href="http://www.comp.nus.edu.sg/~xiangnan/papers/sigir17-nfm.pdf" target="_blank" rel="external">Neural Factorization Machine</a>和<a href="http://www.comp.nus.edu.sg/~xiangnan/papers/ijcai17-afm.pdf，无一例外，它们都是在FM的基础上衍生出与深度学习相关的研究。由于两篇文章的是同一团队所著，所以工作有重叠和改进部分，前一篇网络结构相对简单，因此本文主要针对Attentional Facotrization Machine展开，但也会在其中涉及Neural Factorization Machine。不仅如此，作者也同样给出了开源实现，源码解析也会在此基础上进行（[Neural FM](https://github.com/hexiangnan/attentional_factorization_machine" target="_blank" rel="external">Attentional Facotrization Machine</a> and <a href="https://github.com/hexiangnan/neural_factorization_machine" target="_blank" rel="external">Attention FM</a>）。</p>
 <p>FM模型虽然存在了所有可能的二阶特征交叉项，但本质上，并不是所有的特征都是有效的，比如一个垃圾特征a和一个牛逼特征b做交叉可能会起到一些作用，但a和垃圾特征c再做交叉基本上不会有任何作用，因此Attentional Facotrization Machine解决的问题主要就是——利用目前比较流行的attention的概念，对每个特征交叉分配不同的attention，使没用的交叉特征权重降低，有用的交叉特征权重提高，加强模型预测能力。原始的FM模型，如果忽略一阶项，可以表示为</p>
 <script type="math/tex; mode=display">
 y_{fm} = \sum_i \sum_{j = i + 1} <v_i, v_j> x_i x_j</script><p>这里我们可以把$v_i$理解为特征$x_i$的feature embedding，而上式中交叉项的表达为embedding向量的内积，因此输入的$y$直接就为标量，不需要再次的映射；但是这种内积操作如果变换为哈达玛积的操作（element-wise product）$(v_i \odot v_j) x_i x_j$，这样从Neural Network的角度去看，每个特征都交叉之后上层就变成了一个embedding layer，然后再对这个layer做一次sum pooling和映射，便可以得到输出值，即</p>
