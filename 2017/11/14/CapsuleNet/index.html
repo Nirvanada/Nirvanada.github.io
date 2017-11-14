@@ -1,0 +1,653 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="Hinton上个月在axiv上甩出了一篇文章Dynamic Routing Between Capsules，作者在结构设计上弥补了一些cnn的设计缺陷。虽然作为行业领军人物，研究具有一定权威性，但也依然需要时间的考验和同行的不断推敲。
+Capsules在与cnn相关的研究中，这些年流行的网络框架都是基于conv+pooling的这种方式搭建的，即使是微软Resnet中引入了residual的概念">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Capsule Networks">
+<meta property="og:url" content="https://nirvanada.github.io/2017/11/14/CapsuleNet/index.html">
+<meta property="og:site_name" content="Andante">
+<meta property="og:description" content="Hinton上个月在axiv上甩出了一篇文章Dynamic Routing Between Capsules，作者在结构设计上弥补了一些cnn的设计缺陷。虽然作为行业领军人物，研究具有一定权威性，但也依然需要时间的考验和同行的不断推敲。
+Capsules在与cnn相关的研究中，这些年流行的网络框架都是基于conv+pooling的这种方式搭建的，即使是微软Resnet中引入了residual的概念">
+<meta property="og:image" content="https://nirvanada.github.io/images/CapsuleNet/structure.jpg">
+<meta property="og:image" content="https://nirvanada.github.io/images/CapsuleNet/routing.jpg">
+<meta property="og:image" content="https://nirvanada.github.io/images/CapsuleNet/reconstruction.jpg">
+<meta property="og:image" content="https://nirvanada.github.io/images/CapsuleNet/param.jpg">
+<meta property="og:updated_time" content="2017-11-14T09:50:30.770Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Capsule Networks">
+<meta name="twitter:description" content="Hinton上个月在axiv上甩出了一篇文章Dynamic Routing Between Capsules，作者在结构设计上弥补了一些cnn的设计缺陷。虽然作为行业领军人物，研究具有一定权威性，但也依然需要时间的考验和同行的不断推敲。
+Capsules在与cnn相关的研究中，这些年流行的网络框架都是基于conv+pooling的这种方式搭建的，即使是微软Resnet中引入了residual的概念">
+<meta name="twitter:image" content="https://nirvanada.github.io/images/CapsuleNet/structure.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Muse',
+    sidebar: {"position":"right","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://nirvanada.github.io/2017/11/14/CapsuleNet/"/>
+
+  <title> Capsule Networks | Andante </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Andante</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Capsule Networks
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-11-14T16:46:15+08:00" content="2017-11-14">
+              2017-11-14
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Paper/" itemprop="url" rel="index">
+                    <span itemprop="name">Paper</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Hinton上个月在axiv上甩出了一篇文章<a href="https://arxiv.org/abs/1710.09829" target="_blank" rel="external">Dynamic Routing Between Capsules</a>，作者在结构设计上弥补了一些cnn的设计缺陷。虽然作为行业领军人物，研究具有一定权威性，但也依然需要时间的考验和同行的不断推敲。</p>
+<h4 id="Capsules"><a href="#Capsules" class="headerlink" title="Capsules"></a>Capsules</h4><p>在与cnn相关的研究中，这些年流行的网络框架都是基于conv+pooling的这种方式搭建的，即使是微软Resnet中引入了residual的概念，子网络依然是以这种方式组织起来。cnn中神经元的概念，无论是否共享权重，其实就是featureMap中的每一个具体的像素，是个标量。而capsules的将神经元扩展了一个维度，变成了一个向量，所以我们可以将capsules简单的理解为向量版的神经元。从网络上来说，cnn的forward过程是神经元与神经元的不断传播关系，而Capsules Network，显然，就是向量神经元之间的传播。</p>
+<h4 id="Model-Structure"><a href="#Model-Structure" class="headerlink" title="Model Structure"></a>Model Structure</h4><p>以mnist数据集为例，step by step看model的每个环节都是怎样的输出（第一个维度为batch_size）</p>
+<img src="/images/CapsuleNet/structure.jpg">
+<h5 id="Layer-One"><a href="#Layer-One" class="headerlink" title="Layer One"></a>Layer One</h5><p><strong>Input</strong>: $[None,28,28,1]$</p>
+<p>经过一层$9*9$，strides为1，通道数为256的conv layer</p>
+<p><strong>Output</strong>:[None,20,20,256]</p>
+<h5 id="Layer-Two"><a href="#Layer-Two" class="headerlink" title="Layer Two"></a>Layer Two</h5><p><strong>Input</strong>:$[None,20,20,256]$</p>
+<p>经过一层$9*9$的，strides为2，通道数为128的conv layer，按照这种方式的setting下，输出应为$[None,6,6,32]$。但如果我们将这一层的conv layer复制8份，输出就变成了$[None,6,6,8,32]$，如果我们再将这个结果reshape到$[None,6*6*32,8] = [None,1152,8]$的维度，此时capsules的概念就可以体现出来了，即，这一层共有1152个$[1*8]$的capsules向量。</p>
+<p><strong>Output</strong>:$[None,1152,8]$</p>
+<h5 id="Layer-Three"><a href="#Layer-Three" class="headerlink" title="Layer Three"></a>Layer Three</h5><p><strong>Input</strong>:$[None,1152,8]$</p>
+<p>这一层在维度上的变化略微复杂。对于一个指定index为$i$的$capsule_{i}$，其维度为$[1*8]$，引入一个维度为$[8*16]$的$Weight_{ij}$，那么</p>
+<script type="math/tex; mode=display">
+\hat{capsule_{j|i}} = Weight_{ij}capsule_i</script><p>上面的式子输出维度为$[1*16]​$，而$i\in(1,1152)​$，$j\in(1,10)​$，所以共有$1152*10​$个$\hat{capsule_{j|i}}​$。直观上的理解是，上面的操作我们令其进行10次，一次操作代表一个类别，加上这样的capsule一共存在1152个，所以$Weight​$的维度为$[1152,10,8,16]​$，所以截止在$\hat{capsule}​$的输出维度为$[None,1152,10,1,16]​$。</p>
+<p>接着，再引入一个维度为$[1152,10,1,1]$的bias，首先对bias做一次按第二个维度（10）的softmax压缩，维度保持不变</p>
+<script type="math/tex; mode=display">
+c_{ij} = \frac{exp(bias_{ij})}{\sum_k exp(bias_{ik})}</script><p>可以看到，这里的$c_{ij}$就是一个标量，用它将所有capsules建立起联系，做一次对1152个capsules的sum，即</p>
+<script type="math/tex; mode=display">
+s_j = \sum_i c_{ij}\hat{capsule_{j|i}}</script><p>可以看到，由于是按$i$求和，因此维度与$\hat{capsule_{j|i}}$一致（$[1*16]$），每一个$s_j$也都可以看成是capsule。由于Hinton在文中提到，capsule的模长表示概率，方向表示属性（真的很难理解。。），因此在输出层之前还要将每个capsule做一次非线性压缩</p>
+<script type="math/tex; mode=display">
+v_j = \frac{||s_j||^2}{1+||s_j||^2} \frac{s_j}{||s_j||}</script><p><strong>Output</strong>:$[None,10,16]$</p>
+<p>另外可以注意到，文章的题目中有dynamic routing的关键字，这个思想也穿插在上面的pipeline里。从公式2到公式4，可以概化为一个公式，</p>
+<script type="math/tex; mode=display">
+cupsule_{layer2} = squashing(\sum softmax(bias)*capsule_{layer1})</script><p>这里其实我们只进行了一次上面的操作，即将layer1的capsule transform到layer2的capsule，所以衍生出可以进行多次循环来获取更高level的capsule，而这个循环capsule高阶表达的过程就成为routing。具体的做法就是不断通过输出的高层capsule回传到低层capsule，从而更新bias（只更新bias，其余参数不更新），即</p>
+<script type="math/tex; mode=display">
+bias_{ij} = bias_{ij} + \hat{capsule_{j|i}} v_j</script><p>剥离上面公式的维度信息，发现$\hat{capsule_{j|i}} v_j$与$v_{ij}$均为$[16*1]$的向量，而$bias_{ij}$为一个标量，完全match，具体routing流程见下图。</p>
+<img src="/images/CapsuleNet/routing.jpg">
+<p>在这也顺便粘上一句原文的话，说明的是每个layer之间的capsule究竟是用来干嘛的，可以好好体会一下，就一句话已经看的云里雾里了。</p>
+<blockquote>
+<p>In convolutional capsule layers, each capsule outputs a local grid of vectors to each type of capsule in the layer above using different transformation matrices for each member of the grid as well as for each type of capsule.</p>
+</blockquote>
+<h5 id="Layer-Four"><a href="#Layer-Four" class="headerlink" title="Layer Four"></a>Layer Four</h5><p><strong>Input:</strong>$[None,10,16]$</p>
+<p>上面已经说到了，capsule的模长表示概率，因此直接将上层输入做一次范数即可，输出的维度即为所有类别总数</p>
+<p><strong>Output</strong>:$[None,10]$</p>
+<h5 id="Reconstruction-Layer"><a href="#Reconstruction-Layer" class="headerlink" title="Reconstruction Layer"></a>Reconstruction Layer</h5><p><strong>Input</strong>:$[None,10,16]$</p>
+<p>上面所描述的layer均为正向预测的过程，而通过top layer的capsule还原回原始图片质量的好坏也是能证明模型表达能力的一种评价方式，所以作者又引入了reconstruction layer，来对图像进行重构。首先将Layer Four中的输入拿过来，用真实class对张量进行一次掩模，只保留真实类别对应的vector，维度为$[None,16]$，然后连续接上三个Full Connected Layer，大小分别为512，1024和728，激活函数分别为ReLU，ReLU和Sigmoid，最后再讲728维向量reshape到$[28*28]$，从而还原了原始图像。</p>
+<p><strong>Output</strong>:$[None,28,28,1]$</p>
+<img src="/images/CapsuleNet/reconstruction.jpg">
+<h4 id="Loss-Defination"><a href="#Loss-Defination" class="headerlink" title="Loss Defination"></a>Loss Defination</h4><p>说完了上面的结构，应该可以清晰的看出来，loss由两部分构成，一部分为网络正向传播上层capsule模预测为哪个class的loss-1，另一部分为重构网络还原的图片与真实图片的差异loss-2。其中loss-1使用类似于svm的margin loss，加入了一些小trick，而loss-2则使用的是重构与真实pixel-to-pixel的平方损失。形式为</p>
+<script type="math/tex; mode=display">
+loss = loss_1 + \alpha loss_2 = T_k max(0, m^+ - ||v_k||)^2+ \lambda(1-T_k)max(0, ||v_k|| - m^-)^2 + \alpha \sum_{28}\sum_{28}(x_{ri}-x_{ti})^2</script><p>其中$T_{k} \in (0,1)$表示图像中是否存在第k个类（这里不太一样的是，学习的图片里允许有多个类别，文章在实验中也加入两个类别分离的实验），$m^+$与$m^-$分别表示类比预测的upperBound和lowerBound，引入$\lambda(==0.5)$的作用是为了减弱不存在类capsule在初始阶段的学习，以防止对其他的capsule影响过大？（没太理解），$x<em>{ri}$和$x</em>{ti}$分别表示第$i$个重构像素与真实像素。为了尽量不影响正向构造capsule的能力，重构loss稀疏$\alpha$在文章中取得极小（0.0005）。</p>
+<h4 id="Implementation"><a href="#Implementation" class="headerlink" title="Implementation"></a>Implementation</h4><p>Keras版本：<a href="https://github.com/XifengGuo/CapsNet-Keras" target="_blank" rel="external">https://github.com/XifengGuo/CapsNet-Keras</a></p>
+<p>Layer的模型参数<br><img src="/images/CapsuleNet/param.jpg"></p>
+<h4 id="Qustions"><a href="#Qustions" class="headerlink" title="Qustions"></a>Qustions</h4><ol>
+<li>squashing的形式为何是这样?</li>
+<li>多次routing的作用是什么？</li>
+<li>为什么采用margin loss？</li>
+<li>包含有capsule的网络结构中，激活函数在哪里？</li>
+<li>cifar数据集表现不佳的原因？</li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/18/AFM/" rel="next" title="Attentional FM及源码解析">
+                <i class="fa fa-chevron-left"></i> Attentional FM及源码解析
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Nirvanada" />
+          <p class="site-author-name" itemprop="name">Nirvanada</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">19</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Capsules"><span class="nav-number">1.</span> <span class="nav-text">Capsules</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Model-Structure"><span class="nav-number">2.</span> <span class="nav-text">Model Structure</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Layer-One"><span class="nav-number">2.1.</span> <span class="nav-text">Layer One</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Layer-Two"><span class="nav-number">2.2.</span> <span class="nav-text">Layer Two</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Layer-Three"><span class="nav-number">2.3.</span> <span class="nav-text">Layer Three</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Layer-Four"><span class="nav-number">2.4.</span> <span class="nav-text">Layer Four</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Reconstruction-Layer"><span class="nav-number">2.5.</span> <span class="nav-text">Reconstruction Layer</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Loss-Defination"><span class="nav-number">3.</span> <span class="nav-text">Loss Defination</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Implementation"><span class="nav-number">4.</span> <span class="nav-text">Implementation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Qustions"><span class="nav-number">5.</span> <span class="nav-text">Qustions</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Nirvanada</span>
+</div>
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="http://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+  </script>
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for (i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+    });
+  </script>
+  <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  
+
+  
+
+</body>
+</html>
