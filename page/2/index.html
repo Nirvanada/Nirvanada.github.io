@@ -245,6 +245,125 @@
             
               
                 
+                <a class="post-title-link" href="/2017/03/03/gcForest/" itemprop="url">
+                  挑战深度学习——Deep Forest
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-03-03T21:17:02+08:00" content="2017-03-03">
+              2017-03-03
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Paper/" itemprop="url" rel="index">
+                    <span itemprop="name">Paper</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>两天前南大周志华教授在arXiv上放了一篇文章：Deep Forest: Towards An Alternative to Deep Neural Networks。国内机器学习界瞬间爆炸，业内著名非著名人士纷纷前来解读，有说即将取代DNN的，有说其实没什么新玩意就是那么回事的。我们这里只阐述这个model的基本结构和原理，不做任何评价（个人认为在相同资历和学术水平上才真正有资格去评价，反正我是没资格）。</p>
+<h3 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h3><p>首先，Deep Forest，换一种叫法，gcForest(multi-Grained Cascade forest)，可以翻译为多粒度级联随机森林。通俗的来讲就是把若干个随机森林合并起来作为类似于神经网络中的一个layer，然后将这些layer串联起来，形成一个基于组合随机森林的、相对deep的模型。通过这个描述，模型的主体结构就已经基本形成了，如下图<br><img src="/images/gcForest/1.png"></p>
+<p>这里level就是layer的概念，而我们发现Forest有黑色和蓝色两种，其中黑色代表传统意义上的随机森林，即每次选择sqrt(#Features)数量的特征作为候选特征进行分裂；蓝色代表“完全随机森林”，其中每个森林中包含1000棵树，每棵树随机选择特征进行节点的分裂使树一直生长到叶节点只包含同类样本或小于是个样本。因为随机森林本质上就一种ensemble method，而每一个layer又引入了若干个两种随机形式的随机森林，因此在layer层面上可以认为是“ensemble of ensemble”。<br>现在具体到一个layer，如下图，假设现在是个三分类问题，那么每个随机森林的输出都是这三个类别的概率值，因此对于任何一个样本而言，在每一个layer的每一个forest输的都是3维的向量，如果每一个layer有4个forest，那么在这个layer上就输出4<em>3维的新特征灌到下一个layer里。注意，如果不是最后一层，那么每一层接收的特征还要加上raw feature，也就是第N+1层比第N层多出了4</em>3个特征。如果是最后一层，就不再接收原始特征，把上一层的输出结果做平均再取最大值，作为最后的prediction。还有一点很重要，也是区别于DNN的最显著因素，就是gcForest每一层都是监督学习，都利用到了label的信息，而非像DNN一样只在最有一层才是有监督而进行误差传播。这样的好处就是可以每向后训练一层就用validation set评估一下accuracy和loss，因为每一层的输出结果都是可解释的，都可以拿来当做预测得分，因此如果训练N+1层时验证效果提高不大或有降低时，可以自适应的终止训练。在这点上DNN必须在训练前就指定layer的层数，相当于变相多了一个超参数。<br><img src="/images/gcForest/2.png"></p>
+<h3 id="Multi-Grained-Scanning"><a href="#Multi-Grained-Scanning" class="headerlink" title="Multi-Grained Scanning"></a>Multi-Grained Scanning</h3><p>这算是论文的另一个亮点吧，主要描述了如何由原始数据生成样本和特征，依然还是先看下图。对于序列数据，假设特征是400维，现在我们用一个100维的滑动窗口（实际上窗口也是可变的，并不是只有一个窗）来做window-slide（比较类似于1D-convolution），每滑动一次生成100维向量就作为一个新的样本，这里相当于把原始数据做了滑动拆分，最终形成301个100维特征的子样本。接下来把这些样本灌到Deep Forest的第一层，一个Random Forest为301个子样本生成3个新特征，一个Complete Random Forest也为301个子样本生成3个新特征，然后再将这些特征做一个concat，这样一来一个真正的400维特的样本在第一层输出的高阶特征就是2<em>3</em>301维。后面的训练过程就和上面写的一样，一层接一层，直到模型精度改善不明显的时候就终止。而对于图像数据也同理，只不过window-slide由一维变为二维（类似于2D-convolution），不再赘述。整体流程如下图，画的非常明白。<br><img src="/images/gcForest/3.png"></p>
+<h3 id="DF-vs-DNN"><a href="#DF-vs-DNN" class="headerlink" title="DF vs DNN"></a>DF vs DNN</h3><p>再来看DF与对标对象DNN的参数对比，也是文章比较骄傲的一点。在训练DNN时候我们需要指定一大堆超参数，最常见的比如layer数、neuron数、dropout rate、batch size等等。但DF完全不用考虑这些超参，只用默认的参数就很好了。<br><img src="/images/gcForest/4.png"></p>
+<h3 id="Performance"><a href="#Performance" class="headerlink" title="Performance"></a>Performance</h3><p>不多说，直接上图。<br><img src="/images/gcForest/5.png"></p>
+<p>总的来说，这些评估结果都是基于小数据集的，在大数据集上还没测试过。但不可否认的是，相对于DL来讲效率还是要快不少，而且也没用到GPU资源。要知道现在普遍大公司里计算资源已经不是瓶颈了，而是如何把这些复杂的算法在线或是移动端应用起来，所以在这种趋势下，文章提出的这种方法还是极有意义的。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2017/03/01/mf/" itemprop="url">
                   矩阵分解：从入门到高级入门
                 </a>
@@ -326,11 +445,11 @@ min \sum c_{ui} (p_{ui} - \beta_u - \gamma_i - x_u^T y_i)^2 + \lambda(\sum_{u} (
 c_{ui} = 1 + \alpha r_{ui}</script><p>$\alpha$与$\gamma$同样都是hyper parameter，需要交叉验证来确定，对置信度定性的解释也就是用户对指定商品的行为越多，我们就越有理由认为用户对这个商品是真正感兴趣的，比较类似于统计检验中置信度的概念。设想我们在网购时买一个自己喜欢的东西基本上都要看来看去好多次甚至好多天，但如果是帮人买，多数情况下的行为是与这个商品只接触一次，买完即走。更generalized的想法是，把$c_{ui}$解释为用户对商品的行为权重，对电商而言，如果仅仅浏览过，权重最小，浏览次数大于一定阈值时，权重次之，加购过，权重再次加大，购买过，权重最大。</p>
 <p>如果考虑得再复杂一点，可以把$x_u^T y_i$更加具体化，比如加上用户的属性特征$U$，有过行为的商品embedding归一化特征$I$，扩充用户的隐因子矩阵$x$，就变为</p>
 <script type="math/tex; mode=display">
-(x_u + |N(u)|^{-0.5}\sum_{i \in N(u)}I_i + \sum U_{\alpha})^Ty_i</script><p>对于$y_i$，如果有何必要的话也可以同样进行这种扩充方式处理，从而解决一些数据不足或冷启动的问题。</p>
+(x_u + |N(u)|^{-0.5}\sum_{i \in N(u)}I_i + \sum U_{\alpha})^Ty_i</script><p>对于$y_i$，如果有必要的话也可以同样进行这种扩充方式处理，从而解决一些数据不足或冷启动的问题。</p>
 <h3 id="学习算法"><a href="#学习算法" class="headerlink" title="学习算法"></a>学习算法</h3><p>最小化目标函数的方法主要有梯度下降法和交替最小二乘法（Alternative Least Square, ALS），接下来分别简要说明一下。</p>
 <h4 id="梯度下降"><a href="#梯度下降" class="headerlink" title="梯度下降"></a>梯度下降</h4><p>其实严格的来说，矩阵分解的梯度下降应该叫做随机梯度下降（逐个元素更新）。先看最基础的，定义损失函数</p>
 <script type="math/tex; mode=display">
-e_{ij}^2 = (r_{ij} - \hat r_{ij})^2 = (r_{ij} - \sum_kx_{ik} y_{kj})^2</script><p>，待更新参数为$x<em>{ik}$和$y</em>{kj}$，每一步梯度更新后两个参数分别为</p>
+e_{ij}^2 = (r_{ij} - \hat r_{ij})^2 = (r_{ij} - \sum_kx_{ik} y_{kj})^2</script><p>，待更新参数为$x_{ik}$和$y_{kj}$，每一步梯度更新后两个参数分别为</p>
 <script type="math/tex; mode=display">
 x_{ik}^‘ = x_{ik} - \eta \frac{\partial}{\partial x_{ik}} e_{ij}^2 =  x_{ik} + 2\eta (r_{ij} - \hat r_{ij})y_{kj} =  x_{ik} + 2\eta e_{ij} y_{kj}\\
 y_{kj}^‘ = y_{kj} - \eta \frac{\partial}{\partial y_{kj}} e_{ij}^2 =  y_{kj} + 2\eta (r_{ij} - \hat r_{ij})x_{ik} =  y_{kj} + 2\eta e_{ij} x_{ik}</script><p>加上正则项后，形式类似，</p>
@@ -1277,7 +1396,7 @@ w_{update} = w - \eta \frac{\partial loss} {\partial w}</script><p>针对$w_2$�
 <h4 id="1-1-2-为图片加caption"><a href="#1-1-2-为图片加caption" class="headerlink" title="1.1.2 为图片加caption"></a>1.1.2 为图片加caption</h4><img src="/images/Test/guitar.jpg" title="Epiphone Les Paul">
 <h3 id="1-2"><a href="#1-2" class="headerlink" title="1.2"></a>1.2</h3><p>代码测试<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Java Test</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span> </span>&#123; </div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</div><div class="line">    System.out.println(<span class="string">"HelloWorld!"</span>); </div><div class="line">  &#125; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Scala Test</span></div><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">HelloWorld</span> </span>&#123;</div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]): <span class="type">Unit</span> = &#123;</div><div class="line">    println(<span class="string">"Hello, world!"</span>)</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">// Python Test</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></div><div class="line">  <span class="keyword">print</span> <span class="string">"HelloWorld!"</span></div></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># Python Test</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></div><div class="line">  <span class="keyword">print</span> <span class="string">"HelloWorld!"</span></div></pre></td></tr></table></figure>
 <h2 id="2"><a href="#2" class="headerlink" title="2"></a>2</h2><p>hahaha</p>
 <h3 id="2-1"><a href="#2-1" class="headerlink" title="2.1"></a>2.1</h3><p>Quote Test:<br><blockquote><p>Do not just seek happiness for yourself. Seek happiness for all. Through kindness. Through mercy.</p>
 </blockquote></p>
@@ -1591,7 +1710,7 @@ R_{rs} = \rho_{plaque} (L_u - \rho_f L_{sky})/(\pi L_{plaque})</script><p>其中
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">19</span>
+              <span class="site-state-item-count">20</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

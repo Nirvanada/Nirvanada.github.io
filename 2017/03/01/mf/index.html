@@ -92,7 +92,7 @@
 <meta property="og:site_name" content="Andante">
 <meta property="og:description" content="引言矩阵分解可以视为无监督学习的一种形式，成名于Netflix Prize推荐比赛，由Yehuda Koren引申出诸多变种，在推荐系统中可谓是简单粗暴，非常有效。
 矩阵分解，顾名思义，就是把已有的目标矩阵分解为两个矩阵相乘的形式，那么目标矩阵是什么？在推荐系统里一般我们可以理解为是用户（user）-商品（item）-评分（rating）所构成的矩阵。矩阵的每一行代表一个user，每一列代表ite">
-<meta property="og:updated_time" content="2017-03-01T15:32:39.000Z">
+<meta property="og:updated_time" content="2017-12-14T02:33:01.057Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="矩阵分解：从入门到高级入门">
 <meta name="twitter:description" content="引言矩阵分解可以视为无监督学习的一种形式，成名于Netflix Prize推荐比赛，由Yehuda Koren引申出诸多变种，在推荐系统中可谓是简单粗暴，非常有效。
@@ -326,11 +326,11 @@ min \sum c_{ui} (p_{ui} - \beta_u - \gamma_i - x_u^T y_i)^2 + \lambda(\sum_{u} (
 c_{ui} = 1 + \alpha r_{ui}</script><p>$\alpha$与$\gamma$同样都是hyper parameter，需要交叉验证来确定，对置信度定性的解释也就是用户对指定商品的行为越多，我们就越有理由认为用户对这个商品是真正感兴趣的，比较类似于统计检验中置信度的概念。设想我们在网购时买一个自己喜欢的东西基本上都要看来看去好多次甚至好多天，但如果是帮人买，多数情况下的行为是与这个商品只接触一次，买完即走。更generalized的想法是，把$c_{ui}$解释为用户对商品的行为权重，对电商而言，如果仅仅浏览过，权重最小，浏览次数大于一定阈值时，权重次之，加购过，权重再次加大，购买过，权重最大。</p>
 <p>如果考虑得再复杂一点，可以把$x_u^T y_i$更加具体化，比如加上用户的属性特征$U$，有过行为的商品embedding归一化特征$I$，扩充用户的隐因子矩阵$x$，就变为</p>
 <script type="math/tex; mode=display">
-(x_u + |N(u)|^{-0.5}\sum_{i \in N(u)}I_i + \sum U_{\alpha})^Ty_i</script><p>对于$y_i$，如果有何必要的话也可以同样进行这种扩充方式处理，从而解决一些数据不足或冷启动的问题。</p>
+(x_u + |N(u)|^{-0.5}\sum_{i \in N(u)}I_i + \sum U_{\alpha})^Ty_i</script><p>对于$y_i$，如果有必要的话也可以同样进行这种扩充方式处理，从而解决一些数据不足或冷启动的问题。</p>
 <h3 id="学习算法"><a href="#学习算法" class="headerlink" title="学习算法"></a>学习算法</h3><p>最小化目标函数的方法主要有梯度下降法和交替最小二乘法（Alternative Least Square, ALS），接下来分别简要说明一下。</p>
 <h4 id="梯度下降"><a href="#梯度下降" class="headerlink" title="梯度下降"></a>梯度下降</h4><p>其实严格的来说，矩阵分解的梯度下降应该叫做随机梯度下降（逐个元素更新）。先看最基础的，定义损失函数</p>
 <script type="math/tex; mode=display">
-e_{ij}^2 = (r_{ij} - \hat r_{ij})^2 = (r_{ij} - \sum_kx_{ik} y_{kj})^2</script><p>，待更新参数为$x<em>{ik}$和$y</em>{kj}$，每一步梯度更新后两个参数分别为</p>
+e_{ij}^2 = (r_{ij} - \hat r_{ij})^2 = (r_{ij} - \sum_kx_{ik} y_{kj})^2</script><p>，待更新参数为$x_{ik}$和$y_{kj}$，每一步梯度更新后两个参数分别为</p>
 <script type="math/tex; mode=display">
 x_{ik}^‘ = x_{ik} - \eta \frac{\partial}{\partial x_{ik}} e_{ij}^2 =  x_{ik} + 2\eta (r_{ij} - \hat r_{ij})y_{kj} =  x_{ik} + 2\eta e_{ij} y_{kj}\\
 y_{kj}^‘ = y_{kj} - \eta \frac{\partial}{\partial y_{kj}} e_{ij}^2 =  y_{kj} + 2\eta (r_{ij} - \hat r_{ij})x_{ik} =  y_{kj} + 2\eta e_{ij} x_{ik}</script><p>加上正则项后，形式类似，</p>
@@ -460,7 +460,7 @@ y_i = (\lambda I + X_{I_u} X_{I_u}^T)^{-1}X_{I_u}R(i, I_u)</script><p>含义和�
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">19</span>
+              <span class="site-state-item-count">20</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
