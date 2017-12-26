@@ -1,15 +1,22 @@
-<!doctype html>
+<!DOCTYPE html>
 
 
 
   
 
 
-<html class="theme-next muse use-motion">
+<html class="theme-next mist use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
 
 
 
@@ -27,45 +34,38 @@
 
 
 
-  
-  
-  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
 
 
 
   
   
-  
-  
-
-  
-    
-    
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-    
-    
-    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
-  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
 
 
 
 
 
-<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
 
-<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
 
 
   <meta name="keywords" content="Hexo, NexT" />
@@ -73,11 +73,6 @@
 
 
 
-
-
-
-
-  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
 
 
 
@@ -99,30 +94,39 @@
 
 
 
-<script type="text/javascript" id="hexo.configuration">
+<script type="text/javascript" id="hexo.configurations">
   var NexT = window.NexT || {};
   var CONFIG = {
-    scheme: 'Muse',
-    sidebar: {"position":"right","display":"post"},
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: true,
-    motion: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     duoshuo: {
-      userId: 0,
+      userId: '0',
       author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     }
   };
 </script>
 
 
 
-
   <link rel="canonical" href="https://nirvanada.github.io/2017/03/22/w_n_d/"/>
 
-  <title> Wide & Deep Learning for Recommender Systems解读 | Andante </title>
-</head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
+
+
+  <title>Wide & Deep Learning for Recommender Systems解读 | Andante</title>
   
 
 
@@ -132,36 +136,42 @@
 
 
 
+</head>
 
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
   
   
     
   
 
-  <div class="container one-collumn sidebar-position-right page-post-detail ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-meta ">
-  
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
 
-  <div class="custom-logo-site-title">
-    <a href="/"  class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <span class="site-title">Andante</span>
-      <span class="logo-line-after"><i></i></span>
-    </a>
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andante</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
   </div>
-  <p class="site-subtitle"></p>
-</div>
 
-<div class="site-nav-toggle">
-  <button>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-  </button>
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
 </div>
 
 <nav class="site-nav">
@@ -182,31 +192,11 @@
       
         
         <li class="menu-item menu-item-archives">
-          <a href="/archives" rel="section">
+          <a href="/archives/" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
             归档
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-categories">
-          <a href="/categories" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
-            
-            分类
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-about">
-          <a href="/about" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
-            
-            关于
           </a>
         </li>
       
@@ -217,6 +207,8 @@
 
   
 </nav>
+
+
 
  </div>
     </header>
@@ -231,49 +223,68 @@
     
 
   
-  
 
   
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://nirvanada.github.io/2017/03/22/w_n_d/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Nirvanada">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andante">
+    </span>
 
     
       <header class="post-header">
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                Wide & Deep Learning for Recommender Systems解读
-              
-            
-          </h1>
+          <h1 class="post-title" itemprop="name headline">Wide & Deep Learning for Recommender Systems解读</h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-03-22T22:59:53+08:00" content="2017-03-22">
-              2017-03-22
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-22T22:59:53+08:00">
+                2017-03-22
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/Paper/" itemprop="url" rel="index">
                     <span itemprop="name">Paper</span>
                   </a>
@@ -281,7 +292,6 @@
 
                 
                 
-
               
             </span>
           
@@ -291,16 +301,21 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -316,21 +331,21 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</div><div class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</div><div class="line"><span class="keyword">import</span> tensorflow.contrib.learn <span class="keyword">as</span> tf_learn</div><div class="line"><span class="keyword">import</span> tensorflow.contrib.layers <span class="keyword">as</span> tf_layers</div><div class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> accuracy_score</div><div class="line"><span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> LabelEncoder</div><div class="line"><span class="keyword">from</span> sklearn.cross_validation <span class="keyword">import</span> train_test_split</div><div class="line"><span class="keyword">import</span> os</div><div class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</div><div class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> roc_auc_score</div><div class="line"><span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> StandardScaler</div><div class="line"></div><div class="line"></div><div class="line"><span class="keyword">from</span> feat <span class="keyword">import</span> CONTINUOUS_COLUMNS</div><div class="line"><span class="keyword">from</span> feat <span class="keyword">import</span> CATEGORICAL_COLUMNS</div><div class="line"><span class="keyword">from</span> feat <span class="keyword">import</span> COLUMNS</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">add_columns</span><span class="params">(x)</span>:</span></div><div class="line">    <span class="keyword">return</span> <span class="string">':'</span>.join(x)</div><div class="line"></div><div class="line"><span class="comment"># Define the column names for the data sets.</span></div><div class="line">LABEL_COLUMN = <span class="string">'target'</span></div><div class="line"><span class="comment">#second order</span></div><div class="line">CROSSED_COLUMNS = []</div><div class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(CATEGORICAL_COLUMNS) <span class="number">-1</span>):</div><div class="line">  <span class="keyword">for</span> j <span class="keyword">in</span> range(i+<span class="number">1</span>, len(CATEGORICAL_COLUMNS)):</div><div class="line">     CROSSED_COLUMNS.append([CATEGORICAL_COLUMNS[i], CATEGORICAL_COLUMNS[j]])</div><div class="line"></div><div class="line">CATEGORICAL_COLUMNS_DNN = CATEGORICAL_COLUMNS[:]</div><div class="line">CATEGORICAL_COLUMNS += map(add_columns, CROSSED_COLUMNS)</div><div class="line">CATEGORICAL_ID_COLUMNS = [col + <span class="string">'_ids'</span> <span class="keyword">for</span> col <span class="keyword">in</span> CATEGORICAL_COLUMNS]</div><div class="line"></div><div class="line"></div><div class="line">HIDDEN_UNITS = [<span class="number">512</span>, <span class="number">512</span>, <span class="number">512</span>]</div><div class="line">CATEGORICAL_EMBED_SIZE = <span class="number">10</span></div><div class="line"></div><div class="line">LABEL_ENCODERS = &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">pandas_input_fn</span><span class="params">(X, y=None, batch_size=<span class="number">1024</span>, num_epochs=None)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">input_fn</span><span class="params">()</span>:</span></div><div class="line">        <span class="keyword">if</span> y <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</div><div class="line">            X[<span class="string">'target'</span>] = y</div><div class="line">        queue = tf_learn.dataframe.queues.feeding_functions.enqueue_data(</div><div class="line">            X, <span class="number">1000</span>, shuffle=num_epochs <span class="keyword">is</span> <span class="keyword">None</span>, num_epochs=num_epochs)</div><div class="line">        <span class="keyword">if</span> num_epochs <span class="keyword">is</span> <span class="keyword">None</span>:</div><div class="line">            features = queue.dequeue_many(batch_size)</div><div class="line">        <span class="keyword">else</span>:</div><div class="line">            features = queue.dequeue_up_to(batch_size)</div><div class="line"></div><div class="line">        features = dict(zip([<span class="string">'index'</span>] + list(X.columns), features))</div><div class="line"></div><div class="line">        <span class="keyword">if</span> y <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</div><div class="line">            target = features.pop(<span class="string">'target'</span>)</div><div class="line">            <span class="keyword">return</span> features, target</div><div class="line">        <span class="keyword">return</span> features</div><div class="line"></div><div class="line">    <span class="keyword">return</span> input_fn</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">encode_categorical_cross</span><span class="params">(df)</span>:</span></div><div class="line">    <span class="keyword">global</span> LABEL_ENCODERS</div><div class="line">    <span class="keyword">for</span> col <span class="keyword">in</span> CATEGORICAL_COLUMNS:</div><div class="line">        <span class="keyword">if</span> <span class="string">":"</span> <span class="keyword">in</span> col:</div><div class="line">            df[col] = df[col.split(<span class="string">":"</span>)[<span class="number">0</span>]].fillna(<span class="number">-1</span>).astype(str) + <span class="string">":"</span> + df[col.split(<span class="string">":"</span>)[<span class="number">1</span>]].fillna(<span class="number">-1</span>).astype(str)</div><div class="line">        <span class="keyword">else</span>:</div><div class="line">            df[col] = df[col].fillna(<span class="number">-1</span>).astype(str)</div><div class="line">        encoder = LabelEncoder().fit(df[col])</div><div class="line">        df[col + <span class="string">'_ids'</span>] = encoder.transform(df[col])</div><div class="line">        LABEL_ENCODERS[col] = encoder</div><div class="line">    <span class="keyword">for</span> col <span class="keyword">in</span> CATEGORICAL_COLUMNS:</div><div class="line">        df.pop(col)</div><div class="line">    <span class="keyword">return</span> df, LABEL_ENCODERS</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">process_input_df</span><span class="params">(df)</span>:</span></div><div class="line">    df, label_encoders = encode_categorical_cross(df)</div><div class="line">	<span class="keyword">for</span> col <span class="keyword">in</span> CATEGORICAL_COLUMNS:</div><div class="line">    	y = df.pop(LABEL_COLUMN)</div><div class="line">    	X = df[CATEGORICAL_ID_COLUMNS + CONTINUOUS_COLUMNS].fillna(<span class="number">0</span>)</div><div class="line">    <span class="keyword">return</span> X, y</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">wide_and_deep</span><span class="params">(features, target, hidden_units=HIDDEN_UNITS)</span>:</span></div><div class="line">    <span class="keyword">global</span> LABEL_ENCODERS</div><div class="line">    target = tf.one_hot(target, <span class="number">2</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)</div><div class="line"></div><div class="line">    <span class="comment"># DNN</span></div><div class="line">    final_features_nn = [tf.expand_dims(tf.cast(features[col], tf.float32), <span class="number">1</span>) <span class="keyword">for</span></div><div class="line">                      col <span class="keyword">in</span> CONTINUOUS_COLUMNS]</div><div class="line"></div><div class="line">    <span class="comment"># Embed categorical variables into distributed representation.</span></div><div class="line">    <span class="keyword">for</span> col <span class="keyword">in</span> CATEGORICAL_COLUMNS_DNN:</div><div class="line">        feature_tmp = tf_learn.ops.categorical_variable(</div><div class="line">            features[col + <span class="string">'_ids'</span>],</div><div class="line">            len(LABEL_ENCODERS[col].classes_),</div><div class="line">            embedding_size=CATEGORICAL_EMBED_SIZE,</div><div class="line">            name=col)</div><div class="line">        final_features_nn.append(feature_tmp)</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    <span class="comment"># Concatenate all features into one vector.</span></div><div class="line">    features_nn = tf.concat(<span class="number">1</span>, final_features_nn)</div><div class="line"></div><div class="line">    logits_nn = tf_layers.stack(features_nn,</div><div class="line">                             tf_layers.fully_connected,</div><div class="line">                             stack_args=hidden_units,</div><div class="line">                             activation_fn=tf.nn.relu)</div><div class="line"></div><div class="line">    <span class="comment"># LR</span></div><div class="line">    final_features_lr = [tf.expand_dims(tf.cast(features[col], tf.float32), <span class="number">1</span>) <span class="keyword">for</span></div><div class="line">                      col <span class="keyword">in</span> CONTINUOUS_COLUMNS]</div><div class="line"></div><div class="line">    <span class="keyword">for</span> col <span class="keyword">in</span> CATEGORICAL_COLUMNS:</div><div class="line">        final_features_lr.append(tf.one_hot(features[col + <span class="string">'_ids'</span>],</div><div class="line">            len(LABEL_ENCODERS[col].classes_),</div><div class="line">            on_value = <span class="number">1.0</span>,</div><div class="line">            off_value = <span class="number">0.0</span>))</div><div class="line"></div><div class="line"></div><div class="line">    logits_lr = tf_layers.stack(tf.concat(<span class="number">1</span>, final_features_lr),</div><div class="line">                             tf_layers.fully_connected,</div><div class="line">                             stack_args=[<span class="number">1</span>],</div><div class="line">                             activation_fn=<span class="keyword">None</span>)</div><div class="line"></div><div class="line">    <span class="comment"># add logits</span></div><div class="line">    logits = logits_lr + logits_nn</div><div class="line"></div><div class="line">    prediction, loss = tf_learn.models.logistic_regression(logits, target)</div><div class="line">    train_op = tf_layers.optimize_loss(loss,</div><div class="line">                                       tf.contrib.framework.get_global_step(),</div><div class="line">                                       optimizer=<span class="string">'Adam'</span>,</div><div class="line">                                       learning_rate=<span class="number">0.001</span>)</div><div class="line">    <span class="keyword">return</span> prediction[:,<span class="number">1</span>], loss, train_op</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span><span class="params">(X, y, steps=<span class="number">100</span>)</span>:</span></div><div class="line">    print(<span class="string">"model dir: "</span>, model_dir)</div><div class="line">    classifier = tf_learn.Estimator(model_fn=wide_and_deep, model_dir=model_dir)</div><div class="line">    classifier.fit(input_fn=pandas_input_fn(X, y), steps=steps)</div><div class="line"></div><div class="line">    <span class="keyword">return</span> classifier</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">predict</span><span class="params">(classifier, X)</span>:</span></div><div class="line">    <span class="keyword">return</span> list(classifier.predict(input_fn=pandas_input_fn(X, num_epochs=<span class="number">1</span>),</div><div class="line">                                   as_iterable=<span class="keyword">True</span>))</div><div class="line"></div><div class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</div><div class="line">    model_dir = <span class="string">"./wnd"</span></div><div class="line">    os.system(<span class="string">"rm -rf ./wnd"</span>)</div><div class="line"></div><div class="line">    trainFile = <span class="string">'train.csv'</span></div><div class="line">    testFile = <span class="string">'test.csv'</span></div><div class="line"></div><div class="line">    data_train = pd.read_csv(trainFile, names=COLUMNS)  <span class="comment"># LOAD DATA</span></div><div class="line">    data_test = pd.read_csv(testFile, names=COLUMNS)  <span class="comment"># LOAD DATA</span></div><div class="line"></div><div class="line">    train_size = data_train.shape[<span class="number">0</span>]</div><div class="line"></div><div class="line">    X_train, y_train = process_input_df(data_train)</div><div class="line">    X_test, y_test = process_input_df(data_test)</div><div class="line"></div><div class="line">    <span class="comment"># data scale</span></div><div class="line">    data_continuous = pd.concat([X_train[CONTINUOUS_COLUMNS], X_test[CONTINUOUS_COLUMNS]])</div><div class="line">    scaler = StandardScaler()</div><div class="line">    data_continuous_scale = scaler.fit_transform(data_continuous)</div><div class="line">    X_train[CONTINUOUS_COLUMNS] = pd.DataFrame(data_continuous_scale[:train_size])</div><div class="line">    X_test[CONTINUOUS_COLUMNS] = pd.DataFrame(data_continuous_scale[train_size:])</div><div class="line"></div><div class="line">    classifier = train(X_train, y_train, steps=<span class="number">5000</span>)</div><div class="line">    pred = predict(classifier, X_test)</div><div class="line">    print(<span class="string">"auc"</span>, roc_auc_score(y_test, np.array(pred)))</div></pre></td></tr></table></figure>
       
     </div>
+    
+    
+    
 
-    <div>
-      
-        
-      
-    </div>
+    
 
-    <div>
-      
-        
+    
 
-      
-    </div>
+    
 
     <footer class="post-footer">
+      
+
+      
+      
       
 
       
@@ -342,6 +357,8 @@
               </a>
             
           </div>
+
+          <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
@@ -356,6 +373,10 @@
       
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -371,9 +392,14 @@
 
 
           
-  <div class="comments" id="comments">
-    
-  </div>
+
+  
+    <div class="comments" id="comments">
+      <div id="uyan_frame"></div>
+    </div>
+
+  
+
 
 
         </div>
@@ -389,75 +415,72 @@
   </div>
 
   <aside id="sidebar" class="sidebar">
+    
     <div class="sidebar-inner">
 
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <section class="site-overview sidebar-panel ">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-          <img class="site-author-image" itemprop="image"
-               src="/images/avatar.png"
-               alt="Nirvanada" />
-          <p class="site-author-name" itemprop="name">Nirvanada</p>
-          <p class="site-description motion-element" itemprop="description"></p>
-        </div>
-        <nav class="site-state motion-element">
-          <div class="site-state-item site-state-posts">
-            <a href="/archives">
-              <span class="site-state-item-count">20</span>
-              <span class="site-state-item-name">日志</span>
-            </a>
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Nirvanada" />
+            
+              <p class="site-author-name" itemprop="name">Nirvanada</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
           </div>
 
           
-            <div class="site-state-item site-state-categories">
-              <a href="/categories">
-                <span class="site-state-item-count">6</span>
-                <span class="site-state-item-name">分类</span>
-              </a>
-            </div>
+          
+
+          
           
 
           
 
-        </nav>
-
-        
-
-        <div class="links-of-author motion-element">
-          
         </div>
-
-        
-        
-
-        
-        
-
       </section>
 
       
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-            
-              
-            
-            
-              <p class="post-toc-empty">此文章未包含目录</p>
-            
-          </div>
-        </section>
+
       
 
     </div>
@@ -470,36 +493,50 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright" >
-  
-  &copy; 
-  <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
   <span class="with-love">
-    <i class="fa fa-heart"></i>
+    <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Nirvanada</span>
+
+  
 </div>
 
-<div class="powered-by">
-  Powered by <a class="theme-link" href="http://hexo.io">Hexo</a>
-</div>
 
-<div class="theme-info">
-  Theme -
-  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Muse
-  </a>
-</div>
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
 
         
+
+
+
+
+
+
 
         
       </div>
     </footer>
 
-    <div class="back-to-top">
-      <i class="fa fa-arrow-up"></i>
-    </div>
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
   </div>
 
   
@@ -522,82 +559,143 @@
 
 
 
-  
-  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
-
-  
-  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-
-  
-  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-
-  
-  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
-
-
-  
-
-
-  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
-
-  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
 
 
 
-  
-  
-
-  
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
 
 
-
-  
-
-
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
-
-
-
-  
-
-
-
-  
 
 
 
 
   
   
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
   
-  <script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-      tex2jax: {
-        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-        processEscapes: true,
-        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-    });
-  </script>
 
-  <script type="text/x-mathjax-config">
-    MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for (i=0; i < all.length; i += 1) {
-        all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-    });
-  </script>
-  <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
 
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2152824"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
 
   
 
