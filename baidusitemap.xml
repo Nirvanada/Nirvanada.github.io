@@ -4,6 +4,24 @@
 
     
   <url>
+    <loc>https://nirvanada.github.io/2017/03/22/w_n_d/</loc>
+    <lastmod>2017-12-27T02:03:57.848Z</lastmod>
+    <data>
+        <display>
+        <title>Wide and Deep Learning for Recommender Systems解读</title>
+        <pubTime>2017-03-22T14:59:53.000Z</pubTime>
+        
+         
+           
+             
+              <breadCrumb title="Paper" url="https://nirvanada.github.io/categories/Paper/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>https://nirvanada.github.io/2017/12/14/DCN/</loc>
     <lastmod>2017-12-27T02:01:46.304Z</lastmod>
     <data>
@@ -51,24 +69,6 @@
            
              
               <breadCrumb title="Machine Learning" url="https://nirvanada.github.io/categories/Machine-Learning/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>https://nirvanada.github.io/2017/03/22/w_n_d/</loc>
-    <lastmod>2017-11-28T06:30:58.570Z</lastmod>
-    <data>
-        <display>
-        <title>Wide & Deep Learning for Recommender Systems解读</title>
-        <pubTime>2017-03-22T14:59:53.000Z</pubTime>
-        
-         
-           
-             
-              <breadCrumb title="Paper" url="https://nirvanada.github.io/categories/Paper/"/>
           
         </display>
     </data>
