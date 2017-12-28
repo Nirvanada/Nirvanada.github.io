@@ -92,7 +92,7 @@ Input我们从wide and deep model切入，不论是wide侧还是deep侧，在输
 <meta property="og:image" content="https://nirvanada.github.io/images/DCN/structure.jpeg">
 <meta property="og:image" content="https://nirvanada.github.io/images/DCN/cross.jpeg">
 <meta property="og:image" content="https://nirvanada.github.io/images/DCN/model.png">
-<meta property="og:updated_time" content="2017-12-27T02:01:46.304Z">
+<meta property="og:updated_time" content="2017-12-28T09:09:33.660Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Deep and Cross Network原理及实现">
 <meta name="twitter:description" content="Deep &amp;amp; Cross Network for Ad Click Predictions，是四位在谷歌的中国人放出的一篇文章。题目也一目了然，是用复杂网络结构做CTR预估的，与2016年谷歌的wide and deep model非常相似，于是利用课余时间梳理并简单的实现了一下。
@@ -770,6 +770,28 @@ x_{l+1} = x_0 x_l^Tw_l + b_l + x_l</script><p>其中$w_l(w_l \in R^d)$和$b_l(b_
   
 
   
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
 
   
 
