@@ -4,6 +4,24 @@
 
     
   <url>
+    <loc>https://nirvanada.github.io/2017/09/18/AFM/</loc>
+    <lastmod>2018-01-09T15:27:41.848Z</lastmod>
+    <data>
+        <display>
+        <title>Attentional FM及源码解析</title>
+        <pubTime>2017-09-18T10:17:15.000Z</pubTime>
+        
+         
+           
+             
+              <breadCrumb title="Machine Learning" url="https://nirvanada.github.io/categories/Machine-Learning/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>https://nirvanada.github.io/2017/12/14/DCN/</loc>
     <lastmod>2017-12-28T09:09:33.660Z</lastmod>
     <data>
@@ -87,24 +105,6 @@
            
              
               <breadCrumb title="Paper" url="https://nirvanada.github.io/categories/Paper/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>https://nirvanada.github.io/2017/09/18/AFM/</loc>
-    <lastmod>2017-09-18T10:20:05.000Z</lastmod>
-    <data>
-        <display>
-        <title>Attentional FM及源码解析</title>
-        <pubTime>2017-09-18T10:17:15.000Z</pubTime>
-        
-         
-           
-             
-              <breadCrumb title="Machine Learning" url="https://nirvanada.github.io/categories/Machine-Learning/"/>
           
         </display>
     </data>
