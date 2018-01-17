@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言2016是我来北京第一年，这年年末和2017年的年初，雾霾在这个城市肆虐了一个冬天，还记得那时候每天出门都要带着口罩，卡着眼镜戴的特别难受。在公司里大家也时不时的讨论着空气质量、哪款口罩质量比较好、中午要不要出去吃饭等等与雾霾有关的话题。本科四年在哈尔滨，那时候冬天的雾虽然存在，但也没有让人感到窒息，研究生在武汉的三年也未见满大街都带着口罩的壮观景象。所以当时的想法是，连基本的生存都要成问题，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2017中国城市空气质量指数（aqi）爬取及分析">
+<meta property="og:url" content="https://nirvanada.github.io/2018/01/17/aqi/index.html">
+<meta property="og:site_name" content="Andante">
+<meta property="og:description" content="引言2016是我来北京第一年，这年年末和2017年的年初，雾霾在这个城市肆虐了一个冬天，还记得那时候每天出门都要带着口罩，卡着眼镜戴的特别难受。在公司里大家也时不时的讨论着空气质量、哪款口罩质量比较好、中午要不要出去吃饭等等与雾霾有关的话题。本科四年在哈尔滨，那时候冬天的雾虽然存在，但也没有让人感到窒息，研究生在武汉的三年也未见满大街都带着口罩的壮观景象。所以当时的想法是，连基本的生存都要成问题，">
+<meta property="og:image" content="https://nirvanada.github.io/images/aqi/output_8_1.png">
+<meta property="og:image" content="https://nirvanada.github.io/images/aqi/output_9_1.png">
+<meta property="og:image" content="https://nirvanada.github.io/images/aqi/output_10_1.png">
+<meta property="og:image" content="https://nirvanada.github.io/images/aqi/output_11_1.png">
+<meta property="og:image" content="https://nirvanada.github.io/images/aqi/output_11_2.png">
+<meta property="og:image" content="https://nirvanada.github.io/images/aqi/output_12_2.png">
+<meta property="og:image" content="https://nirvanada.github.io/images/aqi/output_14_1.png">
+<meta property="og:updated_time" content="2018-01-17T13:19:15.256Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="2017中国城市空气质量指数（aqi）爬取及分析">
+<meta name="twitter:description" content="引言2016是我来北京第一年，这年年末和2017年的年初，雾霾在这个城市肆虐了一个冬天，还记得那时候每天出门都要带着口罩，卡着眼镜戴的特别难受。在公司里大家也时不时的讨论着空气质量、哪款口罩质量比较好、中午要不要出去吃饭等等与雾霾有关的话题。本科四年在哈尔滨，那时候冬天的雾虽然存在，但也没有让人感到窒息，研究生在武汉的三年也未见满大街都带着口罩的壮观景象。所以当时的想法是，连基本的生存都要成问题，">
+<meta name="twitter:image" content="https://nirvanada.github.io/images/aqi/output_8_1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://nirvanada.github.io/2018/01/17/aqi/"/>
+
+
+
+
+
+  <title>2017中国城市空气质量指数（aqi）爬取及分析 | Andante</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andante</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://nirvanada.github.io/2018/01/17/aqi/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Nirvanada">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andante">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">2017中国城市空气质量指数（aqi）爬取及分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-17T21:17:02+08:00">
+                2018-01-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Data-Analysis/" itemprop="url" rel="index">
+                    <span itemprop="name">Data Analysis</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/01/17/aqi/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="2018/01/17/aqi/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>2016是我来北京第一年，这年年末和2017年的年初，雾霾在这个城市肆虐了一个冬天，还记得那时候每天出门都要带着口罩，卡着眼镜戴的特别难受。在公司里大家也时不时的讨论着空气质量、哪款口罩质量比较好、中午要不要出去吃饭等等与雾霾有关的话题。本科四年在哈尔滨，那时候冬天的雾虽然存在，但也没有让人感到窒息，研究生在武汉的三年也未见满大街都带着口罩的壮观景象。所以当时的想法是，连基本的生存都要成问题，还谈何工作、生活？既然无法改变空气质量，那可以做的就是选择一个空气质量说得过去的城市。于是选择了十个城市，在<a href="http://www.air-level.com/" target="_blank" rel="external">空气质量网站</a>上爬了2017年连续一年的空气质量，分别是北京、上海、杭州、珠海、深圳、广州、成都、苏州、厦门、哈尔滨。这些城市主要是以经济发展空间这个维度来选择的，个人认为也是我们这代人比较有倾向性的久居城市（哈尔滨是hometown，纯属关心；武汉呆了几年，觉得以后再也不会去了）。<br>爬虫代码在服务器上crontab每五分钟一次定时执行，最终结果最小粒度为小时，个别时间因为不明原因数据缺失。</p>
+<h4 id="爬虫"><a href="#爬虫" class="headerlink" title="爬虫"></a>爬虫</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#!/usr/bin/python</span></div><div class="line"><span class="comment">#-*-coding:utf-8 -*-</span></div><div class="line"></div><div class="line"><span class="comment"># crawl.py</span></div><div class="line"></div><div class="line"><span class="keyword">import</span> urllib</div><div class="line"><span class="keyword">import</span> re</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">getHtml</span><span class="params">(url)</span>:</span></div><div class="line">    page = urllib.urlopen(url)</div><div class="line">    html = page.read()</div><div class="line">    <span class="keyword">return</span> html</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">getImg</span><span class="params">(html)</span>:</span></div><div class="line">    reg = <span class="string">r'src="(.+?\.png)" class'</span></div><div class="line">    reg_time = <span class="string">r'&lt;h4&gt;更新时间 (.+?)&lt;/h4&gt;'</span></div><div class="line">    imgre = re.compile(reg)</div><div class="line">    titlere = re.compile(reg_time)</div><div class="line"></div><div class="line">    imgurl = re.findall(imgre,html)[<span class="number">0</span>]</div><div class="line">    title = re.findall(titlere, html)[<span class="number">0</span>][<span class="number">0</span>:<span class="number">13</span>]</div><div class="line"></div><div class="line">    urllib.urlretrieve(imgurl,<span class="string">'./aqi/%s.png'</span> %title)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">getaqi</span><span class="params">(html, file)</span>:</span></div><div class="line">    reg = <span class="string">r'aqi-bg aqi-level-(.+?)\"&gt;(.+?)&lt;/span&gt;'</span></div><div class="line">    reg_time = <span class="string">r'label label-info\"&gt;(.+?)发布&lt;/span&gt;'</span></div><div class="line">    aqire = re.compile(reg)</div><div class="line">    timere = re.compile(reg_time)</div><div class="line"></div><div class="line">    aqiurl = re.findall(aqire,html)[<span class="number">0</span>][<span class="number">1</span>]</div><div class="line">    index = aqiurl.split(<span class="string">" "</span>)[<span class="number">0</span>]</div><div class="line">    quality = aqiurl.split(<span class="string">" "</span>)[<span class="number">1</span>]</div><div class="line"></div><div class="line">    time = re.findall(timere, html)[<span class="number">0</span>].replace(<span class="string">"年"</span>,<span class="string">"-"</span>).replace(<span class="string">"月"</span>,<span class="string">"-"</span>).replace(<span class="string">"日"</span>,<span class="string">""</span>)</div><div class="line">    <span class="keyword">with</span> open(file, <span class="string">'r'</span>) <span class="keyword">as</span> f:</div><div class="line">        lines = f.readlines()</div><div class="line">        last_line = lines[<span class="number">-1</span>]</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (last_line[<span class="number">0</span>:<span class="number">16</span>] != time):</div><div class="line">        <span class="keyword">with</span> open(file, <span class="string">"a"</span>) <span class="keyword">as</span> f:</div><div class="line">            f.write(<span class="string">'\n'</span> + time + <span class="string">'\t'</span> + index + <span class="string">'\t'</span> + quality)</div><div class="line"></div><div class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</div><div class="line">    <span class="comment">#get img</span></div><div class="line">    htmlimg = getHtml(<span class="string">"http://www.air-level.com/"</span>)</div><div class="line">    getImg(htmlimg)</div><div class="line"></div><div class="line">    <span class="comment">#get aqi</span></div><div class="line">    cityarr = (<span class="string">"shanghai"</span>,<span class="string">"beijing"</span>,<span class="string">"hangzhou"</span>,<span class="string">"zhuhai"</span>,<span class="string">"shenzhen"</span>,<span class="string">"guangzhou"</span>,<span class="string">"chengdu"</span>,<span class="string">"haerbin"</span>,<span class="string">"suzhou"</span>,<span class="string">"xiamen"</span>)</div><div class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> cityarr:</div><div class="line">        htmlaqi = getHtml(<span class="string">"http://www.air-level.com/air/%s/"</span> %i)</div><div class="line">        getaqi(htmlaqi, <span class="string">"./aqi/%s"</span> %i)</div></pre></td></tr></table></figure>
+<h4 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</div><div class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</div><div class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</div><div class="line"><span class="keyword">import</span> seaborn <span class="keyword">as</span> sns</div><div class="line">%matplotlib inline</div></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">city_lst = [<span class="string">"beijing"</span>, <span class="string">"chengdu"</span>, <span class="string">"guangzhou"</span>, <span class="string">"haerbin"</span>, <span class="string">"hangzhou"</span>, <span class="string">"shanghai"</span>, <span class="string">"shenzhen"</span>, <span class="string">"suzhou"</span>, <span class="string">"xiamen"</span>, <span class="string">"zhuhai"</span>]</div></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">df_lst = []</div><div class="line"><span class="keyword">for</span> city <span class="keyword">in</span> city_lst:</div><div class="line">    tmp = pd.read_table(city, names = [<span class="string">"tm"</span>, <span class="string">"aqi_"</span> + city, <span class="string">"lv_"</span> + city])</div><div class="line">    tmp[<span class="string">"tm"</span>] = pd.to_datetime(tmp[<span class="string">"tm"</span>].apply(<span class="keyword">lambda</span> x: x + <span class="string">":00"</span>))</div><div class="line">    df_lst.append(tmp)</div><div class="line"></div><div class="line">timeIndex = pd.date_range(<span class="string">"2017-01-07 00:00"</span>, <span class="string">"2018-01-06 23:00"</span>, freq=<span class="string">"H"</span>)</div><div class="line">timeIndex = timeIndex.to_series().to_frame().reset_index(drop = <span class="keyword">True</span>)</div><div class="line">timeIndex.columns = [<span class="string">"tm"</span>]</div><div class="line"></div><div class="line">df = pd.merge(timeIndex, df_lst[<span class="number">0</span>], how = <span class="string">'left'</span>, on = <span class="string">'tm'</span>)</div><div class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>, len(city_lst)):</div><div class="line">    df = pd.merge(df, df_lst[i], how = <span class="string">'left'</span>, on = <span class="string">'tm'</span>)</div></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># hour to day (daily mean)</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">day_scale</span><span class="params">(df)</span>:</span></div><div class="line">    df_scale = pd.DataFrame()</div><div class="line">    df[<span class="string">"date"</span>] = df.tm.dt.date</div><div class="line">    df_scale[<span class="string">"date"</span>] = df[<span class="string">"date"</span>].unique()</div><div class="line">    <span class="keyword">for</span> col <span class="keyword">in</span> [col <span class="keyword">for</span> col <span class="keyword">in</span> df.columns.tolist() <span class="keyword">if</span> <span class="string">"aqi"</span> <span class="keyword">in</span> col]:</div><div class="line">        df_scale[col] = df.groupby([<span class="string">"date"</span>])[col].mean().reset_index()[col]</div><div class="line">    <span class="keyword">return</span> df_scale</div></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># hour to month (monthly mean)</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">month_scale</span><span class="params">(df)</span>:</span></div><div class="line">    df_scale = pd.DataFrame()</div><div class="line">    df[<span class="string">"month"</span>] = df.index.map(<span class="keyword">lambda</span> x: str(int(x / df.shape[<span class="number">0</span>] * <span class="number">12</span>) + <span class="number">1</span>))</div><div class="line">    df_scale[<span class="string">"month"</span>] = df[<span class="string">"month"</span>].unique()</div><div class="line">    <span class="keyword">for</span> col <span class="keyword">in</span> [col <span class="keyword">for</span> col <span class="keyword">in</span> df.columns.tolist() <span class="keyword">if</span> <span class="string">"aqi"</span> <span class="keyword">in</span> col]:</div><div class="line">        df_scale[col] = df.groupby([<span class="string">"month"</span>])[col].mean().reset_index()[col]</div><div class="line">    <span class="keyword">return</span> df_scale</div></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># hour scale</span></div><div class="line">plt.figure(figsize=[<span class="number">20</span>,<span class="number">10</span>])</div><div class="line"><span class="keyword">for</span> city <span class="keyword">in</span> city_lst:</div><div class="line">    plt.plot(df[<span class="string">"tm"</span>], df[<span class="string">"aqi_"</span> + city])</div><div class="line">plt.legend(prop=&#123;<span class="string">'size'</span>:<span class="number">16</span>&#125;)</div></pre></td></tr></table></figure>
+<img src="/images/aqi/output_8_1.png">
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># day scale</span></div><div class="line">plt.figure(figsize=[<span class="number">20</span>,<span class="number">10</span>])</div><div class="line"><span class="keyword">for</span> city <span class="keyword">in</span> city_lst:</div><div class="line">    plt.plot(day_scale(df)[<span class="string">"date"</span>], day_scale(df)[<span class="string">"aqi_"</span> + city])</div><div class="line">plt.legend(prop=&#123;<span class="string">'size'</span>:<span class="number">16</span>&#125;)</div></pre></td></tr></table></figure>
+<img src="/images/aqi/output_9_1.png">
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># month scale</span></div><div class="line">plt.figure(figsize=[<span class="number">20</span>,<span class="number">10</span>])</div><div class="line"><span class="keyword">for</span> city <span class="keyword">in</span> city_lst:</div><div class="line">    plt.plot(month_scale(df)[<span class="string">"month"</span>], month_scale(df)[<span class="string">"aqi_"</span> + city])</div><div class="line">plt.legend(prop=&#123;<span class="string">'size'</span>:<span class="number">16</span>&#125;)</div></pre></td></tr></table></figure>
+<img src="/images/aqi/output_10_1.png">
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># Moving Average</span></div><div class="line">df_day = day_scale(df)</div><div class="line">df_day.fillna(df_day.median(axis = <span class="number">0</span>), inplace=<span class="keyword">True</span>) <span class="comment">#should be no none value when using moving average method</span></div><div class="line"></div><div class="line">plt.figure(figsize=[<span class="number">20</span>,<span class="number">10</span>])</div><div class="line">plt.title(<span class="string">"30 days moving average"</span>, fontsize = <span class="number">18</span>)</div><div class="line"><span class="keyword">for</span> city <span class="keyword">in</span> city_lst:</div><div class="line">    plt.plot(df_day[<span class="string">"date"</span>], df_day[<span class="string">"aqi_"</span> + city].to_frame().rolling(<span class="number">30</span>).mean())</div><div class="line">plt.legend(city_lst, prop = &#123;<span class="string">'size'</span>:<span class="number">16</span>&#125;)</div><div class="line"></div><div class="line">plt.figure(figsize=[<span class="number">20</span>,<span class="number">10</span>])</div><div class="line">plt.title(<span class="string">"60 days moving average"</span>, fontsize = <span class="number">18</span>)</div><div class="line"><span class="keyword">for</span> city <span class="keyword">in</span> city_lst:</div><div class="line">    plt.plot(df_day[<span class="string">"date"</span>], df_day[<span class="string">"aqi_"</span> + city].to_frame().rolling(<span class="number">60</span>).mean())</div><div class="line">plt.legend(city_lst, prop = &#123;<span class="string">'size'</span>:<span class="number">16</span>&#125;)</div></pre></td></tr></table></figure>
+<img src="/images/aqi/output_11_1.png">
+<img src="/images/aqi/output_11_2.png">
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">plt.figure(figsize=[<span class="number">20</span>,<span class="number">10</span>])</div><div class="line">sns.boxplot(df[[col <span class="keyword">for</span> col <span class="keyword">in</span> df.columns <span class="keyword">if</span> <span class="string">"aqi"</span> <span class="keyword">in</span> col]])</div><div class="line">plt.ylim([<span class="number">0</span>,<span class="number">200</span>])</div><div class="line">plt.xticks(fontsize = <span class="number">16</span>)</div></pre></td></tr></table></figure>
+<img src="/images/aqi/output_12_2.png">
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">lvIndex = pd.DataFrame(df.lv_beijing.dropna().unique()).reset_index(drop = <span class="keyword">True</span>)</div><div class="line">lvIndex.columns = [<span class="string">"lvIndex"</span>]</div></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">df_lv = df[<span class="string">"lv_"</span> + city_lst[<span class="number">0</span>]].value_counts().reset_index()</div><div class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>, len(city_lst)):</div><div class="line">    df_lv = pd.merge(df_lv, df[<span class="string">"lv_"</span> + city_lst[i]].value_counts().reset_index(), how = <span class="string">'left'</span>, on = <span class="string">'index'</span>)</div><div class="line">df_lv = df_lv.fillna(<span class="number">0</span>)</div><div class="line">columns = df_lv[<span class="string">"index"</span>].map(&#123;<span class="string">"优"</span>:<span class="string">"lv_0"</span>, <span class="string">"良"</span>:<span class="string">"lv_1"</span>, <span class="string">"轻度污染"</span>:<span class="string">"lv_2"</span>, <span class="string">"中度污染"</span>:<span class="string">"lv_3"</span>, <span class="string">"重度污染"</span>:<span class="string">"lv_4"</span>, <span class="string">"严重污染"</span>:<span class="string">"lv_5"</span>, <span class="string">"极度污染"</span>:<span class="string">"lv_6"</span>&#125;)</div><div class="line">df_lv = df_lv.transpose().drop([<span class="string">"index"</span>])</div><div class="line">df_lv.columns = columns</div><div class="line">df_lv.plot(kind = <span class="string">'bar'</span>, stacked = <span class="keyword">True</span>, figsize = [<span class="number">20</span>,<span class="number">10</span>], fontsize = <span class="number">16</span>)</div></pre></td></tr></table></figure>
+<img src="/images/aqi/output_14_1.png">
+<h4 id="结论："><a href="#结论：" class="headerlink" title="结论："></a>结论：</h4><ol>
+<li>滑动平均结果显示，夏季空气质量优于冬季</li>
+<li>箱型图显示，南方沿海城市空气质量优于北方，且异常值很少且不会很异常，即，再差也差不到哪去</li>
+<li>北京2017年冬季空气质量有明显好转，与相关政策干预河北省有关</li>
+<li>哈尔滨和北京半斤八两，夏季哈尔滨是赢家，冬季北京是赢家。极度恶劣空气状况频率哈尔滨是赢家</li>
+<li>在这个政策主导和经纬度跨度极大的国家，空气质量受到很多因素的影响，过去一年的统计结果未来未必依然具有说服力</li>
+</ol>
+<p>(待更新)<br>全年中国空气质量分布图的动态展示</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/14/DCN/" rel="next" title="Deep and Cross Network原理及实现">
+                <i class="fa fa-chevron-left"></i> Deep and Cross Network原理及实现
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="hypercomments_widget"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Nirvanada" />
+            
+              <p class="site-author-name" itemprop="name">Nirvanada</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/nirvanada" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#爬虫"><span class="nav-number">2.</span> <span class="nav-text">爬虫</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分析"><span class="nav-number">3.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#结论："><span class="nav-number">4.</span> <span class="nav-text">结论：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Nirvanada</span>
+
+  
+</div>
+
+
+  <div class="powered-by"><a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <span id="busuanzi_container_site_pv">
+    访问量<span id="busuanzi_value_site_pv"></span>
+  </span>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+		<script type="text/javascript">
+		_hcwp = window._hcwp || [];
+
+		_hcwp.push({widget:"Bloggerstream", widget_id: 99433, selector:".hc-comment-count", label: "{\%COUNT%\}" });
+
+		
+		_hcwp.push({widget:"Stream", widget_id: 99433, xid: "2018/01/17/aqi/"});
+		
+
+		(function() {
+		if("HC_LOAD_INIT" in window)return;
+		HC_LOAD_INIT = true;
+		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
+		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
+		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/99433/"+lang+"/widget.js";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hcc, s.nextSibling);
+		})();
+		</script>
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
