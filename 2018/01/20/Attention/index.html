@@ -79,34 +79,29 @@
 
 
 
-<meta name="description" content="This is the first test.中文测试
-1hahaha
-1.1Mist scheme中小图片无法居中，通过修改/themes/source/css/_schemes/Mist/_posts-expanded.styl 30行可解决
-1.1.1 自定义图片大小
-1.1.2 为图片加caption
-1.2代码测试123456// Java Testpublic class HelloW">
+<meta name="description" content="NMT在Attention机制没有被发明前，最新的Neural Machine Translation（NMT）模型的结构为decoder + encoder的形式。其中encoder负责将原始文本序列的信息压缩成一个fixed-length的向量，decoder负责在给定encoder的向量及转换文本序列当前词的情况下，预测下一个词的概率。可以数学描述为如下过程：
+encoder的输出：
+
+h_">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hexo Test">
-<meta property="og:url" content="https://nirvanada.github.io/2016/06/27/Test/index.html">
+<meta property="og:title" content="关于机器翻译中的Attention机制">
+<meta property="og:url" content="https://nirvanada.github.io/2018/01/20/Attention/index.html">
 <meta property="og:site_name" content="Andante">
-<meta property="og:description" content="This is the first test.中文测试
-1hahaha
-1.1Mist scheme中小图片无法居中，通过修改/themes/source/css/_schemes/Mist/_posts-expanded.styl 30行可解决
-1.1.1 自定义图片大小
-1.1.2 为图片加caption
-1.2代码测试123456// Java Testpublic class HelloW">
-<meta property="og:image" content="https://nirvanada.github.io/images/Test/avatar.png">
-<meta property="og:image" content="https://nirvanada.github.io/images/Test/guitar.jpg">
-<meta property="og:updated_time" content="2017-12-14T02:36:50.458Z">
+<meta property="og:description" content="NMT在Attention机制没有被发明前，最新的Neural Machine Translation（NMT）模型的结构为decoder + encoder的形式。其中encoder负责将原始文本序列的信息压缩成一个fixed-length的向量，decoder负责在给定encoder的向量及转换文本序列当前词的情况下，预测下一个词的概率。可以数学描述为如下过程：
+encoder的输出：
+
+h_">
+<meta property="og:image" content="https://nirvanada.github.io/images/Attention/encoder-decoder.png">
+<meta property="og:image" content="https://nirvanada.github.io/images/Attention/attention.png">
+<meta property="og:image" content="https://nirvanada.github.io/images/Attention/attention_2.png">
+<meta property="og:updated_time" content="2018-01-20T12:01:34.007Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo Test">
-<meta name="twitter:description" content="This is the first test.中文测试
-1hahaha
-1.1Mist scheme中小图片无法居中，通过修改/themes/source/css/_schemes/Mist/_posts-expanded.styl 30行可解决
-1.1.1 自定义图片大小
-1.1.2 为图片加caption
-1.2代码测试123456// Java Testpublic class HelloW">
-<meta name="twitter:image" content="https://nirvanada.github.io/images/Test/avatar.png">
+<meta name="twitter:title" content="关于机器翻译中的Attention机制">
+<meta name="twitter:description" content="NMT在Attention机制没有被发明前，最新的Neural Machine Translation（NMT）模型的结构为decoder + encoder的形式。其中encoder负责将原始文本序列的信息压缩成一个fixed-length的向量，decoder负责在给定encoder的向量及转换文本序列当前词的情况下，预测下一个词的概率。可以数学描述为如下过程：
+encoder的输出：
+
+h_">
+<meta name="twitter:image" content="https://nirvanada.github.io/images/Attention/encoder-decoder.png">
 
 
 
@@ -136,13 +131,13 @@
 
 
 
-  <link rel="canonical" href="https://nirvanada.github.io/2016/06/27/Test/"/>
+  <link rel="canonical" href="https://nirvanada.github.io/2018/01/20/Attention/"/>
 
 
 
 
 
-  <title>Hexo Test | Andante</title>
+  <title>关于机器翻译中的Attention机制 | Andante</title>
   
 
 
@@ -259,7 +254,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://nirvanada.github.io/2016/06/27/Test/">
+    <link itemprop="mainEntityOfPage" href="https://nirvanada.github.io/2018/01/20/Attention/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Nirvanada">
@@ -276,7 +271,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Hexo Test</h1>
+          <h1 class="post-title" itemprop="name headline">关于机器翻译中的Attention机制</h1>
         
 
         <div class="post-meta">
@@ -288,8 +283,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-06-27T13:17:49+08:00">
-                2016-06-27
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-20T18:17:15+08:00">
+                2018-01-20
               </time>
             
 
@@ -311,8 +306,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Entertainment/" itemprop="url" rel="index">
-                    <span itemprop="name">Entertainment</span>
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
                   </a>
                 </span>
 
@@ -330,8 +325,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2016/06/27/Test/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="2016/06/27/Test/" itemprop="commentsCount"></span>
+                <a href="/2018/01/20/Attention/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="2018/01/20/Attention/" itemprop="commentsCount"></span>
                 </a>
               </span>
               <!--/noindex-->
@@ -360,21 +355,39 @@
       
 
       
-        <p>This is the first test.<br>中文测试</p>
-<h2 id="1"><a href="#1" class="headerlink" title="1"></a>1</h2><p>hahaha</p>
-<h3 id="1-1"><a href="#1-1" class="headerlink" title="1.1"></a>1.1</h3><p>Mist scheme中小图片无法居中，<a href="https://github.com/iissnan/hexo-theme-next/issues/765" target="_blank" rel="external">通过修改/themes/source/css/_schemes/Mist/_posts-expanded.styl 30行可解决</a></p>
-<h4 id="1-1-1-自定义图片大小"><a href="#1-1-1-自定义图片大小" class="headerlink" title="1.1.1 自定义图片大小"></a>1.1.1 自定义图片大小</h4><img src="/images/Test/avatar.png" width="400" height="400">
-<h4 id="1-1-2-为图片加caption"><a href="#1-1-2-为图片加caption" class="headerlink" title="1.1.2 为图片加caption"></a>1.1.2 为图片加caption</h4><img src="/images/Test/guitar.jpg" title="Epiphone Les Paul">
-<h3 id="1-2"><a href="#1-2" class="headerlink" title="1.2"></a>1.2</h3><p>代码测试<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Java Test</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span> </span>&#123; </div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</div><div class="line">    System.out.println(<span class="string">"HelloWorld!"</span>); </div><div class="line">  &#125; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Scala Test</span></div><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">HelloWorld</span> </span>&#123;</div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]): <span class="type">Unit</span> = &#123;</div><div class="line">    println(<span class="string">"Hello, world!"</span>)</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># Python Test</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></div><div class="line">  <span class="keyword">print</span> <span class="string">"HelloWorld!"</span></div></pre></td></tr></table></figure>
-<h2 id="2"><a href="#2" class="headerlink" title="2"></a>2</h2><p>hahaha</p>
-<h3 id="2-1"><a href="#2-1" class="headerlink" title="2.1"></a>2.1</h3><p>Quote Test:<br><blockquote><p>Do not just seek happiness for yourself. Seek happiness for all. Through kindness. Through mercy.</p>
-</blockquote></p>
-<h3 id="2-2"><a href="#2-2" class="headerlink" title="2.2"></a>2.2</h3><p>Raw Test<br>
-content
-</p>
-<h3 id="2-3"><a href="#2-3" class="headerlink" title="2.3"></a>2.3</h3><p>Video Test<br>Video Plugin: <a href="https://github.com/m80126colin/hexo-tag-owl" target="_blank" rel="external">hexo-tag-owl</a><br><div class="owl-media owl-video owl-youku"><iframe src="http://player.youku.com/embed/XMTYxMDA4OTA5Ng==" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen></iframe></div></p>
+        <h4 id="NMT"><a href="#NMT" class="headerlink" title="NMT"></a>NMT</h4><p>在Attention机制没有被发明前，最新的Neural Machine Translation（NMT）模型的结构为decoder + encoder的形式。其中encoder负责将原始文本序列的信息压缩成一个fixed-length的向量，decoder负责在给定encoder的向量及转换文本序列当前词的情况下，预测下一个词的概率。可以数学描述为如下过程：</p>
+<p>encoder的输出：</p>
+<script type="math/tex; mode=display">
+h_t = f(x_t, h_{t-1}) \\
+c = h_{T_x}</script><p>其中$T_x$为输出文本的长度。decoder输出的条件概率：</p>
+<script type="math/tex; mode=display">
+p(y_t|\{y_1,...,y_{t-1}\}, c) = g(y_{t-1}, s_t, c) \\
+s_t = f(y_{t-1}, s_{t-1}, c)</script><p>这里的$f$都是一个关于RNN的非线性函数，例如LSTM或Bi-LSTM。</p>
+<img src="/images/Attention/encoder-decoder.png">
+<h4 id="Attention"><a href="#Attention" class="headerlink" title="Attention"></a>Attention</h4><p>实际上，Attention机制引入的insight是由上面的建模方法的一些不足而来的。假设现在要对[I love you]做一次翻译任务，中文结果为[我爱你]，那么由上面的结构encoder的输出是包含[I],[love],[you]三个词信息量的向量，当decoder来了之后，[我]、[爱]、[你]三个字的翻译都是由这一个向量作为输入，而我们人类的直觉其实应该是：当翻译[我]的时候，[I]这个词的权重权重应该更大，而其他两个词[爱]和[你]的时候，也应该对应的是[love]和[you]的大权重。因此，从这点考虑出发，encoder的输出对于每一个待翻译的词不应该都是一致的，反之应该是一种动态的，对原始文本每个词（或者理解为time step）输出的向量进行加权的形式，这种机制在人类认知里就可以解释为[注意力]机制，即对不同词翻译的时候我们注意力集中的位置也不一样，于是就有了attention的由来，上面的数学描述就发生了一些变化。由于encoder需要对于不同词产生不同的向量，encoder的输出就变为</p>
+<script type="math/tex; mode=display">
+c_i = \sum_{j = 1}^{T_x} \alpha_{ij} h_j</script><p>这里$i$，$j$分别表示的是翻译文本和原始文本的词下标。这样，对于翻译文本的每个词，所产生的向量就是一种加权的形式，暂且先不理会这个权重$\alpha$是怎么来的，先看decoder的变化</p>
+<script type="math/tex; mode=display">
+p(y_t|{y_1,...,y_{t-1}}, c_i) = g(y_{t-1}, s_t, c_i) \\
+s_t = f(y_{t-1}, s_{t-1}, c_i)</script><p>其实可以看到，本质上和上面的decoder根本没发生变化，只是将$c$变成了与词下标有关的$c_i$。</p>
+<img src="/images/Attention/attention.png">
+<p>最后看$\alpha$是怎么得到的，从下标上可以发现，最终得到的$\alpha$应该是一个矩阵，大小为原始文本长度*翻译文本长度，它表示的是原始文本中第$j$个词对翻译文本中第$i$个词的权重大小（重要程度），具体计算方法为</p>
+<script type="math/tex; mode=display">
+\alpha_{ij}= \frac{exp(e_{ij})}{\sum_{k =1 }^{T_x}exp(e_{ij})} \\
+e_{ij} = a(s_{i-1}, h_j)</script><p>函数$a$可以定义为一个full-conneted layer，随着整个网路一起训练，物理意义上是将翻译文本第$i-1$位的翻译词输出的向量与原始文本第$j$个原始词输出向量整合到一起做了一次操作，反映了在准确的翻译成第$i$个目标词的前提下，后者对前者的重要度。</p>
+<blockquote>
+<p>The probability $\alpha_{ij}$, or its associated energy $e_{ij}$, reflects the importance of the annotation $h_j$ with respect to the previous hidden state $s_{i-1}$ in deciding the next state $s_i$ and generating $y_i$.</p>
+</blockquote>
+<p>更一般的，$e$的计算方法表达为</p>
+<script type="math/tex; mode=display">
+e_{ij} = v_a^Ttanh(W_a s_{i-1} + U_a h_j)</script><p>至此，基本的attention方法就结束了，下面一张图可能把整个流程描述的更清楚。值得一提的是，个人理解，attention机制的引入应该对双向RNN的依赖更强，因为翻译任务中某个待翻译词是对原始文本中特定位置的上下文敏感的，因此$h_j$中不仅要包含有上文的信息，也要包含有下文信息。</p>
+<img src="/images/Attention/attention_2.png">
+<p>参考资料</p>
+<ol>
+<li><a href="https://github.com/lvapeab/nmt-keras" target="_blank" rel="external">NMT-Keras</a></li>
+<li><a href="https://github.com/tensorflow/nmt" target="_blank" rel="external">NMT-TensorFlow</a></li>
+<li><a href="https://arxiv.org/abs/1409.0473" target="_blank" rel="external">Neural Machine Translation by Jointly Learning to Align and Translate</a></li>
+</ol>
 
       
     </div>
@@ -399,8 +412,8 @@ content
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2014/09/03/hydro/" rel="next" title="关于水动力模型">
-                <i class="fa fa-chevron-left"></i> 关于水动力模型
+              <a href="/2018/01/17/aqi/" rel="next" title="2017中国城市空气质量指数（aqi）爬取及分析">
+                <i class="fa fa-chevron-left"></i> 2017中国城市空气质量指数（aqi）爬取及分析
               </a>
             
           </div>
@@ -408,10 +421,6 @@ content
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/06/28/Epiphone 1960 Les Paul Tribute Plus/" rel="prev" title="Epiphone 1960 Les Paul Tribute Plus">
-                Epiphone 1960 Les Paul Tribute Plus <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -553,7 +562,7 @@ content
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1"><span class="nav-number">1.</span> <span class="nav-text">1</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1"><span class="nav-number">1.1.</span> <span class="nav-text">1.1</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-1-自定义图片大小"><span class="nav-number">1.1.1.</span> <span class="nav-text">1.1.1 自定义图片大小</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-2-为图片加caption"><span class="nav-number">1.1.2.</span> <span class="nav-text">1.1.2 为图片加caption</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2"><span class="nav-number">1.2.</span> <span class="nav-text">1.2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2"><span class="nav-number">2.</span> <span class="nav-text">2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1"><span class="nav-number">2.1.</span> <span class="nav-text">2.1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2"><span class="nav-number">2.2.</span> <span class="nav-text">2.2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3"><span class="nav-number">2.3.</span> <span class="nav-text">2.3</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#NMT"><span class="nav-number">1.</span> <span class="nav-text">NMT</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Attention"><span class="nav-number">2.</span> <span class="nav-text">Attention</span></a></li></ol></div>
             
 
           </div>
@@ -723,7 +732,7 @@ content
 		_hcwp.push({widget:"Bloggerstream", widget_id: 99433, selector:".hc-comment-count", label: "{\%COUNT%\}" });
 
 		
-		_hcwp.push({widget:"Stream", widget_id: 99433, xid: "2016/06/27/Test/"});
+		_hcwp.push({widget:"Stream", widget_id: 99433, xid: "2018/01/20/Attention/"});
 		
 
 		(function() {
